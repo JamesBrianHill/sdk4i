@@ -1,0 +1,49 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   Define constants for UTF-8 characters (CCSID 1208).
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html.
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(CCSID1208K)
+/EOF
+/ENDIF
+/DEFINE CCSID1208K
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures and template variables.
+// -------------------------------------------------------------------------------------------------
+DCL-S C_SDK4I_UTF8_AT CHAR(1) CCSID(*UTF8) INZ('@'); // Not a variant character.
+DCL-S C_SDK4I_UTF8_BACKSLASH CHAR(1) CCSID(*UTF8) INZ('\');
+DCL-S C_SDK4I_UTF8_CENT CHAR(4) CCSID(*UTF8) INZ('¢');
+DCL-S C_SDK4I_UTF8_CARET CHAR(1) CCSID(*UTF8) INZ('^');
+DCL-S C_SDK4I_UTF8_DOLLAR CHAR(1) CCSID(*UTF8) INZ('$');
+DCL-S C_SDK4I_UTF8_EXCLAMATION_MARK CHAR(1) CCSID(*UTF8) INZ('!');
+DCL-S C_SDK4I_UTF8_FORWARD_SLASH CHAR(1) CCSID(*UTF8) INZ('/');
+DCL-S C_SDK4I_UTF8_GRAVE_ACCENT CHAR(1) CCSID(*UTF8) INZ('`');
+DCL-S C_SDK4I_UTF8_LEFT_BRACE CHAR(1) CCSID(*UTF8) INZ('{');
+DCL-S C_SDK4I_UTF8_LEFT_BRACKET CHAR(1) CCSID(*UTF8) INZ('[');
+DCL-S C_SDK4I_UTF8_NOT CHAR(4) CCSID(*UTF8) INZ('¬');
+DCL-S C_SDK4I_UTF8_OCTOTHORPE CHAR(1) CCSID(*UTF8) INZ('#');
+DCL-S C_SDK4I_UTF8_RIGHT_BRACE CHAR(1) CCSID(*UTF8) INZ('}');
+DCL-S C_SDK4I_UTF8_RIGHT_BRACKET CHAR(1) CCSID(*UTF8) INZ(']');
+DCL-S C_SDK4I_UTF8_SINGLE_QUOTE CHAR(2) CCSID(*UTF8) INZ(''); // Not a variant chaacter.
+DCL-S C_SDK4I_UTF8_SPACE CHAR(1) CCSID(*UTF8) INZ(' '); // Not a variant character.
+DCL-S C_SDK4I_UTF8_TILDE CHAR(1) CCSID(*UTF8) INZ('~');
+DCL-S C_SDK4I_UTF8_VERTICAL_BAR CHAR(1) CCSID(*UTF8) INZ('|');

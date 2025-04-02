@@ -1,0 +1,171 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   This copybook contains definitions for the TXT procedures.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(TXTK)
+/EOF
+/ENDIF
+/DEFINE TXTK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// LOGK - LOG constants and procedure definitions.
+// TPLK - template data structures and variables.
+// -------------------------------------------------------------------------------------------------
+/COPY './logk.rpgleinc'
+/COPY './templatesk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures and template variables.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_TXT_DELIMITER_ARRAY_SIZE 50; // This is an arbitrary size.
+DCL-C C_SDK4I_TXT_TOKEN_ARRAY_SIZE 4096; // This is an arbitrary size.
+
+DCL-S tpl_sdk4i_txt_delimiter VARCHAR(5) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_txt_token VARCHAR(C_SDK4I_SIZE_1KI) CCSID(*UTF8) TEMPLATE;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Create a JSON object.
+//
+// This procedure creates a JSON "object" used by web services to return JSON data.
+//
+// NOTE: Scott Klement's YAJL tool is far, far superior to anything this procedure can do. This
+// procedure was written solely to not have a dependency on any other tool or framework. If you 
+// need to do any real JSON processing, Scott's YAJL tool is highly recommended - you can find it
+// here: https://www.scottklement.com/yajl/
+//
+// @param REQUIRED. The "key" part of the JSON object.
+// @param REQUIRED. The "value" part of the JSON object. This could be another JSON object, an array
+//   of JSON objects, etc.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return A UTF-8 string containing a JSON object: {"i_name":"i_object"}
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR TXT_CreateJSONObject LIKE(tpl_sdk4i_varchar_2M_utf8) EXTPROC(*DCLCASE);
+  i_name LIKE(tpl_sdk4i_varchar_2M) CONST;
+  i_object LIKE(tpl_sdk4i_varchar_2M_utf8) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR TXT_CreateJSONObject;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Justify a string.
+//
+// Justify a string to the left, center, or right. This procedure works with single-byte and multi-
+// byte characters.
+//
+// @param REQUIRED. The source string that needs to be justified.
+// @param REQUIRED. The justification desired: C = centered, L = left justified, and R = right
+//   justified.
+// @param REQUIRED. The character count of the final string. NOTE: it is important this is the
+//   number of CHARACTERS in the final string, not the number of BYTES. You should use 
+//   %CHARCOUNT(return_string) or provide this number as a constant.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return The justified string.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR TXT_Justify LIKE(tpl_sdk4i_varchar_1K_utf8) EXTPROC(*DCLCASE);
+  i_str LIKE(tpl_sdk4i_varchar_1K_utf8) OPTIONS(*TRIM) CONST;
+  i_position CHAR(1) CONST; // C, L, or R
+  i_char_count PACKED(5: 0) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR TXT_Justify;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Add single quotes and an optional prefix/suffix around a string.
+//
+// We often need to build an SQL statement and have single quotes around strings that make up those
+// statements. This procedure exists primarily to make our code more readable. Note that the source
+// string will be stripped of all leading and trailing blanks before the optional prefix and suffix
+// and the opening/closing single quotes.
+// Returns: '<optional prefix><the TRIMmed string given to this procedure><optional suffix>'
+//
+// @param REQUIRED. This is the source string that needs quotes around it.
+// @param OPTIONAL. This is a prefix that will appear between a single quote and the beginning of
+//   the source string.
+// @param OPTIONAL. This is a suffix that will appear between the end of the source string and the
+//   closing single quote.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return The quoted source string.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR TXT_Q LIKE(tpl_sdk4i_sql_statement) EXTPROC(*DCLCASE);
+  i_str LIKE(tpl_sdk4i_sql_statement) OPTIONS(*TRIM) CONST;
+  i_prefix LIKE(tpl_sdk4i_sql_statement) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_suffix LIKE(tpl_sdk4i_sql_statement) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR TXT_Q;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Tokenize a string using 0 or more delimiters.
+//
+// Note that the delimiter_array and token_array are both variable size arrays in the calling
+// program defined something like this:
+// DCL-S delimiter_array LIKE(tpl_sdk4i_txt_delimiter) DIM(*AUTO: C_SDK4I_TXT_DELIMITER_ARRAY_SIZE);
+// DCL-S token_array LIKE(tpl_sdk4i_txt_token) DIM(*VAR: C_SDK4I_TXT_TOKEN_ARRAY_SIZE);
+//
+// It doesn't matter if the caller uses *AUTO or *VAR but it is important they do this before
+// calling this procedure:
+// %ELEM(token_array: *ALLOC) = C_SDK4I_TXT_TOKEN_ARRAY_SIZE;
+//
+// IBM documentation seems to indicate memory must be allocated before the array is passed to a
+// procedure - though all testing indicates this is not necessary. It is very possible the tests
+// work by sheer luck - perhaps that area in memory isn't being overwritten by some other process.
+//
+// The caller does not need to worry about allocating memory for the delimiter_array - this
+// procedure does not add elements to that array.
+//
+// Note: a possible alternative for certain cases (all delimiters are 1 character and the caller
+// does not want delimiters returned) might be the strtok function from C.
+// @link https://www.ibm.com/docs/en/i/7.5?topic=functions-strtok-tokenize-string
+//
+// @param REQUIRED. The string to be tokenized.
+// @param REQUIRED. The number of delimiters in the delimiter_array.
+// @param REQUIRED. An array of delimiters (like a space, &, etc.).
+// @param REQUIRED. An array that will hold tokens from the source string.
+// @param OPTIONAL. An indicator that tells us if the caller wants the delimiters returned as well
+//   as the tokens. Defaults to *OFF so delimiters are not returned.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return The number of tokens (including delimiters if the caller wants them) in o_token_array.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR TXT_Tokenize LIKE(tpl_sdk4i_binary4) EXTPROC(*DCLCASE);
+  i_str LIKE(tpl_sdk4i_varchar_2M_utf8) OPTIONS(*TRIM) CONST;
+  i_delimiter_array_count LIKE(tpl_sdk4i_binary4) CONST;
+  i_delimiter_array LIKE(tpl_sdk4i_txt_delimiter) DIM(C_SDK4I_TXT_DELIMITER_ARRAY_SIZE)
+    OPTIONS(*VARSIZE) CONST;
+  o_token_array LIKE(tpl_sdk4i_txt_token) DIM(C_SDK4I_TXT_TOKEN_ARRAY_SIZE) OPTIONS(*VARSIZE);
+  i_return_delimiters IND OPTIONS(*NOPASS: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;

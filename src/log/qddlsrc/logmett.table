@@ -1,0 +1,111 @@
+-- *************************************************************************************************
+--   This table will hold metrics telling us how a program or procedure is performing.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_metrics FOR SYSTEM NAME logmett (
+  -- Primary key column.
+  id
+    DECIMAL(15,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  process_system FOR sys -- From PSDS position 396.
+    VARCHAR(8) DEFAULT NULL,
+
+  process_library FOR lib -- From PSDS position 81.
+    VARCHAR(10) DEFAULT NULL,
+
+  process_program FOR pgm -- From PSDS position 334.
+    VARCHAR(10) DEFAULT NULL,
+
+  process_module FOR mod -- From PSDS position 344.
+    VARCHAR(10) DEFAULT NULL,
+
+  process_procedure FOR prc -- Typically from the %PROC built-in function.
+    VARCHAR(128) DEFAULT NULL,
+
+  process_job_number FOR job_number -- From PSDS position 264 or QSYS2.JOB_NAME.
+    DECIMAL(6,0) DEFAULT NULL,
+
+  process_job_user FOR job_user -- From PSDS position 254 or QSYS2.JOB_NAME.
+    VARCHAR(10) DEFAULT NULL,
+
+  process_job_name FOR job_name -- From PSDS position 244 or QSYS2.JOB_NAME.
+    VARCHAR(10) DEFAULT NULL,
+
+  user_profile_current FOR usrprf_cur -- From PSDS position 358.
+    VARCHAR(10) NOT NULL,
+
+  user_profile_session FOR usrprf_ses
+    VARCHAR(128) NOT NULL GENERATED ALWAYS AS (SESSION_USER),
+  
+  external_user_id FOR user_id -- A user ID from another platform, perhaps a website.
+    DECIMAL(15,0) DEFAULT NULL,
+
+  external_username FOR username -- A username from another platform, perhaps a website.
+    VARCHAR(128) DEFAULT NULL,
+
+  beg_ts
+    TIMESTAMP NOT NULL,
+
+  end_ts
+    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  success -- Indicates the procedure ended successfully/no errors ('1') or unsuccessfully ('0').
+    CHAR(1) DEFAULT NULL,
+
+  abend -- Indicates the procedure ended abnormally ('1') or normally ('0').
+    CHAR(1) DEFAULT NULL,
+
+  -- Constraints.
+  CONSTRAINT logmettpk PRIMARY KEY(id),
+  CONSTRAINT logmettc00 CHECK (success = '0' OR success = '1'),
+  CONSTRAINT logmettc01 CHECK (abend = '0' OR abend = '1')
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logmett IS 'SDK4i - LOG - Log Usage';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logmett (
+  id         IS 'ID',
+  sys        IS 'System',
+  lib        IS 'Library',
+  pgm        IS 'Program',
+  mod        IS 'Module',
+  prc        IS 'Procedure',
+  job_number IS 'Job Number',
+  job_user   IS 'Job User',
+  job_name   IS 'Job Name',
+  usrprf_cur IS 'Current USRPRF',
+  usrprf_ses IS 'Session USRPRF',
+  user_id    IS 'External User ID',
+  username   IS 'External Username',
+  beg_ts     IS 'Beg Timestamp',
+  end_ts     IS 'End Timestamp',
+  success    IS 'Success',
+  abend      IS 'Abend'
+);

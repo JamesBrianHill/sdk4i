@@ -1,0 +1,96 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   This copybook contains definitions for constants, data structures, variables, and procedures
+// related to the MSG component of SDK4I.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(MSGK)
+/EOF
+/ENDIF
+/DEFINE MSGK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// LOGK - LOG constants, data structures, variables, and procedure definitions.
+// -------------------------------------------------------------------------------------------------
+/COPY './logk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+DCL-DS tpl_sdk4i_msgt_ds EXTNAME('MSGT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures, and template variables.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_MSG_ARRAY_COUNT 50;
+
+DCL-DS tpl_sdk4i_msg_ds QUALIFIED TEMPLATE;
+  id LIKE(tpl_sdk4i_msgt_ds.id);
+  severity LIKE(tpl_sdk4i_logmsgt_ds.loglvlt_id);
+  lng_id LIKE(tpl_sdk4i_msgt_ds.lng_id);
+END-DS tpl_sdk4i_msg_ds;
+
+DCL-S tpl_sdk4i_json_msg VARCHAR(C_SDK4I_SIZE_2KI) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_json_msg_array VARCHAR(C_SDK4I_SIZE_1MI) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_msg_count PACKED(3: 0) TEMPLATE;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Retrieve a message in JSON format.
+//
+// Create a JSON object based on a message code, optional severity and optional language then
+// return it to the caller.
+//
+// @param REQUIRED. The message ID to be looked up in the database.
+// @param OPTIONAL. The severity of the message. Defaults to SDK4I_C_LL_INF.
+// @param OPTIONAL. The requested language of the message. Defaults to en (English).
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return The JSON object.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR MSG_MsgToJSON LIKE(tpl_sdk4i_json_msg) EXTPROC(*DCLCASE);
+  i_msg_id LIKE(tpl_sdk4i_msgt_ds.id) CONST;
+  i_severity LIKE(tpl_sdk4i_logmsgt_ds.loglvlt_id) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_lng_id LIKE(tpl_sdk4i_msgt_ds.lng_id) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Retreive an array of messages in JSON format.
+//
+// This procedure will create a JSON string containing an array of error messages.
+//
+// @param REQUIRED. The number of elements in the i_msg_array.
+// @param REQUIRED. An array of tpl_sdk4i_msg_ds data structures.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return A JSON string containing all the messages in i_msg_array.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR MSG_MsgArrayToJSON LIKE(tpl_sdk4i_json_msg_array) EXTPROC(*DCLCASE);
+  i_msg_count LIKE(tpl_sdk4i_msg_count) CONST;
+  i_msg_array LIKEDS(tpl_sdk4i_msg_ds) DIM(C_SDK4I_MSG_ARRAY_COUNT) OPTIONS(*VARSIZE) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;

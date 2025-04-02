@@ -1,0 +1,64 @@
+-- *************************************************************************************************
+--   This table will hold a list of valid logging levels as defined by the Internet Engineering
+-- Task Force in RFC5424.
+--
+-- 0 = Emergency: system is unusable
+-- 1 = Alert: action must be taken immediately
+-- 2 = Critical: critical conditions
+-- 3 = Error: error conditions
+-- 4 = Warning: warning conditions
+-- 5 = Notice: normal but significant condition
+-- 6 = Informational: informational messages
+-- 7 = Debug: debug-level messages
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_level FOR SYSTEM NAME loglvlt (
+  -- Primary key column.
+  id
+    DECIMAL(1,0) NOT NULL,
+
+  -- Data columns.
+  code -- LL_EMG, LL_ALT, LL_CRT, LL_ERR, LL_WRN, LL_NOT, LL_INF, and LL_DBG.
+    CHAR(6) NOT NULL,
+
+  description FOR dsc
+    VARCHAR(50) NOT NULL,
+
+  -- Constraints.
+  CONSTRAINT loglvltpk PRIMARY KEY(id),
+  CONSTRAINT loglvltu00 UNIQUE(code)
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE loglvlt IS 'SDK4i - LOG - Log Levels';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN loglvlt (
+  id   IS 'ID',
+  code IS 'Code',
+  dsc  IS 'Description'
+);

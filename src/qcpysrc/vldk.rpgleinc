@@ -1,0 +1,244 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   This copybook contains contants, data structures, variables and procedure definitions for
+// VLD (Validation) procedures.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(VLDK)
+/EOF
+/ENDIF
+/DEFINE VLDK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// LOGK - LOG constants, data structures, variables, and procedure definitions.
+// MSGK - MSG constants, data structures, variables, and procedure definitions.
+// TEMPLATESK - template variables used throughout our software.
+// -------------------------------------------------------------------------------------------------
+/COPY './logk.rpgleinc'
+/COPY './msgk.rpgleinc'
+/COPY './templatesk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+DCL-DS tpl_sdk4i_vldt_ds EXTNAME('VLDT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
+
+DCL-DS tpl_sdk4i_vld_error_ds QUALIFIED TEMPLATE;
+  lib_id LIKE(tpl_sdk4i_vldt_ds.lib);
+  tbl_id LIKE(tpl_sdk4i_vldt_ds.tbl);
+  col_id LIKE(tpl_sdk4i_vldt_ds.col);
+  err_id LIKE(tpl_sdk4i_vldt_ds.id);
+  err_msg LIKE(tpl_sdk4i_msgt_ds.msg);
+END-DS tpl_sdk4i_vld_error_ds;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Validate a value.
+//
+// This procedure will validate a value for any column in any table that has a validation rule
+// defined in VLDT.
+//
+// Examples:
+// DCL-S my_name LIKE(tpl_my_table_ds.fname) INZ('James');
+// DCL-S my_age LIKE(tpl_my_table_ds.age) INZ(18);
+//
+// IF (NOT VLD_IsValid('MY_TABLE' : 'FNAME' : my_name));
+//   // Log error and handle appropriately.
+// ENDIF;
+//
+// IF (NOT VLD_IsValid('MY_TABLE' : 'AGE' : *OMIT : my_age));
+//   // Log error and handle appropriately.
+// ENDIF;
+//
+// @param REQUIRED. The table where the column resides.
+// @param REQUIRED. The column to validate against.
+// @param REQUIRED. The message ID associated with this i_tbl/i_col.
+// @param OPTIONAL. The string to be validated.
+// @param OPTIONAL. The number to be validated.
+// @param OPTIONAL. The date to be validated.
+// @param OPTIONAL. The time to be validated.
+// @param OPTIONAL. The timestamp to be validated.
+// @param OPTIONAL. The library where the column resides.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the value is valid, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR VLD_IsValid IND EXTPROC(*DCLCASE);
+  i_tbl LIKE(tpl_sdk4i_vldt_ds.tbl) OPTIONS(*TRIM) CONST;
+  i_col LIKE(tpl_sdk4i_vldt_ds.col) OPTIONS(*TRIM) CONST;
+  o_msg_id LIKE(tpl_sdk4i_vldt_ds.msg_id);
+  i_str LIKE(tpl_sdk4i_sql_statement) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_num LIKE(tpl_sdk4i_vldt_ds.max_num) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_date LIKE(tpl_sdk4i_vldt_ds.max_date) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_time LIKE(tpl_sdk4i_vldt_ds.max_time) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_ts  LIKE(tpl_sdk4i_vldt_ds.max_ts) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_lib LIKE(tpl_sdk4i_vldt_ds.lib) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR VLD_IsValid;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Validate a date.
+//
+// Determine if a date is valid. The caller can provide a minimum and maximum date to test if the
+// date to be validated falls in the range: min_date <= test_date <= max_date. If no minimum or
+// maximum value is provided, they default to *LOVAL and *HIVAL respectively.
+//
+// @param i_date REQUIRED. The date to be validated.
+// @param i_min_date OPTIONAL. A minimum date - the date value must be after or equal to this.
+// @param i_max_date OPTIONAL. A maximum date - the date value must be before or equal to this.
+// @param i_log_user_info_ds OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if date is valid, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR VLD_IsValidDate IND EXTPROC(*DCLCASE);
+  i_date LIKE(tpl_sdk4i_vldt_ds.max_date) OPTIONS(*NULLIND) CONST;
+  i_min_date LIKE(tpl_sdk4i_vldt_ds.max_date) OPTIONS(*NULLIND) CONST;
+  i_max_date LIKE(tpl_sdk4i_vldt_ds.max_date) OPTIONS(*NULLIND) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR VLD_IsValidDate;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Validate a foreign key.
+// 
+// Determine if a value is valid as a foreign key on this host or any other Db2 for i host 
+// configured for remote connections.
+//
+// @param REQUIRED. The foreign table we need to check.
+// @param REQUIRED. The foreign column we need to check.
+// @param OPTIONAL. The string to be validated.
+// @param OPTIONAL. The number to be validated.
+// @param OPTIONAL. The date to be validated.
+// @param OPTIONAL. The time to be validated.
+// @param OPTIONAL. The timestamp to be validated.
+// @param OPTIONAL. The foreign host we need to check.
+// @param OPTIONAL. The foreign library we need to check.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the value is valid, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR VLD_IsValidFK IND EXTPROC(*DCLCASE);
+  i_ftbl LIKE(tpl_sdk4i_vldt_ds.ftbl) OPTIONS(*TRIM) CONST;
+  i_fcol LIKE(tpl_sdk4i_vldt_ds.fcol) OPTIONS(*TRIM) CONST;
+  i_str LIKE(tpl_sdk4i_sql_statement) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_num LIKE(tpl_sdk4i_vldt_ds.max_num) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_date LIKE(tpl_sdk4i_vldt_ds.max_date) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_time LIKE(tpl_sdk4i_vldt_ds.max_time) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_ts LIKE(tpl_sdk4i_vldt_ds.max_ts) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_fhost LIKE(tpl_sdk4i_vldt_ds.fhost) OPTIONS(*NOPASS: *OMIT : *TRIM) CONST;
+  i_flib LIKE(tpl_sdk4i_vldt_ds.flib) OPTIONS(*NOPASS: *OMIT : *TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR VLD_IsValidFK;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Validate a number.
+//
+// Determine if a number is valid. The caller can provide a minimum and maximum value to test if the
+// number to be validated falls in the range: min_value <= test_value <= max_value. If no minimum
+// or maximum value is provided, they default to *LOVAL and *HIVAL respectively.
+//
+// @param REQUIRED. The number to be validated.
+// @param OPTIONAL. A minimum number - the num value must be >= this number. Defaults to *LOVAL.
+// @param OPTIONAL. A maximum number - the num value must be <= this number. Defaults to *HIVAL.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the number is valid, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR VLD_IsValidNumber IND EXTPROC(*DCLCASE);
+  i_num LIKE(tpl_sdk4i_vldt_ds.max_num) OPTIONS(*NULLIND) CONST;
+  i_min_num LIKE(tpl_sdk4i_vldt_ds.min_num) OPTIONS(*NULLIND) CONST;
+  i_max_num LIKE(tpl_sdk4i_vldt_ds.max_num) OPTIONS(*NULLIND) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR VLD_IsValidNumber;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Validate a string.
+//
+// Determine if a string is valid. The caller must provide a regex (regular expression) to be used
+// to validate the string.
+//
+// @param REQUIRED. The string to be validated.
+// @param REQUIRED. The regex (regular expression) to be used to validate str.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the string is valid, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR VLD_IsValidString IND EXTPROC(*DCLCASE);
+  i_str LIKE(tpl_sdk4i_sql_statement) OPTIONS(*NULLIND) CONST;
+  i_rgx LIKE(tpl_sdk4i_vldt_ds.rgx) OPTIONS(*NULLIND) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR VLD_IsValidString;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Validate a time.
+//
+// Determine if a time is valid. The caller can provide a minimum and maximum value to test if the
+// time to be validated falls in the range: min_time <= test_time <= max_time. If no minimum or
+// maximum time is provided, they default to *LOVAL and *HIVAL respectively.
+//
+// @param REQUIRED. The time to be validated.
+// @param REQUIRED. A minimum time - the time value must be after or equal to this.
+// @param REQUIRED. A maximum time - the time value must be before or equal to this.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the time is valid, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR VLD_IsValidTime IND EXTPROC(*DCLCASE);
+  i_time LIKE(tpl_sdk4i_vldt_ds.max_time) OPTIONS(*NULLIND) CONST;
+  i_min_time LIKE(tpl_sdk4i_vldt_ds.min_time) OPTIONS(*NULLIND) CONST;
+  i_max_time LIKE(tpl_sdk4i_vldt_ds.max_time) OPTIONS(*NULLIND) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR VLD_IsValidTime;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Validate a timestamp.
+//
+// Determine if a timestamp is valid. The caller can provide a minimum and maximum value to test if
+// the timestamp to be validated falls in the range: min_ts <= test_ts <= max_ts. If no minimum or
+// maximum timestamp is provided, they default to *LOVAL and *HIVAL respectively.
+//
+// @param REQUIRED. The timestamp to be validated.
+// @param OPTIONAL. A minimum timestamp - the ts value must be after or equal to this.
+// @param OPTIONAL. A maximum timestamp - the ts value must be before or equal to this.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the timestamp is valid, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR VLD_IsValidTimestamp IND EXTPROC(*DCLCASE);
+  i_ts LIKE(tpl_sdk4i_vldt_ds.max_ts) OPTIONS(*NULLIND) CONST;
+  i_min_ts LIKE(tpl_sdk4i_vldt_ds.min_ts) OPTIONS(*NULLIND) CONST;
+  i_max_ts LIKE(tpl_sdk4i_vldt_ds.max_ts) OPTIONS(*NULLIND) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR VLD_IsValidTimestamp;

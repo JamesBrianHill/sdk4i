@@ -1,0 +1,124 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+// Description: Define constants for HTTP status codes.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html.
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(HTTPSTSK)
+/EOF
+/ENDIF
+/DEFINE HTTPSTSK
+
+// -------------------------------------------------------------------------------------------------
+// 1xx - Informational Responses
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_HTTP_100_CONTINUE '100 Continue'; // Continue
+DCL-C C_SDK4I_HTTP_101_SWITCHING_PROTOCOLS '101 Switching protocols';
+DCL-C C_SDK4I_HTTP_102_PROCESSING '102 Processing'; // WebDAV - RFC 2518
+DCL-C C_SDK4I_HTTP_103_EARLY_HINTS 'Early hints'; // RFC 8297
+
+// -------------------------------------------------------------------------------------------------
+// 2xx - Success Responses
+// Note: 200, 201, 202, 204 are valid for IBM Integrated Web Services Server.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_HTTP_200_OK '200 Ok';
+DCL-C C_SDK4I_HTTP_201_CREATED '201 Created';
+DCL-C C_SDK4I_HTTP_202_ACCEPTED '202 Accepted';
+DCL-C C_SDK4I_HTTP_203_NON_AUTHORITATIVE_INFORMATION '203 Non-authoritative information';
+DCL-C C_SDK4I_HTTP_204_NO_CONTENT '204 No content';
+DCL-C C_SDK4I_HTTP_205_RESET_CONTENT '205 Reset content';
+DCL-C C_SDK4I_HTTP_206_PARTIAL_CONTENT '206 Partial content';
+DCL-C C_SDK4I_HTTP_207_MUTLISTATUS '207 Multi-status'; // WebDAV - RFC 4918
+DCL-C C_SDK4I_HTTP_208_ALREADY_REPORTED '208 Already reported'; // WebDAV - RFC 5842
+DCL-C C_SDK4I_HTTP_226_IM_USED '226 IM used'; // RFC 3229
+
+// -------------------------------------------------------------------------------------------------
+// 3xx - Redirection Responses
+// Note: 301, 303, 304, 307 are valid for IBM Integrated Web Services Server.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_HTTP_300_MULTIPLE_CHOICES '300 Multiple choices';
+DCL-C C_SDK4I_HTTP_301_MOVED_PERMANENTLY '301 Moved permanently';
+DCL-C C_SDK4I_HTTP_302_FOUND '302 Found'; // previously "Moved temporarily"
+DCL-C C_SDK4I_HTTP_303_SEE_OTHER '303 See other';
+DCL-C C_SDK4I_HTTP_304_NOT_MODIFIED '304 Not modified';
+DCL-C C_SDK4I_HTTP_305_USE_PROXY '305 Use proxy';
+DCL-C C_SDK4I_HTTP_306_SWITCH_PROXY '306 Switch proxy';
+DCL-C C_SDK4I_HTTP_307_TEMPORARY_REDIRECT '307 Temporary redirect';
+DCL-C C_SDK4I_HTTP_308_PERMANENT_REDIRECT '308 Permanent redirect';
+
+// -------------------------------------------------------------------------------------------------
+// 4xx - Client Error Responses
+// Note: 400, 401, 403, 404, 406, 409, 410, 412, 415 are valid for IBM Integrated Web Services
+// Server.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_HTTP_400_BAD_REQUEST '400 Bad request';
+DCL-C C_SDK4I_HTTP_401_UNAUTHORIZED '401 Unauthorized'; // actually means unauthenticated
+DCL-C C_SDK4I_HTTP_402_PAYMENT_REQUIRED '402 Payment required';
+DCL-C C_SDK4I_HTTP_403_FORBIDDEN '403 Forbidden'; // means user is not authorized
+DCL-C C_SDK4I_HTTP_404_NOT_FOUND '404 Not found';
+DCL-C C_SDK4I_HTTP_405_METHOD_NOT_ALLOWED '405 Method not allowed';
+DCL-C C_SDK4I_HTTP_406_NOT_ACCEPTABLE '406 Not acceptable';
+DCL-C C_SDK4I_HTTP_407_PROXY_AUTH_REQUIRED '407 Proxy authentation required'; // RFC 7235
+DCL-C C_SDK4I_HTTP_408_REQUEST_TIMEOUT '408 Request timeout';
+DCL-C C_SDK4I_HTTP_409_CONFLICT '409 Conflict'; // duplicate key
+DCL-C C_SDK4I_HTTP_410_GONE '410 Gone';
+DCL-C C_SDK4I_HTTP_411_LENGTH_REQUIRED '411 Length required';
+DCL-C C_SDK4I_HTTP_412_PRECONDITION_FAILED '412 Precondition failed'; // RFC 7232
+DCL-C C_SDK4I_HTTP_413_PAYLOAD_TOO_LARGE '413 Payload too large'; // RFC 7231
+DCL-C C_SDK4I_HTTP_414_URI_TOO_LONG '414 URI too long'; // RFC 7231
+DCL-C C_SDK4I_HTTP_415_UNSUPPORTED_MEDIA_TYPE '415 Unsupported media type'; // RFC 7231
+DCL-C C_SDK4I_HTTP_416_RANGE_NOT_SATISFIABLE '416 Range not satisfiable'; // RFC 7233
+DCL-C C_SDK4I_HTTP_417_EXPECTATION_FAILED '417 Expectation failed';
+DCL-C C_SDK4I_HTTP_418_TEAPOT '418 I am a teapot'; // RFC 2324, RFC 7168
+DCL-C C_SDK4I_HTTP_421_MISDIRECTED_REQUEST '421 Misdirected request'; // RFC 7540
+DCL-C C_SDK4I_HTTP_422_UNPROCESSABLE_ENTITY '422 Unprocessable entity'; // WebDAV - RFC 4918
+DCL-C C_SDK4I_HTTP_423_LOCKED '423 Locked'; // WebDAV - RFC 4918
+DCL-C C_SDK4I_HTTP_424_FAILED_DEPENDENCY '424 Failed dependency'; // WebDAV - RFC 4918
+DCL-C C_SDK4I_HTTP_425_TOO_EARLY '425 Too early'; // RFC 8470
+DCL-C C_SDK4I_HTTP_426_UPGRADE_REQUIRED '426 Upgrade required';
+DCL-C C_SDK4I_HTTP_428_PRECONDITION_REQUIRED '428 Precondition required'; // RFC 6585
+DCL-C C_SDK4I_HTTP_429_TOO_MANY_REQUESTS '429 Too many requests'; // RFC 6585
+DCL-C C_SDK4I_HTTP_431_HEADER_TOO_LARGE 'Request header fields too large'; // RFC 6585
+DCL-C C_SDK4I_HTTP_451_UNAVAILABLE_LEGAL 'Unavailable for legal reasons'; // RFC 7725
+
+// -------------------------------------------------------------------------------------------------
+// 5xx - Server Error Responses
+// Note: 500, 503 are valid for IBM Integrated Web Services Server.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_HTTP_500_INTERNAL_SERVER_ERROR '500 Internal Server Error';
+DCL-C C_SDK4I_HTTP_501_NOT_IMPLEMENTED '501 Not Implemented';
+DCL-C C_SDK4I_HTTP_502_BAD_GATEWAY '502 Bad Gateway';
+DCL-C C_SDK4I_HTTP_503_SERVICE_UNAVAILABLE 'Service unavailable';
+DCL-C C_SDK4I_HTTP_504_GATEWAY_TIMEOUT 'Gateway timeout';
+DCL-C C_SDK4I_HTTP_505_HTTP_VERSION_NOT_SUPPORTED 'HTTP version not supported';
+DCL-C C_SDK4I_HTTP_506_VARIANT_ALSO_NEGOTIATES 'Variant also negotiates'; // RFC 2295
+DCL-C C_SDK4I_HTTP_507_INSUFFICIENT_STORAGE 'Insufficient storage'; // WebDAV - RFC 4918
+DCL-C C_SDK4I_HTTP_508_LOOP_DETECTED 'Loop detected'; // WebDAV - RFC 5842
+DCL-C C_SDK4I_HTTP_510_NOT_EXTENDED 'Not extended'; // RFC 2774
+DCL-C C_SDK4I_HTTP_511_NETWORK_AUTH_REQUIRED 'Network authentication required'; // RFC 6585
+
+// -------------------------------------------------------------------------------------------------
+//   The following HTTP Response Codes are NOT official - they are not defined by the IANA
+// (Internet Assigned Numbers Authority), IETF (Internet Engineering Task Force) or any other
+// entity. It is conceivable that our web services could fail in some way and we need to return a
+// response indicating that failure. However, if we return an official HTTP Status Code, it is not
+// immediately obvious if our own code failed or if there was some other server error.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_HTTP_550_WEB_SERVICE_ERROR '550 Web Service Error';

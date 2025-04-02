@@ -1,0 +1,89 @@
+-- *************************************************************************************************
+--   This table will hold session information about users currently using the system.
+--
+-- @author James Brian Hill
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_sec_session FOR SYSTEM NAME secsest (
+  -- Primary key column.
+  id -- this is a UUID in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+    VARCHAR(36) NOT NULL,
+
+  -- Data columns.
+  usr_id
+    DECIMAL(9,0) NOT NULL,
+  username
+    VARCHAR(128) NOT NULL,
+  honorific_id FOR hon_id
+    VARCHAR(10) NOT NULL CCSID 1208,
+  first_name FOR fname
+    VARCHAR(50) NOT NULL CCSID 1208,
+  middle_name FOR mname
+    VARCHAR(50) DEFAULT NULL CCSID 1208,
+  last_name FOR lname
+    VARCHAR(50) NOT NULL CCSID 1208,
+  preferred_name FOR pname
+    VARCHAR(50) DEFAULT NULL CCSID 1208,
+  suffix_id
+    VARCHAR(10) DEFAULT NULL CCSID 1208,
+
+  last_used
+    TIMESTAMP(6) NOT NULL,
+  language_id FOR lng_id
+    CHAR(2) NOT NULL DEFAULT 'en',
+  timezone_code FOR tz_code
+    VARCHAR(5) NOT NULL,
+  timezone_description FOR tz_dsc
+    VARCHAR(50) NOT NULL,
+  timezone_offset FOR tz_offset
+    DECIMAL(4,2) NOT NULL DEFAULT 0,
+
+  -- Constraints
+  CONSTRAINT secsestpk PRIMARY KEY(id),
+  CONSTRAINT secsestf00 FOREIGN KEY(usr_id) REFERENCES secusrt(id) ON DELETE CASCADE,
+  CONSTRAINT secsestf01 FOREIGN KEY(username) REFERENCES secusrt(usr) ON DELETE CASCADE,
+  CONSTRAINT secsestf02 FOREIGN KEY(lng_id) REFERENCES lngt(id) ON DELETE CASCADE
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE secsest IS 'SDK4i - SEC - Session Information';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN secsest (
+  id        IS 'ID',
+  usr_id    IS 'User ID',
+  username  IS 'Username',
+  hon_id    IS 'Honorific',
+  fname     IS 'First Name',
+  mname     IS 'Middle Name',
+  lname     IS 'Last Name',
+  suffix_id IS 'Suffix',
+  last_used IS 'Last Used Timestamp',
+  lng_id    IS 'Language ID',
+  tz_offset IS 'Timezone Offset (hours)',
+  tz_code   IS 'Timezone Code',
+  tz_dsc    IS 'Timezone Description'
+);

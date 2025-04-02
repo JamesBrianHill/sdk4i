@@ -1,0 +1,58 @@
+-- *************************************************************************************************
+--   This table will hold a list of state codes as defined by the International Organization for
+-- Standardization (ISO). ISO 3166-2 is the standard for state codes.
+--
+-- @author James Brian Hill
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_geo_state FOR SYSTEM NAME geostat (
+  -- Primary key column.
+  id
+    DECIMAL(7,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  country_id
+    CHAR(2) NOT NULL,
+  code
+    VARCHAR(50) NOT NULL CCSID 1208,
+  name -- Full name of the state.
+    VARCHAR(50) NOT NULL CCSID 1208,
+
+  -- Constraints.
+  CONSTRAINT geostatpk PRIMARY KEY(id),
+  CONSTRAINT geostatu00 UNIQUE(country_id, code)
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE geostat IS 'SDK4i - GEO - State';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN geostat (
+  id         IS 'ID',
+  country_id IS 'Country ID',
+  code       IS 'State Code',
+  name       IS 'Name'
+);

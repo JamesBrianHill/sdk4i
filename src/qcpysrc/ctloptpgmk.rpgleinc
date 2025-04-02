@@ -1,0 +1,43 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   Define control options (CTL-OPT) to be used by programs.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(CTLOPTPGMK)
+/EOF
+/ENDIF
+/DEFINE CTLOPTPGMK
+
+// -------------------------------------------------------------------------------------------------
+CTL-OPT ALWNULL(*USRCTL);
+CTL-OPT BNDDIR('SDK4I');
+CTL-OPT CCSID(*EXACT);
+CTL-OPT CCSIDCVT(*EXCP: *LIST); // list all the source statements that have a CCSID conversion.
+CTL-OPT COPYRIGHT('Copyright (c) 2015 - 2025 by James Brian Hill');
+CTL-OPT DATFMT(*ISO);
+// CTL-OPT DATEYY(*NOALLOW); // Became available with 7.5TR5 on 2024-11-22.
+CTL-OPT DEBUG(*CONSTANTS: *DUMP: *INPUT: *RETVAL: *XMLSAX);
+CTL-OPT DECEDIT('0.'); // JSON needs a leading zero.
+CTL-OPT EXPROPTS(*USEDECEDIT); // Use the DECEDIT setting for built-in functions like %DEC.
+CTL-OPT EXTBININT(*YES);
+CTL-OPT OPTIMIZE(*NONE); // Change to *FULL for production code.
+CTL-OPT OPTION(*NODEBUGIO: *NOSHOWCPY: *NOUNREF: *SRCSTMT);
+CTL-OPT TIMFMT(*ISO);

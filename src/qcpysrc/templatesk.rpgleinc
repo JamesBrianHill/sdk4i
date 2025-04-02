@@ -1,0 +1,142 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+// Define template data structures and variables to be used in our applications.
+//
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(TEMPLATESK)
+/EOF
+/ENDIF
+/DEFINE TEMPLATESK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// CONSTANTSK - constant values, helpful for defining variables.
+// -------------------------------------------------------------------------------------------------
+/COPY './constantsk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures and template variables.
+// -------------------------------------------------------------------------------------------------
+
+//   When defining arrays that will hold data from tables, it is helpful to have a template. There
+// can only be 8,000 columns in a table so a PACKED(4:0) is used.
+DCL-S tpl_sdk4i_column_count PACKED(4: 0) TEMPLATE;
+
+//   Db2 for i column and table names have maximum lengths. We define some templates so our
+// software can use consistently sized and typed variables.
+DCL-S tpl_sdk4i_db2_column_name VARCHAR(C_SDK4I_DB2_COLUMN_NAME_MAX_LEN) TEMPLATE;
+DCL-S tpl_sdk4i_db2_table_name VARCHAR(C_SDK4I_DB2_TABLE_NAME_MAX_LEN) TEMPLATE;
+
+//   Most of the procedures we write have an indicator that gets turned *ON if the procedure ends
+// abnormally, and another indicator that gets turned *OFF if the procedure was unable to do
+// whatever it was supposed to do.
+DCL-S tpl_sdk4i_is_abend IND TEMPLATE; // Used to capture if a procedure ends abnormally.
+DCL-S tpl_sdk4i_is_successful IND TEMPLATE; // Used to capture if a procedure completes successfully.
+
+//   We define a template that can be used to define variables that will hold dynamically built SQL
+// statements. Because this software is used by people all over the world, we define the SQL
+// template to use UTF-8 encoding by specifying CCSID(*UTF8).
+DCL-S tpl_sdk4i_sql_statement VARCHAR(C_SDK4I_DB2_VARCHAR_MAX_LEN) CCSID(*UTF8) TEMPLATE;
+
+//   We define some templates that describe system items.
+// IFS path names can be up to 16MiB in size.
+// Objects with descriptions, such as programs and tables, are limited to 50 characters.
+// Objects in the QSYS.LIB filesystem are limited to 10 character names.
+// @link https://www.ibm.com/docs/en/i/7.5?topic=systems-file-system-comparison
+DCL-S tpl_sdk4i_ifs_source_path VARCHAR(1024) TEMPLATE; // 1024 is arbitrary, can be up to 16MiB.
+DCL-S tpl_sdk4i_object_description VARCHAR(50) TEMPLATE;
+DCL-S tpl_sdk4i_system_object_name VARCHAR(10) TEMPLATE;
+
+//   We expect our software to use web services and many web services use a "token". Often, that
+// token is a formatted UUID so we define a template here.
+// @link https://en.wikipedia.org/wiki/Universally_unique_identifier
+// @link https://www.ibm.com/docs/en/i/7.5?topic=instructions-generate-universal-unique-identifier-genuuid
+DCL-S tpl_sdk4i_uuid VARCHAR(36) TEMPLATE;
+
+//   IBM documentation for the APIs they provide often use BINARY(4) and occasionally
+// UNSIGNED BINARY(4). These should not be confused with the binary-decimal data type (BINDEC) in
+// RPG. Instead, these BINARY(4) and UNSIGNED BINARY(4) values are equivalent to INT(10) and UNS(10)
+// respectively. In an effort to simplify things a little, we define some template variables as INT
+// and UNS values but use the "binary" names we commonly see in documentation.
+// @link https://www.ibm.com/docs/en/i/7.5?topic=type-integer-format#intfmt9
+DCL-S tpl_sdk4i_binary1 INT(3) TEMPLATE; // 1-byte integer.
+DCL-S tpl_sdk4i_binary2 INT(5) TEMPLATE; // 2-byte integer.
+DCL-S tpl_sdk4i_binary4 INT(10) TEMPLATE; // 4-byte integer. Used by many IBM APIs.
+DCL-S tpl_sdk4i_binary8 INT(20) TEMPLATE; // 8-byte integer.
+
+// @link https://www.ibm.com/docs/en/i/7.5?topic=type-unsigned-format
+DCL-S tpl_sdk4i_unsigned_binary1 UNS(3) TEMPLATE; // 1-byte unsigned int.
+DCL-S tpl_sdk4i_unsigned_binary2 UNS(5) TEMPLATE; // 2-byte unsigned int.
+DCL-S tpl_sdk4i_unsigned_binary4 UNS(10) TEMPLATE; // 4-byte unsigned int. Used by some IBM APIs.
+DCL-S tpl_sdk4i_unsigned_binary8 UNS(20) TEMPLATE; // 8-byte unsigned int.
+
+//   We define some template strings of various sizes, using both the local CCSID as well as *UTF8.
+// This allows us to the LIKE keyword when we define variables in our applications which keeps
+// everything consistent.
+DCL-S tpl_sdk4i_varchar_1K VARCHAR(C_SDK4I_SIZE_1KI) TEMPLATE;
+DCL-S tpl_sdk4i_varchar_1M VARCHAR(C_SDK4I_SIZE_1MI) TEMPLATE;
+DCL-S tpl_sdk4i_varchar_2M VARCHAR(C_SDK4I_SIZE_2MI) TEMPLATE;
+
+DCL-S tpl_sdk4i_varchar_1K_utf8 VARCHAR(C_SDK4I_SIZE_1KI) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_varchar_1M_utf8 VARCHAR(C_SDK4I_SIZE_1MI) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_varchar_2M_utf8 VARCHAR(C_SDK4I_SIZE_2MI) CCSID(*UTF8) TEMPLATE;
+
+//   We define a template of the Program Status Data Structure so we can use that definition with
+// procedure parameters or for local data structures.
+DCL-DS tpl_sdk4i_psds_ds QUALIFIED TEMPLATE;
+  procedure   CHAR(10)   POS(1);   // *PROC (Program or Module name)
+  status      ZONED(5:0) POS(11);  // *STATUS
+  prev_sts    ZONED(5:0) POS(16);  // Previous *STATUS code
+  line        CHAR(8)    POS(21);  // Source listing statement number
+  routine     CHAR(8)    POS(29);  // *ROUTINE Routine where exception/error occurred
+  parms       ZONED(3:0) POS(37);  // *PARMS Number of parameters passed from calling program
+  exc_type    CHAR(3)    POS(40);  // Exception type (CPF or MCH)
+  exc_num     CHAR(4)    POS(43);  // Exception number
+  lib         CHAR(10)   POS(81);  // Library where this program resides
+  exc_data    CHAR(80)   POS(91);  // Exception data
+  rnx9001id   CHAR(4)    POS(171); // Id of exception that caused RNX9001
+  file        CHAR(10)   POS(175); // Filename with last file operation when error occurred
+  enter_date  CHAR(8)    POS(191); // Date job entered system (Job Date)
+  last_file   CHAR(10)   POS(201); // Filename with last file operation when error occurred
+  lf_status   CHAR(35)   POS(209); // Status info on the last file used
+  job_name    CHAR(10)   POS(244); // Job name
+  username    CHAR(10)   POS(254); // User name from user profile
+  job_number  ZONED(6:0) POS(264); // Job number
+  run_date    ZONED(6:0) POS(270); // Date program started running
+  run_date2   ZONED(6:0) POS(276); // Date of program running
+  run_time    ZONED(6:0) POS(282); // Time of program running
+  comp_date   CHAR(6)    POS(288); // Date program was compiled
+  comp_time   CHAR(6)    POS(294); // Time program was compiled
+  comp_level  CHAR(4)    POS(300); // Compiler level
+  src_fil     CHAR(10)   POS(304); // Source file name
+  src_lib     CHAR(10)   POS(314); // Source library name
+  src_mbr     CHAR(10)   POS(324); // Source member name
+  pgm_prc     CHAR(10)   POS(334); // Program containing procedure
+  mod_prc     CHAR(10)   POS(344); // Module containing procedure
+  src_id1     INT(5)     POS(354); // Source ID matching statement number from position 21-28
+  src_id2     INT(5)     POS(356); // Source Id matching statement number from position 228-235
+  cur_usr     CHAR(10)   POS(358); // Current user profile name (can be different than pos 254-263)!
+  ext_err_cod INT(10)    POS(368); // External error code
+  elements    INT(20)    POS(372); // Elements set by XML-INTO and DATA-INTO
+  job_id      CHAR(16)   POS(380); // 7.4 Internal job ID.
+  sys         CHAR(8)    POS(396); // 7.4 System name.
+  unused      CHAR(50)   POS(404); // 7.5 Currently not used.
+END-DS tpl_sdk4i_psds_ds;

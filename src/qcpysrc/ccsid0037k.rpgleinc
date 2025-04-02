@@ -1,0 +1,295 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   Define constants for EBCDIC characters (CCSID 37).
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(CCSID0037K)
+/EOF
+/ENDIF
+/DEFINE CCSID0037K
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures, and template variables.
+// -------------------------------------------------------------------------------------------------
+
+// EBCDIC control codes.
+DCL-C C_SDK4I_EBCDIC_CRLF x'0D25'; // Carriage return/Line feed
+
+DCL-C C_SDK4I_EBCDIC_NULL x'00'; // NULL               (ASCII x'00')
+DCL-C C_SDK4I_EBCDIC_SOH  x'01'; // Start of heading.  (ASCII x'01')
+DCL-C C_SDK4I_EBCDIC_STX  x'02'; // Start of text.     (ASCII x'02')
+DCL-C C_SDK4I_EBCDIC_ETX  x'03'; // End of text.       (ASCII x'03')
+DCL-C C_SDK4I_EBCDIC_SEL  x'04'; // Select.            (No ASCII equivalent)
+DCL-C C_SDK4I_EBCDIC_HT   x'05'; // Horizontal tab.    (ASCII x'09')
+DCL-C C_SDK4I_EBCDIC_RNL  x'06'; // Required newline.  (No ASCII equivalent)
+DCL-C C_SDK4I_EBCDIC_DEL  x'07'; // Delete.            (ASCII x'7F')
+DCL-C C_SDK4I_EBCDIC_GE   x'08'; // Graphic escape.    (No ASCII equivalent)
+DCL-C C_SDK4I_EBCDIC_SPS  x'09'; // Superscript        (No ASCII equivalent)
+DCL-C C_SDK4I_EBCDIC_RPT  x'0A'; // Repeat             (No ASCII equivalent)
+DCL-C C_SDK4I_EBCDIC_VT   x'0B'; // Vertical tab       (ASCII x'0B')
+DCL-C C_SDK4I_EBCDIC_FF   x'0C'; // Form feed          (ASCII x'0C')
+DCL-C C_SDK4I_EBCDIC_CR   x'0D'; // Carriage return    (ASCII x'0D')
+DCL-C C_SDK4I_EBCDIC_SO   x'0E'; // Shift out          (ASCII x'0E')
+DCL-C C_SDK4I_EBCDIC_SI   x'0F'; // Shift in           (ASCII x'0F')
+DCL-C C_SDK4I_EBCDIC_DLE  x'10'; // Data link escape   (ASCII x'10')
+DCL-C C_SDK4I_EBCDIC_DC1  x'11'; // Device control 1   (ASCII x'11')
+DCL-C C_SDK4I_EBCDIC_DC2  x'12'; // Device control 2   (ASCII x'12')
+DCL-C C_SDK4I_EBCDIC_DC3  x'13'; // Device control 3   (ASCII x'13')
+DCL-C C_SDK4I_EBCDIC_RES  x'14'; // Restore/Enable presentation (No ASCII equivalent)
+DCL-C C_SDK4I_EBCDIC_NL   x'15'; // New-line           (No ASCII equivalent)
+DCL-C C_SDK4I_EBCDIC_BS   x'16'; // Backspace          (ASCII x'08')
+DCL-C C_SDK4I_EBCDIC_POC  x'17'; // Program-operator communications (No ASCII equivalent)
+DCL-C C_SDK4I_EBCDIC_CAN  x'18'; // Cancel
+DCL-C C_SDK4I_EBCDIC_EM   x'19'; // End of medium
+DCL-C C_SDK4I_EBCDIC_UBS  x'1A'; // Unit backspace
+DCL-C C_SDK4I_EBCDIC_CU1  x'1B'; // Customer use 1
+DCL-C C_SDK4I_EBCDIC_IFS  x'1C'; // Interchange file separator
+DCL-C C_SDK4I_EBCDIC_IGS  x'1D'; // Interchange group separator
+DCL-C C_SDK4I_EBCDIC_IRS  x'1E'; // Interchange record separator
+DCL-C C_SDK4I_EBCDIC_IUS  x'1F'; // Interchange unit separator/Intermediate transmission block
+DCL-C C_SDK4I_EBCDIC_DS   x'20'; // Digit select
+DCL-C C_SDK4I_EBCDIC_SOS  x'21'; // Start of significance
+DCL-C C_SDK4I_EBCDIC_FS   x'22'; // Field separator
+DCL-C C_SDK4I_EBCDIC_WUS  x'23'; // Word underscore
+DCL-C C_SDK4I_EBCDIC_BYP  x'24'; // Bypass/inhibit presentation
+DCL-C C_SDK4I_EBCDIC_LF   x'25'; // Line feed
+DCL-C C_SDK4I_EBCDIC_ETB  x'26'; // End of transmission block
+DCL-C C_SDK4I_EBCDIC_ESC  x'27'; // Escape
+DCL-C C_SDK4I_EBCDIC_SA   x'28'; // Set attribute
+DCL-C C_SDK4I_EBCDIC_U01  x'29'; // Undefined 1
+DCL-C C_SDK4I_EBCDIC_SM   x'2A'; // Set model switch
+DCL-C C_SDK4I_EBCDIC_CSP  x'2B'; // Control sequence prefix
+DCL-C C_SDK4I_EBCDIC_MFA  x'2C'; // Modify field attribute
+DCL-C C_SDK4I_EBCDIC_ENQ  x'2D'; // Enquiry
+DCL-C C_SDK4I_EBCDIC_ACK  x'2E'; // Acknowledge
+DCL-C C_SDK4I_EBCDIC_BEL  x'2F'; // Bell
+DCL-C C_SDK4I_EBCDIC_U02  x'30'; // Undefined 2
+DCL-C C_SDK4I_EBCDIC_U03  x'31'; // Undefined 3
+DCL-C C_SDK4I_EBCDIC_SYN  x'32'; // Synchronous idle
+DCL-C C_SDK4I_EBCDIC_IR   x'33'; // Index return
+DCL-C C_SDK4I_EBCDIC_PP   x'34'; // Presentation position
+DCL-C C_SDK4I_EBCDIC_TRN  x'35'; //
+DCL-C C_SDK4I_EBCDIC_NBS  x'36'; // Numeric backspace
+DCL-C C_SDK4I_EBCDIC_EOT  x'37'; // End of transmission
+DCL-C C_SDK4I_EBCDIC_SBS  x'38'; // Subscript
+DCL-C C_SDK4I_EBCDIC_IT   x'39'; // Indent tab
+DCL-C C_SDK4I_EBCDIC_RFF  x'3A'; // Required form feed
+DCL-C C_SDK4I_EBCDIC_CU3  x'3B'; // Customer use 3
+DCL-C C_SDK4I_EBCDIC_DC4  x'3C'; // Device control 4
+DCL-C C_SDK4I_EBCDIC_NAK  x'3D'; // Negative acknowledge
+DCL-C C_SDK4I_EBCDIC_U04  x'3E'; // Undefined 4
+DCL-C C_SDK4I_EBCDIC_SUB  x'3F'; // Substitute
+DCL-C C_SDK4I_EBCDIC_SPC  x'40'; // Space
+DCL-C C_SDK4I_EBCDIC_U05  x'41'; // Undefined 5
+DCL-C C_SDK4I_EBCDIC_U06  x'42'; // Undefined 6
+DCL-C C_SDK4I_EBCDIC_U07  x'43'; // Undefined 7
+DCL-C C_SDK4I_EBCDIC_U08  x'44'; // Undefined 8
+DCL-C C_SDK4I_EBCDIC_U09  x'45'; // Undefined 9
+DCL-C C_SDK4I_EBCDIC_U10  x'46'; // Undefined 10
+DCL-C C_SDK4I_EBCDIC_U11  x'47'; // Undefined 11
+DCL-C C_SDK4I_EBCDIC_U12  x'48'; // Undefined 12
+DCL-C C_SDK4I_EBCDIC_U13  x'49'; // Undefined 13
+DCL-C C_SDK4I_EBCDIC_CNT  x'4A'; // Cent symbol
+DCL-C C_SDK4I_EBCDIC_PRD  x'4B'; // Period
+DCL-C C_SDK4I_EBCDIC_LT   x'4C'; // Less than
+DCL-C C_SDK4I_EBCDIC_LP   x'4D'; // Left parenthesis
+DCL-C C_SDK4I_EBCDIC_PLS  x'4E'; // Plus sign
+DCL-C C_SDK4I_EBCDIC_OR   x'4F'; // Logical or
+DCL-C C_SDK4I_EBCDIC_AMP  x'50'; // Ampersand sign
+DCL-C C_SDK4I_EBCDIC_U14  x'51'; // Undefined 14
+DCL-C C_SDK4I_EBCDIC_U15  x'52'; // Undefined 15
+DCL-C C_SDK4I_EBCDIC_U16  x'53'; // Undefined 16
+DCL-C C_SDK4I_EBCDIC_U17  x'54'; // Undefined 17
+DCL-C C_SDK4I_EBCDIC_U18  x'55'; // Undefined 18
+DCL-C C_SDK4I_EBCDIC_U19  x'56'; // Undefined 19
+DCL-C C_SDK4I_EBCDIC_U20  x'57'; // Undefined 20
+DCL-C C_SDK4I_EBCDIC_U21  x'58'; // Undefined 21
+DCL-C C_SDK4I_EBCDIC_U22  x'59'; // Undefined 22
+DCL-C C_SDK4I_EBCDIC_EXC  x'5A'; // Exclamation mark
+DCL-C C_SDK4I_EBCDIC_DOL  x'5B'; // Dollar sign
+DCL-C C_SDK4I_EBCDIC_AST  x'5C'; // Asterisk
+DCL-C C_SDK4I_EBCDIC_RP   x'5D'; // Right parenthesis
+DCL-C C_SDK4I_EBCDIC_SEM  x'5E'; // Semi-colon
+DCL-C C_SDK4I_EBCDIC_NOT  x'5F'; // Logical not
+DCL-C C_SDK4I_EBCDIC_MNS  x'60'; // Minus sign
+DCL-C C_SDK4I_EBCDIC_FSL  x'61'; // Forward slash /
+DCL-C C_SDK4I_EBCDIC_U23  x'62'; // Undefined 23
+DCL-C C_SDK4I_EBCDIC_U24  x'63'; // Undefined 24
+DCL-C C_SDK4I_EBCDIC_U25  x'64'; // Undefined 25
+DCL-C C_SDK4I_EBCDIC_U26  x'65'; // Undefined 26
+DCL-C C_SDK4I_EBCDIC_U27  x'66'; // Undefined 27
+DCL-C C_SDK4I_EBCDIC_U28  x'67'; // Undefined 28
+DCL-C C_SDK4I_EBCDIC_U29  x'68'; // Undefined 29
+DCL-C C_SDK4I_EBCDIC_U30  x'69'; // Undefined 30
+DCL-C C_SDK4I_EBCDIC_SBR  x'6A'; // Split vertical bar
+DCL-C C_SDK4I_EBCDIC_CMA  x'6B'; // Comma
+DCL-C C_SDK4I_EBCDIC_PRC  x'6C'; // Percent sign
+DCL-C C_SDK4I_EBCDIC_UND  x'6D'; // Underscore
+DCL-C C_SDK4I_EBCDIC_GT   x'6E'; // Greater than
+DCL-C C_SDK4I_EBCDIC_QMK  x'6F'; // Question mark
+DCL-C C_SDK4I_EBCDIC_U31  x'70'; // Undefined 31
+DCL-C C_SDK4I_EBCDIC_U32  x'71'; // Undefined 32
+DCL-C C_SDK4I_EBCDIC_U33  x'72'; // Undefined 33
+DCL-C C_SDK4I_EBCDIC_U34  x'73'; // Undefined 34
+DCL-C C_SDK4I_EBCDIC_U35  x'74'; // Undefined 35
+DCL-C C_SDK4I_EBCDIC_U36  x'75'; // Undefined 36
+DCL-C C_SDK4I_EBCDIC_U37  x'76'; // Undefined 37
+DCL-C C_SDK4I_EBCDIC_U38  x'77'; // Undefined 38
+DCL-C C_SDK4I_EBCDIC_U39  x'78'; // Undefined 39
+DCL-C C_SDK4I_EBCDIC_GRV  x'79'; // Grave `
+DCL-C C_SDK4I_EBCDIC_CLN  x'7A'; // Colon
+DCL-C C_SDK4I_EBCDIC_OCT  x'7B'; // Octothorpe symbol (number sign, hash sigh, pound sign)
+DCL-C C_SDK4I_EBCDIC_AT   x'7C'; // At sign
+DCL-C C_SDK4I_EBCDIC_SQ   x'7D'; // Single quote
+DCL-C C_SDK4I_EBCDIC_EQ   x'7E'; // Equal sign
+DCL-C C_SDK4I_EBCDIC_DQ   x'7F'; // Double quote
+DCL-C C_SDK4I_EBCDIC_U40  x'80'; // Undefined 40
+DCL-C C_SDK4I_EBCDIC_LOA  x'81'; // Lowercase a
+DCL-C C_SDK4I_EBCDIC_LOB  x'82'; // Lowercase b
+DCL-C C_SDK4I_EBCDIC_LOC  x'83'; // Lowercase c
+DCL-C C_SDK4I_EBCDIC_LOD  x'84'; // Lowercase d
+DCL-C C_SDK4I_EBCDIC_LOE  x'85'; // Lowercase e
+DCL-C C_SDK4I_EBCDIC_LOF  x'86'; // Lowercase f
+DCL-C C_SDK4I_EBCDIC_LOG  x'87'; // Lowercase g
+DCL-C C_SDK4I_EBCDIC_LOH  x'88'; // Lowercase h
+DCL-C C_SDK4I_EBCDIC_LOI  x'89'; // Lowercase i
+DCL-C C_SDK4I_EBCDIC_U41  x'8A'; // Undefined 41
+DCL-C C_SDK4I_EBCDIC_U42  x'8B'; // Undefined 42
+DCL-C C_SDK4I_EBCDIC_U43  x'8C'; // Undefined 43
+DCL-C C_SDK4I_EBCDIC_U44  x'8D'; // Undefined 44
+DCL-C C_SDK4I_EBCDIC_U45  x'8E'; // Undefined 45
+DCL-C C_SDK4I_EBCDIC_U46  x'8F'; // Undefined 46
+DCL-C C_SDK4I_EBCDIC_U47  x'90'; // Undefined 47
+DCL-C C_SDK4I_EBCDIC_LOJ  x'91'; // Lowercase j
+DCL-C C_SDK4I_EBCDIC_LOK  x'92'; // Lowercase k
+DCL-C C_SDK4I_EBCDIC_LOL  x'93'; // Lowercase l
+DCL-C C_SDK4I_EBCDIC_LOM  x'94'; // Lowercase m
+DCL-C C_SDK4I_EBCDIC_LON  x'95'; // Lowercase n
+DCL-C C_SDK4I_EBCDIC_LOO  x'96'; // Lowercase o
+DCL-C C_SDK4I_EBCDIC_LOP  x'97'; // Lowercase p
+DCL-C C_SDK4I_EBCDIC_LOQ  x'98'; // Lowercase q
+DCL-C C_SDK4I_EBCDIC_LOR  x'99'; // Lowercase r
+DCL-C C_SDK4I_EBCDIC_U48  x'9A'; // Undefined 48
+DCL-C C_SDK4I_EBCDIC_U49  x'9B'; // Undefined 49
+DCL-C C_SDK4I_EBCDIC_U50  x'9C'; // Undefined 50
+DCL-C C_SDK4I_EBCDIC_U51  x'9D'; // Undefined 51
+DCL-C C_SDK4I_EBCDIC_U52  x'9E'; // Undefined 52
+DCL-C C_SDK4I_EBCDIC_U53  x'9F'; // Undefined 53
+DCL-C C_SDK4I_EBCDIC_U54  x'A0'; // Undefined 54
+DCL-C C_SDK4I_EBCDIC_TIL  x'A1'; // Tilde ~
+DCL-C C_SDK4I_EBCDIC_LOS  x'A2'; // Lowercase s
+DCL-C C_SDK4I_EBCDIC_LOT  x'A3'; // Lowercase t
+DCL-C C_SDK4I_EBCDIC_LOU  x'A4'; // Lowercase u
+DCL-C C_SDK4I_EBCDIC_LOV  x'A5'; // Lowercase v
+DCL-C C_SDK4I_EBCDIC_LOW  x'A6'; // Lowercase w
+DCL-C C_SDK4I_EBCDIC_LOX  x'A7'; // Lowercase x
+DCL-C C_SDK4I_EBCDIC_LOY  x'A8'; // Lowercase y
+DCL-C C_SDK4I_EBCDIC_LOZ  x'A9'; // Lowercase z
+DCL-C C_SDK4I_EBCDIC_U55  x'AA'; // Undefined 55
+DCL-C C_SDK4I_EBCDIC_U56  x'AB'; // Undefined 56
+DCL-C C_SDK4I_EBCDIC_U57  x'AC'; // Undefined 57
+DCL-C C_SDK4I_EBCDIC_U58  x'AD'; // Undefined 58
+DCL-C C_SDK4I_EBCDIC_U59  x'AE'; // Undefined 59
+DCL-C C_SDK4I_EBCDIC_U60  x'AF'; // Undefined 60
+DCL-C C_SDK4I_EBCDIC_U61  x'B0'; // Undefined 61
+DCL-C C_SDK4I_EBCDIC_U62  x'B1'; // Undefined 62
+DCL-C C_SDK4I_EBCDIC_U63  x'B2'; // Undefined 63
+DCL-C C_SDK4I_EBCDIC_U64  x'B3'; // Undefined 64
+DCL-C C_SDK4I_EBCDIC_U65  x'B4'; // Undefined 65
+DCL-C C_SDK4I_EBCDIC_U66  x'B5'; // Undefined 66
+DCL-C C_SDK4I_EBCDIC_U67  x'B6'; // Undefined 67
+DCL-C C_SDK4I_EBCDIC_U68  x'B7'; // Undefined 68
+DCL-C C_SDK4I_EBCDIC_U69  x'B8'; // Undefined 69
+DCL-C C_SDK4I_EBCDIC_U70  x'B9'; // Undefined 70
+DCL-C C_SDK4I_EBCDIC_U71  x'BA'; // Undefined 71
+DCL-C C_SDK4I_EBCDIC_U72  x'BB'; // Undefined 72
+DCL-C C_SDK4I_EBCDIC_U73  x'BC'; // Undefined 73
+DCL-C C_SDK4I_EBCDIC_U74  x'BD'; // Undefined 74
+DCL-C C_SDK4I_EBCDIC_U75  x'BE'; // Undefined 75
+DCL-C C_SDK4I_EBCDIC_U76  x'BF'; // Undefined 76
+DCL-C C_SDK4I_EBCDIC_LCB  x'C0'; // Left curly brace {
+DCL-C C_SDK4I_EBCDIC_UPA  x'C1'; // Uppercase A
+DCL-C C_SDK4I_EBCDIC_UPB  x'C2'; // Uppercase B
+DCL-C C_SDK4I_EBCDIC_UPC  x'C3'; // Uppercase C
+DCL-C C_SDK4I_EBCDIC_UPD  x'C4'; // Uppercase D
+DCL-C C_SDK4I_EBCDIC_UPE  x'C5'; // Uppercase E
+DCL-C C_SDK4I_EBCDIC_UPF  x'C6'; // Uppercase F
+DCL-C C_SDK4I_EBCDIC_UPG  x'C7'; // Uppercase G
+DCL-C C_SDK4I_EBCDIC_UPH  x'C8'; // Uppercase H
+DCL-C C_SDK4I_EBCDIC_UPI  x'C9'; // Uppercase I
+DCL-C C_SDK4I_EBCDIC_U77  x'CA'; // Undefined 77
+DCL-C C_SDK4I_EBCDIC_U78  x'CB'; // Undefined 78
+DCL-C C_SDK4I_EBCDIC_U79  x'CC'; // Undefined 79
+DCL-C C_SDK4I_EBCDIC_U80  x'CD'; // Undefined 80
+DCL-C C_SDK4I_EBCDIC_U81  x'CE'; // Undefined 81
+DCL-C C_SDK4I_EBCDIC_U82  x'CF'; // Undefined 82
+DCL-C C_SDK4I_EBCDIC_RCB  x'D0'; // Right curly brace }
+DCL-C C_SDK4I_EBCDIC_UPJ  x'D1'; // Uppercase J
+DCL-C C_SDK4I_EBCDIC_UPK  x'D2'; // Uppercase K
+DCL-C C_SDK4I_EBCDIC_UPL  x'D3'; // Uppercase L
+DCL-C C_SDK4I_EBCDIC_UPM  x'D4'; // Uppercase M
+DCL-C C_SDK4I_EBCDIC_UPN  x'D5'; // Uppercase N
+DCL-C C_SDK4I_EBCDIC_UPO  x'D6'; // Uppercase O
+DCL-C C_SDK4I_EBCDIC_UPP  x'D7'; // Uppercase P
+DCL-C C_SDK4I_EBCDIC_UPQ  x'D8'; // Uppercase Q
+DCL-C C_SDK4I_EBCDIC_UPR  x'D9'; // Uppercase R
+DCL-C C_SDK4I_EBCDIC_U83  x'DA'; // Undefined 83
+DCL-C C_SDK4I_EBCDIC_U84  x'DB'; // Undefined 84
+DCL-C C_SDK4I_EBCDIC_U85  x'DC'; // Undefined 85
+DCL-C C_SDK4I_EBCDIC_U86  x'DD'; // Undefined 86
+DCL-C C_SDK4I_EBCDIC_U87  x'DE'; // Undefined 87
+DCL-C C_SDK4I_EBCDIC_U88  x'DF'; // Undefined 88
+DCL-C C_SDK4I_EBCDIC_BSL  x'E0'; // Backslash \
+DCL-C C_SDK4I_EBCDIC_U89  x'E1'; // Undefined 89
+DCL-C C_SDK4I_EBCDIC_UPS  x'E2'; // Uppercase S
+DCL-C C_SDK4I_EBCDIC_UPT  x'E3'; // Uppercase T
+DCL-C C_SDK4I_EBCDIC_UPU  x'E4'; // Uppercase U
+DCL-C C_SDK4I_EBCDIC_UPV  x'E5'; // Uppercase V
+DCL-C C_SDK4I_EBCDIC_UPW  x'E6'; // Uppercase W
+DCL-C C_SDK4I_EBCDIC_UPX  x'E7'; // Uppercase X
+DCL-C C_SDK4I_EBCDIC_UPY  x'E8'; // Uppercase Y
+DCL-C C_SDK4I_EBCDIC_UPZ  x'E9'; // Uppercase Z
+DCL-C C_SDK4I_EBCDIC_U90  x'EA'; // Undefined 90
+DCL-C C_SDK4I_EBCDIC_U91  x'EB'; // Undefined 91
+DCL-C C_SDK4I_EBCDIC_U92  x'EC'; // Undefined 92
+DCL-C C_SDK4I_EBCDIC_U93  x'ED'; // Undefined 93
+DCL-C C_SDK4I_EBCDIC_U94  x'EE'; // Undefined 94
+DCL-C C_SDK4I_EBCDIC_U95  x'EF'; // Undefined 95
+DCL-C C_SDK4I_EBCDIC_0    x'F0'; // Number zero
+DCL-C C_SDK4I_EBCDIC_1    x'F1'; // Number one
+DCL-C C_SDK4I_EBCDIC_2    x'F2'; // Number two
+DCL-C C_SDK4I_EBCDIC_3    x'F3'; // Number three
+DCL-C C_SDK4I_EBCDIC_4    x'F4'; // Number four
+DCL-C C_SDK4I_EBCDIC_5    x'F5'; // Number five
+DCL-C C_SDK4I_EBCDIC_6    x'F6'; // Number six
+DCL-C C_SDK4I_EBCDIC_7    x'F7'; // Number seven
+DCL-C C_SDK4I_EBCDIC_8    x'F8'; // Number eight
+DCL-C C_SDK4I_EBCDIC_9    x'F9'; // Number nine
+DCL-C C_SDK4I_EBCDIC_VRT  x'FA'; // Vertical line |
+DCL-C C_SDK4I_EBCDIC_U96  x'FB'; // Undefined 96
+DCL-C C_SDK4I_EBCDIC_U97  x'FC'; // Undefined 97
+DCL-C C_SDK4I_EBCDIC_U98  x'FD'; // Undefined 98
+DCL-C C_SDK4I_EBCDIC_U99  x'FE'; // Undefined 99
+DCL-C C_SDK4I_EBCDIC_XFF  x'FF'; // Eight ones

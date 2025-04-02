@@ -1,0 +1,215 @@
+**FREE
+// TODO: implement COM_SendSMS
+// -------------------------------------------------------------------------------------------------
+// Define constants, variables, and procedures related to the COM component.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This source member is meant to be /COPYd so the following compiler directives are added to
+// prevent this member from being added multiple times.
+//
+// More information about compiler directives:
+// @link https://www.ibm.com/docs/en/i/7.5?topic=concepts-compiler-directives
+// -------------------------------------------------------------------------------------------------
+/IF DEFINED(COMK)
+/EOF
+/ENDIF
+/DEFINE COMK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// LOGK - LOG constants, data structures, variables, and procedure definitions.
+// TEMPLATESK - template variables used throughout our software.
+// -------------------------------------------------------------------------------------------------
+/COPY './logk.rpgleinc'
+/COPY './templatesk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures and template variables.
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+// Define template data structures and variables.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_TEXT 0;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_HTML 1;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_XML 2;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_OCTET_STREAM 3;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_RTF 4;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_OGG 5;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_PDF 6;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_VISIO 7;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_ZIP 8;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_PS 9;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_LOTUS123 10;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_LOTUS_FREELANCE 11;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_APP_LOTUS_WORDPRO 12;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_MSWORD 13;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_VND_MS_PPT 14;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_VND_MS_PROJECT 15;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_VND_MS_XLS 16;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_AUDIO_AC3 17;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_AUDIO_BASIC 18;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_AUDIO_MP3 19;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_AUDIO_WAV 20;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_IMG_BMP 21;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_IMG_GIF 22;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_IMG_JPEG 23;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_IMG_PNG 24;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_VIDEO_MPEG 25;
+DCL-C C_SDK4I_COM_EMAIL_ATTACHMENT_TYPE_MSG_RFC822 26;
+
+DCL-C C_SDK4I_COM_EMAIL_MAX_RECIPIENTS 200; // As of 2025, most mail servers will only handle 500.
+DCL-C C_SDK4I_COM_EMAIL_MAX_ATTACHMENTS 50; // This value is arbitrary, there is no limit.
+
+//   This data structure holds information about email recipients.
+DCL-DS tpl_sdk4i_com_email_recipient_ds QUALIFIED TEMPLATE;
+  address LIKE(tpl_sdk4i_com_email_address) INZ('');
+  type LIKE(tpl_sdk4i_com_email_recipient_type) INZ('TO');
+END-DS tpl_sdk4i_com_email_recipient_ds;
+
+// This data structure holds information about an email attachment.
+DCL-DS tpl_sdk4i_atch0100_ds QUALIFIED TEMPLATE;
+  input_ccsid LIKE(tpl_sdk4i_unsigned_binary4) INZ(437);
+  offset_to_filename LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+  length_of_filename LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+  content_type LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+END-DS tpl_sdk4i_atch0100_ds;
+
+// This data structure holds information about an email: subject, body, whether it is signed and/or
+// encrypted, and the password needed for signing/encrypting.
+DCL-DS tpl_sdk4i_note0100_ds QUALIFIED TEMPLATE;
+  input_ccsid LIKE(tpl_sdk4i_unsigned_binary4) INZ(1208); // 0 = use job CCSID, else a valid CCSID.
+  offset_to_password LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+  length_of_password LIKE(tpl_sdk4i_unsigned_binary4) INZ(0); // length in bytes.
+  offset_to_subject LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+  length_of_subject LIKE(tpl_sdk4i_unsigned_binary4) INZ(0); // length in bytes.
+  offset_to_note LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+  length_of_note LIKE(tpl_sdk4i_unsigned_binary4) INZ(0); // length in bytes.
+  note_security_level LIKE(tpl_sdk4i_unsigned_binary4) INZ(0); // 0=none,1=signed,2=encrypted,3=both
+  note_content_type LIKE(tpl_sdk4i_unsigned_binary4) INZ(1); // 0=text/plain,1=text/html,2=text/xml.
+END-DS tpl_sdk4i_note0100_ds;
+
+// This data structure holds information about email recipients.
+DCL-DS tpl_sdk4i_rcpt0100_ds QUALIFIED TEMPLATE;
+  input_ccsid LIKE(tpl_sdk4i_unsigned_binary4) INZ(1208); // 0 = use job CCSID, else a valid CCSID.
+  recipient_type LIKE(tpl_sdk4i_unsigned_binary4) INZ(0); // 0 = To, 1 = CC, 2 = BCC.
+  offset_to_recipient_address LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+  length_of_recipient_address LIKE(tpl_sdk4i_unsigned_binary4) INZ(0); // Length in bytes.
+END-DS tpl_sdk4i_rcpt0100_ds;
+
+// Email addresses can only be 254 characters long.
+DCL-S tpl_sdk4i_com_email_address VARCHAR(254) CCSID(*UTF8) TEMPLATE;
+
+// Path names can be up to 16MB. We limit them to something more reasonable though.
+DCL-S tpl_sdk4i_com_email_attachment_name VARCHAR(C_SDK4I_SIZE_1KI) CCSID(*UTF8) TEMPLATE;
+
+// TO, CC, and BCC are the only valid values.
+DCL-S tpl_sdk4i_com_email_recipient_type CHAR(3) TEMPLATE;
+
+DCL-S tpl_sdk4i_com_sms_msg VARCHAR(160) TEMPLATE;
+
+DCL-S tpl_sdk4i_com_sndmsg_msg VARCHAR(494) TEMPLATE;
+DCL-S tpl_sdk4i_com_sndmsg_usrprf CHAR(10) TEMPLATE;
+
+// -------------------------------------------------------------------------------------------------
+///
+//   Send a break message.
+//
+//   Send a break message to another IBM i user profile using the QEZSNDMG API.
+//
+// @param REQUIRED. A user profile name.
+// @param REQUIRED. The message to send - 494 characters maximum.
+// @param OPTIONAL. A tpl_sdk4i_log_user_info_ds data structure.
+//
+// @return *ON if the break message was sent successfully, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR COM_SendBreakMessage IND EXTPROC(*DCLCASE);
+  i_usrprf LIKE(tpl_sdk4i_com_sndmsg_usrprf) CONST;
+  i_msg LIKE(tpl_sdk4i_com_sndmsg_msg) OPTIONS(*TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR COM_SendBreakMessage;
+
+// -------------------------------------------------------------------------------------------------
+///
+//   Send an email.
+//
+//   This procedure can send an email with a message of any size, with any number of attachements,
+// digitally signed, and encrypted.
+//
+// @param REQUIRED. The number of recipients. Must be greater than 0 and less than or equal to
+//   C_SDK4I_COM_EMAIL_MAX_RECIPIENTS.
+// @param REQUIRED. An array of data structures containing the email address and email type (To,
+//   CC, BCC) for each address.
+// @param REQUIRED. The length of the subject string in bytes.
+// @param REQUIRED. A pointer to the variable holding the subject string.
+// @param REQUIRED. The length of the message in bytes.
+// @param REQUIRED. A pointer to the variable holding the message to be sent.
+// @param OPTIONAL. The number of attachments. Must be 0 to C_SDK4I_COM_EMAIL_MAX_ATTACHMENTS.
+//   Defaults to 0.
+// @param OPTIONAL. An array of strings containing the full IFS path to a file to be attached to
+//   the email.
+// @param OPTIONAL. A data structure holding logging information about the user.
+// @param OPTIONAL. The length of the password in bytes.
+// @param OPTIONAL. The password needed for signing/encrypting.
+// @param OPTIONAL. A flag indicating if the message should be signed. Defaults to *OFF.
+// @param OPTIONAL. A flag indicating if the message should be encrypted. Defaults to *OFF.
+//
+// @return *ON if the email was sent successfully, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR COM_SendEmail IND EXTPROC(*DCLCASE);
+  i_recipient_count LIKE(tpl_sdk4i_unsigned_binary4) CONST;
+  i_recipient_array LIKEDS(tpl_sdk4i_com_email_recipient_ds) DIM(C_SDK4I_COM_EMAIL_MAX_RECIPIENTS);
+  i_subject_length LIKE(tpl_sdk4i_unsigned_binary4) CONST;
+  i_subject POINTER VALUE;
+  i_msg_length LIKE(tpl_sdk4i_unsigned_binary4) CONST;
+  i_msg POINTER VALUE;
+  i_attachment_count LIKE(tpl_sdk4i_unsigned_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_attachment_array LIKE(tpl_sdk4i_com_email_attachment_name)
+    DIM(C_SDK4I_COM_EMAIL_MAX_ATTACHMENTS) OPTIONS(*NOPASS: *OMIT);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_password_length LIKE(tpl_sdk4i_unsigned_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_password POINTER VALUE OPTIONS(*NOPASS);
+  i_is_signed IND OPTIONS(*NOPASS: *OMIT) CONST;
+  i_is_encrypted IND OPTIONS(*NOPASS: *OMIT) CONST;
+END-PR COM_SendEmail;
+
+// -------------------------------------------------------------------------------------------------
+///
+//   Send an SMS
+//
+//   Send a Short Message Service (ie "text") message.
+//
+// @param OPTIONAL. A data structure holding logging information about the user.
+//
+// @return *ON if the SMS message was sent successfully, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR COM_SendSMS IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR COM_SendSMS;

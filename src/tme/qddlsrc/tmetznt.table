@@ -1,0 +1,56 @@
+-- *************************************************************************************************
+--   This table will hold a list of timezones and their offsets from UTC.
+--
+-- @author James Brian Hill
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_tme_timezone FOR SYSTEM NAME tmetznt (
+  -- Primary key column.
+  id
+    DECIMAL(2,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data
+  code
+    VARCHAR(5) NOT NULL,
+  description FOR dsc
+    VARCHAR(50) NOT NULL,
+  offset
+    DECIMAL(4,2) NOT NULL,
+
+  -- Constraints.
+  CONSTRAINT tmetzntpk PRIMARY KEY(id)
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE tmetznt IS 'SDK4i - TME - Timezone';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN tmetznt (
+  id     IS 'ID',
+  code   IS 'Abbreviation',
+  dsc    IS 'Description',
+  offset IS 'Offset from UTC'
+);

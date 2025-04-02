@@ -1,0 +1,80 @@
+-- *************************************************************************************************
+--   This table will hold a list of facility codes as defined by the Internet Engineering Task
+-- Force in RFC5424.
+--
+--   SDK4i tries to use facility 10 (authpriv) whenever there is a security/authorization message
+-- from the operating system - for instance, when a user attempts to do something but lacks OS-level
+-- authority for that action. We use facility 4 (auth) for all SDK4i-based security/authorization
+-- messages.
+--
+--  0 = kernel messages (kern)
+--  1 = user-level messages (user)
+--  2 = mail system (mail)
+--  3 = system daemons (daemon)
+--  4 = security/authorization messages (auth)
+--  5 = messages generated internally by syslogd (syslog)
+--  6 = line printer subsystem (lpr)
+--  7 = network news subsystem (news)
+--  8 = UUCP subsystem (uucp)
+--  9 = clock daemon (cron)
+-- 10 = security/authorization messages (authpriv) - this might be more secured by the OS than 4.
+-- 11 = FTP daemon (ftp)
+-- 12 = NTP subsystem (ntp)
+-- 13 = log audit (security)
+-- 14 = log alert (console)
+-- 15 = clock daemon (solaris-cron)
+-- 16 = local use 0 (local0)
+-- 17 = local use 1 (local1)
+-- 18 = local use 2 (local2)
+-- 19 = local use 3 (local3)
+-- 20 = local use 4 (local4)
+-- 21 = local use 5 (local5)
+-- 22 = local use 6 (local6)
+-- 23 = local use 7 (local7)
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_facility FOR SYSTEM NAME logfact (
+  -- Primary key column.
+  id
+    DECIMAL(2,0) NOT NULL,
+
+  -- Data columns.
+  description FOR dsc
+    VARCHAR(50) NOT NULL,
+
+  -- Constraints.
+  CONSTRAINT logfactpk PRIMARY KEY(id)
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logfact IS 'SDK4i - LOG - Log Facilities';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logfact (
+  id  IS 'ID',
+  dsc IS 'Description'
+);

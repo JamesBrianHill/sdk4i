@@ -1,0 +1,20 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   This copybook is identical to logvark.rpgleinc with the final 6 lines removed. Use this 
+// copybook when the procedure does NOT have a parameter named: i_log_user_info_ds.
+// -------------------------------------------------------------------------------------------------
+DCL-DS log_cause_info_ds LIKEDS(tpl_sdk4i_log_cause_info_ds) INZ(*LIKEDS);
+DCL-DS log_event_info_ds LIKEDS(tpl_sdk4i_log_event_info_ds) INZ(*LIKEDS);
+DCL-DS log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) INZ(*LIKEDS);
+DCL-S log_is_abend LIKE(tpl_sdk4i_is_abend) INZ(*OFF); // Assume the procedure will end normally.
+DCL-S log_is_successful LIKE(tpl_sdk4i_is_successful) INZ(*ON); // Assume proc will be successful.
+DCL-S log_beg_ts LIKE(tpl_sdk4i_logmett_ds.beg_ts) INZ(*SYS);
+DCL-S log_msg LIKE(tpl_sdk4i_logmsgt_ds.msg) INZ('');
+DCL-S log_proc LIKE(tpl_sdk4i_logmsgt_ds.prc) INZ('');
+
+%NULLIND(log_cause_info_ds.sstate) = *ON;
+%NULLIND(log_cause_info_ds.sstmt) = *ON;
+%NULLIND(log_user_info_ds.user_id) = *ON;
+%NULLIND(log_user_info_ds.username) = *ON;
+
+log_proc = %PROC();

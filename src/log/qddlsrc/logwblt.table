@@ -1,0 +1,95 @@
+-- *************************************************************************************************
+--   This table will hold log information related to locally hosted web services.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_local_web_svc FOR SYSTEM NAME logwblt (
+  -- Primary key column.
+  id
+    DECIMAL(15,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  logmsgt_id
+    DECIMAL(15,0) NOT NULL,
+
+  srv_ipv4 -- From environment variable SERVER_ADDR.
+    VARCHAR(15) DEFAULT NULL,
+
+  srv_port -- From environment variable SERVER_PORT.
+    DECIMAL(5,0) DEFAULT NULL,
+
+  rmt_ipv4 -- From environment variable REMOTE_ADDR.
+    VARCHAR(15) DEFAULT NULL,
+
+  rmt_port -- From environment variable REMOTE_PORT.
+    DECIMAL(5,0) DEFAULT NULL,
+
+  protocol -- From environment variable SERVER_PROTOCOL.
+    VARCHAR(25) DEFAULT NULL,
+
+  request_method FOR req_method -- From environment variable REQUEST_METHOD.
+    VARCHAR(7) DEFAULT NULL,
+
+  uri -- From environment variable DOCUMENT_URI. Length of 255 is arbitrary. Apache defaults to 8,192 bytes for entire request.
+    VARCHAR(255) DEFAULT NULL,
+
+  query -- From environment variable QUERY_STRING. Length of 2048 is arbitrary. Apache defaults to 8,192 bytes for entire request.
+    VARCHAR(2048) DEFAULT NULL,
+
+  response_code FOR rsp_code -- The HTTP Status Code returned from the web service.
+    DECIMAL(3,0) DEFAULT NULL,
+
+  script_name FOR script -- From environment variable SCRIPT_NAME. (LIB/PGM)
+    VARCHAR(255) DEFAULT NULL,
+
+  -- @link https://www.ibm.com/support/pages/current-cgi-users-library-list-used-when-cgi-program-called-iasp-ibm-i-os
+  library_list FOR libl -- From environment variable QIBM_CGI_LIBRARY_LIST.
+    VARCHAR(250) DEFAULT NULL,
+
+  -- Constraints.
+  CONSTRAINT logwbltpk PRIMARY KEY(id),
+  CONSTRAINT logwbltf00 FOREIGN KEY(logmsgt_id) REFERENCES logmsgt(id) ON DELETE CASCADE
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logwblt IS 'SDK4i - LOG - Log Local Web Service Information';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logwblt (
+  id         IS 'ID',
+  logmsgt_id IS 'LOGMSGT Key',
+  srv_ipv4   IS 'Server IPv4',
+  srv_port   IS 'Server Port',
+  rmt_ipv4   IS 'Remote IPv4',
+  rmt_port   IS 'Remote Port',
+  protocol   IS 'Protocol',
+  req_method IS 'Request Method',
+  uri        IS 'URI',
+  query      IS 'Query String',
+  rsp_code   IS 'Response Code',
+  script     IS 'Script',
+  libl       IS 'Library List'
+);

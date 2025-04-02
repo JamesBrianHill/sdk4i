@@ -1,0 +1,117 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   This copybook contains definitions for the ERR procedures which are used to check for error
+// conditions and handle them consistently.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html.
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(ERRK)
+/EOF
+/ENDIF
+/DEFINE ERRK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// LOGK - LOG constants, data structures, variables, and procedure definitions
+// -------------------------------------------------------------------------------------------------
+/COPY './logk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures, and template variables.
+// -------------------------------------------------------------------------------------------------
+DCL-C C_SDK4I_ERR_PERMIT_SQLSTATE_COUNT 50; // 50 is arbitrary but seems more than adequate.
+
+DCL-DS tpl_sdk4i_err_sql_diagnostics_ds QUALIFIED TEMPLATE;
+  // Statement information items.
+  db2_last_row INT(10);
+  db2_number_rows PACKED(31: 0);
+  db2_row_count_secondary PACKED(31: 0);
+  db2_row_length INT(10);
+  number INT(10);
+  row_count PACKED(31: 0);
+  // Error information.
+  err_msg LIKE(tpl_sdk4i_logmsgt_ds.msg); // Same as LOGMSGT.MSG. This is our formatted error msg.
+  db2_message_id CHAR(10);
+  db2_message_id1 VARCHAR(7);
+  db2_message_id2 VARCHAR(7);
+  message_length INT(10);
+  message_text LIKE(tpl_sdk4i_logmsgt_ds.msg); // same as table LOGMSGT.MSG.
+  returned_sqlstate CHAR(5);
+  // Catalog/Schema/Table that owns the constraint.
+  catalog_name VARCHAR(128);
+  schema_name VARCHAR(128);
+  table_name VARCHAR(128);
+  // Catalog/Schema/Table that contains the constraint.
+  constraint_catalog VARCHAR(128);
+  constraint_schema VARCHAR(128);
+  constraint_name VARCHAR(128);
+  // Trigger information.
+  trigger_catalog VARCHAR(128);
+  trigger_schema VARCHAR(128);
+  trigger_name VARCHAR(128);
+  // Routine information.
+  routine_catalog VARCHAR(128);
+  routine_schema VARCHAR(128);
+  routine_name VARCHAR(128);
+  // Information about the SQL statement itself.
+  parameter_name VARCHAR(128); // Name of the parameter that had an error.
+  parameter_ordinal_position INT(10); // Number of the parameter that had an error.
+  db2_offset INT(10); // Estimated position where the parser encountered an error.
+END-DS tpl_sdk4i_err_sql_diagnostics_ds;
+
+DCL-S tpl_sdk4i_err_sqlstate CHAR(5) TEMPLATE;
+DCL-S tpl_sdk4i_err_sqlstate_count PACKED(2:0) TEMPLATE;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Return SQL GET DIAGNOSTICS information if an unexpected SQLSTATE is encountered.
+//
+// Example:
+// DCL-DS s_diagnotics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds) INZ;
+// DCL-S fname LIKE(tpl_my_table_ds.fname) INZ;
+// EXEC SQL
+//   SELECT fname
+//   INTO :fname
+//   FROM my_table
+//   WHERE id = 1;
+// IF (ERR_IsSQLError(s_diagnostics_ds));
+//   // Log error and handle gracefully.
+// ENDIF;
+//
+// @param REQUIRED. A data structure to hold information retrieved from GET DIAGNOSTICS.
+// @param OPTIONAL. The number of entries in the i_permit_sqlstates array.
+// @param OPTIONAL. A list of SQLSTATEs that should be permitted or ignored.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if an SQLSTATE besides 00000 or one found in permit_sqlstates, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR ERR_IsSQLError IND EXTPROC(*DCLCASE);
+  o_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds) OPTIONS(*EXACT);
+  i_permit_sqlstates_count LIKE(tpl_sdk4i_err_sqlstate_count) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_permit_sqlstates LIKE(tpl_sdk4i_err_sqlstate) DIM(C_SDK4I_ERR_PERMIT_SQLSTATE_COUNT)
+    OPTIONS(*NOPASS: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT);
+END-PR ERR_IsSQLError;

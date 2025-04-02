@@ -1,0 +1,556 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   This copybook contains definitions for the WEB procedures which are used to interact with web
+// services.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+//
+// IBM i 7.5 uses Apache 2.4.53
+// IBM i 7.4 uses Apache 2.4.34 (see link below to IBM support page for more)
+// @link https://www.ibm.com/support/pages/node/1170952
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html.
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(WEBK)
+/EOF
+/ENDIF
+/DEFINE WEBK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// HTTPSTSK - HTTP statuses.
+// LOGK - LOG constants, data structures, variables, and procedure definitions.
+// TEMPLATESK - template data structures and variables.
+// -------------------------------------------------------------------------------------------------
+/COPY './httpstsk.rpgleinc'
+/COPY './logk.rpgleinc'
+/COPY './templatesk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures, and template variables.
+// -------------------------------------------------------------------------------------------------
+///
+// IBM i 7.5 has 125 environment variables defined. We double that number to cover future expansion.
+// @link https://www.ibm.com/docs/en/i/7.5?topic=information-environment-variables
+///
+DCL-C C_SDK4I_WEB_ENV_VAR_ARRAY_COUNT 250;
+
+///
+// By default, Apache limits the number of headers to 100.
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestfields
+///
+DCL-C C_SDK4I_WEB_HEADER_ARRAY_COUNT 100;
+
+///
+// This is an arbitrary limit for the number of parameters we will allow in a query string.
+///
+DCL-C C_SDK4I_WEB_MAX_QUERY_PARM_COUNT 100;
+
+///
+//   The longest environment name defined by IBM i 7.5 is 43 characters. We round that up to 100
+// to allow for future growth and potential client-based variables.
+// @link https://www.ibm.com/docs/en/i/7.5?topic=information-environment-variables
+///
+DCL-S tpl_sdk4i_web_env_var_name VARCHAR(100) TEMPLATE; // Use native CCSID.
+DCL-S tpl_sdk4i_web_env_var_string_value VARCHAR(C_SDK4I_SIZE_8KI) CCSID(*UTF8) TEMPLATE;
+
+///
+//   The HTTP standard does not impose any limits to the length of header field names or values,
+// however Apache limits each header to a total of 8,190 bytes by default.
+//
+//   Looking at the header field names listed on Wikipedia, we find the longest standard field name
+// is 65 characters. We have arbitrarily chosen a length of 75 characters for header field names -
+// this should allow for all existing standard header field names and will probably work for future
+// header field names. We want to use as small a value as we can here because variables defined LIKE
+// the tpl_sdk4i_web_header_key template will be used in arrays.
+//
+//   We have chosen an arbitrary length limit of 150 characters for header field values. Similarly
+// to our arbitrary header field name length, we feel 150 characters is sufficient for today's
+// world and allows us to minimize the amount of memory needed by arrays using variables defined
+// LIKE tpl_sdk4i_web_header_val.
+//
+//   You can certainly adjust these length limits if needed. If you run into memory limit errors,
+// look at IBM documentation for the *TERASPACE storage model:
+// @link https://www.ibm.com/docs/en/i/7.5?topic=concepts-teraspace-single-level-storage
+// @link https://www.ibm.com/docs/en/i/7.5?topic=keywords-allocstgmdl-teraspace-snglvl
+//
+// Apache 2.4 limits HTTP Request headers to 8,190 bytes by default.
+// Apache 2.4 limits the number of HTTP Request headers to 100 by default.
+// Apache 2.4.53 and earlier does not limit the size of the HTTP Request body. Later versions set
+//   this limit to 1,073,741,824 bytes (1GiB). It is probably a good idea to set a limit in our
+//   configuration file for IBM i 7.5 and earlier:
+//   LimitRequestBody 1073741824
+//   This limit can be set at the server level, per-directory, per-file, or per-location.
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestfieldsize
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestbody
+// @link https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
+///
+DCL-S tpl_sdk4i_web_header_key VARCHAR(75) TEMPLATE; // Header data should use native CCSID.
+DCL-S tpl_sdk4i_web_header_val VARCHAR(150) TEMPLATE; // Header data should use native CCSID.
+
+///
+//   As of Jan 1, 2024 the only valid HTTP Request Methods are: CONNECT, DELETE, GET, HEAD, OPTIONS,
+// PATCH, POST, PUT, TRACE.
+///
+DCL-S tpl_sdk4i_web_method VARCHAR(7) TEMPLATE;
+
+///
+//   Because the query string is part of the URI and Apache limits the size of the URI (actually,
+// the whole header line) to 8,190 bytes, we define a template for the query string to be 8KiB.
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestline
+///
+DCL-S tpl_sdk4i_web_query_parm_name VARCHAR(C_SDK4I_SIZE_1KI) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_web_query_parm_value VARCHAR(C_SDK4I_SIZE_1KI) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_web_query_string VARCHAR(C_SDK4I_SIZE_8KI) TEMPLATE;
+
+///
+//   By default, Apache limits the entire HTTP Request Line (HTTP method, URI, and protocol version)
+// to 8,190 bytes.
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestline
+///
+DCL-S tpl_sdk4i_web_uri VARCHAR(8190) TEMPLATE;
+
+///
+// We define a data structure to hold information about an environment variable.
+// @link https://www.ibm.com/docs/en/i/7.5?topic=information-environment-variables
+///
+DCL-DS tpl_sdk4i_web_env_var_ds QUALIFIED TEMPLATE;
+  name LIKE(tpl_sdk4i_web_env_var_name) INZ('');
+  type CHAR(1) INZ('S'); // I (for integer) or S (for string).
+  int_value LIKE(tpl_sdk4i_binary4) INZ(0);
+  string_value LIKE(tpl_sdk4i_web_env_var_string_value) INZ('');
+END-DS tpl_sdk4i_web_env_var_ds;
+
+///
+// Headers are composed of a "key" and a "value".
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
+///
+DCL-DS tpl_sdk4i_web_http_header_ds QUALIFIED TEMPLATE;
+  key LIKE(tpl_sdk4i_web_header_key) INZ('');
+  val LIKE(tpl_sdk4i_web_header_val) INZ('');
+END-DS tpl_sdk4i_web_http_header_ds;
+
+///
+// Query parameters are composed of a "key" and a "value".
+///
+DCL-DS tpl_sdk4i_web_query_parm_ds QUALIFIED TEMPLATE;
+  key LIKE(tpl_sdk4i_web_query_parm_name) INZ('');
+  val LIKE(tpl_sdk4i_web_query_parm_value) INZ('');
+END-DS tpl_sdk4i_web_query_parm_ds;
+
+// -------------------------------------------------------------------------------------------------
+///
+//   Populate an array of data structures to describe the Apache environment variables to be
+// retrieve for logging.
+//
+//   This procedure is called by our web services which will later call the LOG_LogMsg procedure.
+//
+// @param REQUIRED. An empty array that will be filled with environment variables to be retrieved.
+// @param OPTIONAL. Information about the user associated with this event.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_BuildLOGWBLTEnvVarArray EXTPROC(*DCLCASE) LIKE(tpl_sdk4i_unsigned_binary4);
+  o_env_var_array LIKEDS(tpl_sdk4i_web_env_var_ds) DIM(C_SDK4I_WEB_ENV_VAR_ARRAY_COUNT)
+    OPTIONS(*NULLIND: *OMIT);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_BuildLOGWBLTEnvVarArray;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Get an environment variable of type int.
+//
+// Call the getenv procedure to get an HTTP Server environment variable of type int.
+//
+// @param REQUIRED. The environment variable to be retrieved.
+// @param OPTIONAL. If the environment variable is not set, this is the value the caller would like
+//   returned instead. If not passed, the default is 0.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return the value retrieved if available, else the default if provided, or 0 if no value was
+//   retrieved and no default value was provided.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_GetEnvVarInt LIKE(tpl_sdk4i_binary4) EXTPROC(*DCLCASE);
+  i_var LIKE(tpl_sdk4i_web_env_var_name) OPTIONS(*TRIM) CONST;
+  i_default LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_GetEnvVarInt;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Get an environment variable of type string.
+//
+// To get the Authorization header from Apache, the following line needs to be added to the config:
+// SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+// @link https://axellarsson.com/blog/rpgle-cgi-authorization-header/ (thank you Axel Larsson!)
+//
+// @param REQUIRED. The environment variable to be retrieved.
+// @param OPTIONAL. If the environment variable is not set, this is the value the caller would like
+//   returned instead. If not passed, the default is *BLANKS.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return the value retrieved if available, else the default if provided, or blanks if no value
+//   was retrieved and no default value was provided.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_GetEnvVarStr LIKE(tpl_sdk4i_web_env_var_string_value) EXTPROC(*DCLCASE);
+  i_var LIKE(tpl_sdk4i_web_env_var_name) OPTIONS(*TRIM) CONST;
+  i_default LIKE(tpl_sdk4i_web_env_var_string_value) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_GetEnvVarStr;
+
+// -------------------------------------------------------------------------------------------------
+///
+// This procedure will get the HTTP Request from the web server.
+//
+// Note that if this procedure fails for any reason, it will attempt to return a response to the
+// client - either a 415 Unsupported Media Type or a 500 Internal Server Error. This means the
+// calling procedure does not need to send an HTTP Response if this procedure fails.
+//
+// @param REQUIRED. The HTTP Request Method for this request.
+// @param REQUIRED. The body of this request.
+// @param REQUIRED. The authentication token associated with this request.
+// @param OPTIONAL. The URI being called.
+// @param OPTIONAL. The query string associated with this request.
+// @param OPTIONAL. The number of elements in o_env_var_array.
+// @param OPTIONAL. An array of environment variables the caller wants values for.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the HTTP Request was retrieved successfully, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_GetHTTPRequest IND EXTPROC(*DCLCASE);
+  o_method LIKE(tpl_sdk4i_web_method);
+  o_body LIKE(tpl_sdk4i_varchar_1M_utf8);
+  o_token LIKE(tpl_sdk4i_uuid);
+  o_uri LIKE(tpl_sdk4i_web_uri) OPTIONS(*NOPASS: *OMIT);
+  o_query_string LIKE(tpl_sdk4i_web_query_string) OPTIONS(*NOPASS: *OMIT);
+  i_env_var_array_count PACKED(3: 0) OPTIONS(*NOPASS: *OMIT) CONST;
+  o_env_var_array LIKEDS(tpl_sdk4i_web_env_var_ds) DIM(C_SDK4I_WEB_ENV_VAR_ARRAY_COUNT)
+    OPTIONS(*NOPASS: *OMIT: *VARSIZE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_GetHTTPRequest;
+
+// -------------------------------------------------------------------------------------------------
+///
+// This procedure will send an HTTP Response back to a client. HTTP Responses have the following
+// components:
+//
+// 1) Status line (REQUIRED) - the protocol version (like HTTP/1.1), a status code (like 404), and
+//   status text like Not Found.
+// 2) Headers (REQUIRED) - the sdk4i WEB service program will allow you to return up to
+//   C_SDK4I_WEB_HEADER_ARRAY_COUNT headers.
+// 3) Body (OPTIONAL) - the sdk4i WEB service program will either send a JSON string in the body
+//   (for a successful GET request for example) or nothing (for a successful DELETE request for
+//   example).
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
+//
+// @param REQUIRED. This is an HTTP Status Code like 200 OK or 404 Not Found. Use the constants
+//   defined in the QCPYSRC/HTTPSTSK.RPGLEINC member.
+// @param OPTIONAL. This is the length of the payload.
+// @param OPTIONAL. This is the payload to return to the caller. No payload is allowed for a status
+//   code of 204 (No Content) but all other statuses can have a payload. This is the *DATA part of a
+//   VARCHAR CCSID(*UTF8) or CLOB variable.
+// @param OPTIONAL. This is the type of data in the payload such as json, html, etc. This parameter
+//   is used to define the Content-Type returned to the caller and will default to json which sends
+//   Content-Type: application/json.
+// @param OPTIONAL. If you want to send additional headers, this is a count of elements in the
+//   following i_header_ds_array.
+// @param OPTIONAL. If you want to send additional headers, you can add tpl_http_header_ds data
+//   structures to this array.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTPResponse IND EXTPROC(*DCLCASE);
+  i_status_code VARCHAR(50) CONST; // 200 OK, etc. See QCPYSRC/HTTPSTSK.RPGLEINC.
+  i_payload_length LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST; // The length of payload
+  i_payload POINTER OPTIONS(*NOPASS: *OMIT) CONST; // The *DATA part of a UTF8 VARCHAR or CLOB.
+  i_payload_type VARCHAR(50) OPTIONS(*NOPASS: *OMIT) CONST; // json (default), html, etc.
+  i_header_ds_array_count PACKED(2: 0) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_header_ds_array LIKEDS(tpl_sdk4i_web_http_header_ds) DIM(C_SDK4I_WEB_HEADER_ARRAY_COUNT)
+    OPTIONS(*NOPASS: *OMIT: *VARSIZE) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTPResponse;
+
+// -------------------------------------------------------------------------------------------------
+///
+// This procedure will send an HTTP 200 OK response.
+//
+// 200 OK indicates success.
+//
+// @param OPTIONAL. The length of i_payload in bytes. (Use the %LEN BIF)
+// @param OPTIONAL. The information, such as an error or warning message, to be sent back to the
+//   caller.
+// @param OPTIONAL. The payload type being returned to the caller. Defaults to application/json.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP200Response IND EXTPROC(*DCLCASE);
+  i_payload_length LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_payload POINTER OPTIONS(*NOPASS: *OMIT) CONST; // The *DATA part of a VARCHAR or CLOB.
+  i_payload_type LIKE(tpl_sdk4i_web_header_val) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP200Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// This procedure will send an HTTP 201 Created response.
+//
+// 201 Created indicates the request succeeded and a new resource was created.
+//
+// @param OPTIONAL. The URI where the new resource can be found.
+// @param OPTIONAL. The length of i_payload in bytes. (Use the %LEN BIF)
+// @param OPTIONAL. The information, such as an error or warning message, to be sent back to the
+//   caller.
+// @param OPTIONAL. The payload type being returned to the caller. Defaults to application/json.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/201
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP201Response IND EXTPROC(*DCLCASE);
+  i_location LIKE(tpl_sdk4i_web_header_val) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_payload_length LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_payload POINTER OPTIONS(*NOPASS: *OMIT) CONST; // The *DATA part of a VARCHAR or CLOB.
+  i_payload_type LIKE(tpl_sdk4i_web_header_val) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP201Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// This procedure will send an HTTP 204 No Content response. This means the Request was processed
+// successfully.
+//
+// 204 No Content indicates the request succeeded and this response has no content, only headers.
+//
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP204Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP204Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 400.
+//
+// This procedure will send an HTTP 400 Bad Request response. An example of when this response
+// might be sent is if the caller provides invalid or incomplete data in a POST or PUT request.
+//
+// @param OPTIONAL. The length of i_payload in bytes. (Use the %LEN BIF)
+// @param OPTIONAL. The information, such as an error or warning message, to be sent back to the
+//   caller.
+// @param OPTIONAL. The payload type being returned to the caller. Defaults to application/json.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP400Response IND EXTPROC(*DCLCASE);
+  i_payload_length LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_payload POINTER OPTIONS(*NOPASS: *OMIT) CONST; // The *DATA part of a VARCHAR.
+  i_payload_type LIKE(tpl_sdk4i_web_header_val) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP400Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 401.
+//
+// This procedure will send an HTTP 401 Unauthorized response. This means the client is not
+// currently authenticated or the authentication token provided is invalid.
+//
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP401Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP401Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 403.
+//
+// This procedure will send an HTTP 403 Forbidden response. This means the user is not authorized
+// to perform the requested procedure.
+//
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP403Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP403Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 404.
+//
+// This procedure will send an HTTP 404 Not Found response. An example of when this response might
+// be sent is if the caller attempts to delete or update a resource that does not exist.
+//
+// @param OPTIONAL. The length of i_payload in bytes. (Use the %LEN BIF)
+// @param OPTIONAL. The information, such as an error or warning message, to be sent back to the
+//   caller.
+// @param OPTIONAL. The payload type being returned to the caller. Defaults to application/json.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP404Response IND EXTPROC(*DCLCASE);
+  i_payload_length LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_payload POINTER OPTIONS(*NOPASS: *OMIT) CONST; // The *DATA part of a VARCHAR or CLOB.
+  i_payload_type LIKE(tpl_sdk4i_web_header_val) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP404Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 405.
+//
+// This procedure will send an HTTP 405 Method Not Allowed response. The client has sent an HTTP
+// Request Method that is not allowed.
+//
+// @param REQUIRED. The Request Method(s) supported by the web service - this is a comma delimited
+//   list of methods like: DELETE, GET, POST
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages#http_responses
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP405Response IND EXTPROC(*DCLCASE);
+  i_allow LIKE(tpl_sdk4i_web_header_val) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP405Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 409.
+//
+// This procedure will send an HTTP 409 Conflict response. This is usually triggered by a caller
+// attempting to create a resource that would violate a uniqueness constraint in a table.
+//
+// @param OPTIONAL. The length of i_payload in bytes. (Use the %LEN BIF)
+// @param OPTIONAL. The information, such as an error or warning message, to be sent back to the
+//   caller.
+// @param OPTIONAL. The payload type being returned to the caller. Defaults to application/json.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP409Response IND EXTPROC(*DCLCASE);
+  i_payload_length LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_payload POINTER OPTIONS(*NOPASS: *OMIT) CONST; // The *DATA part of a VARCHAR or CLOB.
+  i_payload_type LIKE(tpl_sdk4i_web_header_val) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP409Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 415.
+//
+// This procedure will send an HTTP 415 Unsupported Media Type response. The client has sent a
+// Request using a media type our web service does not support - for example, they sent a header
+// indicating the associated data is application/xml but we only support application/json.
+//
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/415
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP415Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP415Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 500.
+//
+// This procedure will send an HTTP 500 Internal Server Error response. This means something went
+// wrong in our code or on the IBM i itself, there is nothing the client can do to fix it.
+//
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+//
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP500Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP500Response;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Send response code 550.
+//
+// This procedure will send an HTTP 550 Web Service Error response. This means something went
+// wrong in OUR code, there is nothing the client can do to fix it.
+//
+// @param OPTIONAL. The length of i_payload in bytes. (Use the %LEN BIF)
+// @param OPTIONAL. The information, such as an error or warning message, to be sent back to the
+//   caller.
+// @param OPTIONAL. The payload type being returned to the caller. Defaults to application/json.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the response was sent successfully, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP550Response IND EXTPROC(*DCLCASE);
+  i_payload_length LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_payload POINTER OPTIONS(*NOPASS: *OMIT) CONST; // The *DATA part of a VARCHAR.
+  i_payload_type LIKE(tpl_sdk4i_web_header_val) OPTIONS(*NOPASS: *OMIT: *TRIM) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_SendHTTP550Response;

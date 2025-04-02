@@ -1,0 +1,71 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   Definition of the Program Status Data Structure (PSDS).
+//
+//   We will use this definition throughout SDK4i, primarily for logging.
+//
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(PSDSK)
+/EOF
+/ENDIF
+/DEFINE PSDSK
+
+// -------------------------------------------------------------------------------------------------
+// Define the Program Status Data Structure.
+// -------------------------------------------------------------------------------------------------
+DCL-DS psds_ds PSDS QUALIFIED;
+  procedure   CHAR(10)   POS(1);   // *PROC (Program or Module name)
+  status      ZONED(5:0) POS(11);  // *STATUS
+  prev_sts    ZONED(5:0) POS(16);  // Previous *STATUS code
+  line        CHAR(8)    POS(21);  // Source listing statement number
+  routine     CHAR(8)    POS(29);  // *ROUTINE Routine where exception/error occurred
+  parms       ZONED(3:0) POS(37);  // *PARMS Number of parameters passed from calling program
+  exc_type    CHAR(3)    POS(40);  // Exception type (CPF or MCH)
+  exc_num     CHAR(4)    POS(43);  // Exception number
+  lib         CHAR(10)   POS(81);  // Library where this program resides
+  exc_data    CHAR(80)   POS(91);  // Exception data
+  rnx9001id   CHAR(4)    POS(171); // Id of exception that caused RNX9001
+  file        CHAR(10)   POS(175); // Filename with last file operation when error occurred
+  enter_date  CHAR(8)    POS(191); // Date job entered system (Job Date)
+  last_file   CHAR(10)   POS(201); // Filename with last file operation when error occurred
+  lf_status   CHAR(35)   POS(209); // Status info on the last file used
+  job_name    CHAR(10)   POS(244); // Job name
+  username    CHAR(10)   POS(254); // User name from user profile
+  job_number  ZONED(6:0) POS(264); // Job number
+  run_date    ZONED(6:0) POS(270); // Date program started running
+  run_date2   ZONED(6:0) POS(276); // Date of program running
+  run_time    ZONED(6:0) POS(282); // Time of program running
+  comp_date   CHAR(6)    POS(288); // Date program was compiled
+  comp_time   CHAR(6)    POS(294); // Time program was compiled
+  comp_level  CHAR(4)    POS(300); // Compiler level
+  src_fil     CHAR(10)   POS(304); // Source file name
+  src_lib     CHAR(10)   POS(314); // Source library name
+  src_mbr     CHAR(10)   POS(324); // Source member name
+  pgm_prc     CHAR(10)   POS(334); // Program containing procedure
+  mod_prc     CHAR(10)   POS(344); // Module containing procedure
+  src_id1     INT(5)     POS(354); // Source ID matching statement number from position 21-28
+  src_id2     INT(5)     POS(356); // Source Id matching statement number from position 228-235
+  cur_usr     CHAR(10)   POS(358); // Current user profile name (can be different than pos 254-263)!
+  ext_err_cod INT(10)    POS(368); // External error code
+  elements    INT(20)    POS(372); // Elements set by XML-INTO and DATA-INTO
+  job_id      CHAR(16)   POS(380); // 7.4 Internal job ID.
+  sys         CHAR(8)    POS(396); // 7.4 System name.
+  unused      CHAR(50)   POS(404); // 7.5 Currently not used.
+END-DS psds_ds;

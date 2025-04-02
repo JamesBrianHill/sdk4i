@@ -1,0 +1,64 @@
+-- *************************************************************************************************
+--   This table will hold a list of country codes as defined by the International Organization for
+-- Standardization (ISO). ISO 3166 is the standard for country codes.
+--
+-- @author James Brian Hill
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_geo_country FOR SYSTEM NAME geocntt (
+  -- Primary key column.
+  id
+    CHAR(2) NOT NULL,
+
+  -- Data columns.
+  iso3 -- Three character code like CAN, MEX, or USA.
+    CHAR(3) NOT NULL,
+  isonum -- Three digit code.
+    CHAR(3) NOT NULL,
+  name -- Full name of the country.
+    VARCHAR(50) NOT NULL CCSID 1208,
+  tld -- Top-level domain like ca, mx, or us.
+    CHAR(2) DEFAULT NULL,
+
+  -- Constraints
+  CONSTRAINT geocnttpk PRIMARY KEY(id),
+  CONSTRAINT geocnttu00 UNIQUE(iso3),
+  CONSTRAINT geocnttu01 UNIQUE(isonum),
+  CONSTRAINT geocnttu02 UNIQUE(name),
+  CONSTRAINT geocnttu03 UNIQUE(tld)
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE geocntt IS 'SDK4i - GEO - Country';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN geocntt (
+  id     IS 'ID',
+  iso3   IS 'ISO Alpha 3',
+  isonum IS 'ISO Numeric',
+  name   IS 'Name',
+  tld    IS 'Top Level Domain'
+);

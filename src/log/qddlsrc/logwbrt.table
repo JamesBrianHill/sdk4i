@@ -1,0 +1,90 @@
+-- *************************************************************************************************
+--   This table will hold log information related to remotely hosted web services.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_remote_web_svc FOR SYSTEM NAME logwbrt (
+  -- Primary key column.
+  id
+    DECIMAL(15,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  logmsgt_id
+    DECIMAL(15,0) NOT NULL,
+  
+  protocol -- From environment variable SERVER_PROTOCOL.
+    VARCHAR(25) DEFAULT NULL,
+
+  rmt_fqdn
+    VARCHAR(255) DEFAULT NULL,
+
+  rmt_ipv4
+    VARCHAR(15) DEFAULT NULL,
+
+  rmt_port
+    DECIMAL(5,0) DEFAULT NULL,
+
+  rmt_api -- Length of 2048 is arbitrary.
+    VARCHAR(255) DEFAULT NULL,
+
+  query -- Length of 2048 is arbitrary.
+    VARCHAR(2048) DEFAULT NULL,
+
+  request_method FOR req_method
+    VARCHAR(7) DEFAULT NULL,
+
+  request_body FOR req_body -- Length of 2048 is arbitrary.
+    VARCHAR(2048) DEFAULT NULL,
+
+  response_code FOR rsp_code -- The HTTP Status Code returned from the web service.
+    DECIMAL(3,0) DEFAULT NULL,
+
+  response_body FOR rsp_body -- Length of 2048 is arbitrary.
+    VARCHAR(2048) DEFAULT NULL,
+
+  -- Constraints.
+  CONSTRAINT logwbrtpk PRIMARY KEY(id),
+  CONSTRAINT logwbrtf00 FOREIGN KEY(logmsgt_id) REFERENCES logmsgt(id) ON DELETE CASCADE
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logwbrt IS 'SDK4i - LOG - Log Remote Web Service Information';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logwbrt (
+  id         IS 'ID',
+  logmsgt_id IS 'LOGMSGT Key',
+  protocol   IS 'Protocol',
+  rmt_fqdn   IS 'Remote FQDN',
+  rmt_ipv4   IS 'Remote IPv4',
+  rmt_port   IS 'Remote Port',
+  rmt_api    IS 'Remote API',
+  query      IS 'Query String',
+  req_method IS 'Request Method',
+  req_body   IS 'Request Body',
+  rsp_code   IS 'Response Code',
+  rsp_body   IS 'Response Body'
+);

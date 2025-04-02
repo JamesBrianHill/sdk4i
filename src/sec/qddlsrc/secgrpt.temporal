@@ -1,0 +1,72 @@
+-- *************************************************************************************************
+--   This table will hold information about security groups.
+--
+-- @author James Brian Hill
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_sec_group FOR SYSTEM NAME secgrpt (
+  -- Primary key column.
+  id
+    DECIMAL(7,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Audit columns.
+  audit_type FOR audtype
+    CHAR(1) NOT NULL GENERATED ALWAYS AS (DATA CHANGE OPERATION) IMPLICITLY HIDDEN,
+  audit_job FOR audjob
+    VARCHAR(28) NOT NULL GENERATED ALWAYS AS (QSYS2.JOB_NAME) IMPLICITLY HIDDEN,
+  audit_timestamp FOR audts
+    TIMESTAMP NOT NULL FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP IMPLICITLY HIDDEN,
+  audit_user FOR audusr
+    VARCHAR(128) NOT NULL GENERATED ALWAYS AS (SESSION_USER) IMPLICITLY HIDDEN,
+
+  -- System Period Temporal Table columns.
+  sys_start
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS ROW BEGIN IMPLICITLY HIDDEN,
+  sys_end
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS ROW END IMPLICITLY HIDDEN,
+  sys_ts
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS TRANSACTION START ID IMPLICITLY HIDDEN,
+
+  -- Data columns.
+  description FOR dsc
+    VARCHAR(50) NOT NULL,
+
+  -- Define the System Period
+  PERIOD SYSTEM_TIME(sys_start, sys_end),
+
+  -- Constraints
+  CONSTRAINT secgrptpk PRIMARY KEY(id),
+  CONSTRAINT secgrpu00 UNIQUE(dsc)
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE secgrpt IS 'SDK4i - SEC - Security Group';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN secgrpt (
+  id  IS 'ID',
+  dsc IS 'Description'
+);

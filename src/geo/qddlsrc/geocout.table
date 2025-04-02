@@ -1,0 +1,54 @@
+-- *************************************************************************************************
+--   This table will hold a list of counties.
+--
+-- @author James Brian Hill
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_geo_county FOR SYSTEM NAME geocout (
+  -- Primary key column.
+  id
+    DECIMAL(7,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  state_id
+    DECIMAL(7,0) NOT NULL,
+  name -- Full name of the county.
+    VARCHAR(50) DEFAULT NULL CCSID 1208,
+
+  -- Constraints
+  CONSTRAINT geocoutpk PRIMARY KEY(id),
+  CONSTRAINT geocoutf00 FOREIGN KEY(state_id) REFERENCES geostat(id) ON DELETE CASCADE
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE geocout IS 'SDK4i - GEO - County';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN geocout (
+  id         IS 'ID',
+  state_id   IS 'State ID',
+  name       IS 'County Name'
+);

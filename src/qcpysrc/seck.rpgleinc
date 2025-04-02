@@ -1,0 +1,157 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   This service program provides security-related procedures.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(SECK)
+/EOF
+/ENDIF
+/DEFINE SECK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// LOGK - LOG constants, data structures, variables, and procedure definitions
+// TEMPLATESK - template variables used throughout our software.
+// -------------------------------------------------------------------------------------------------
+/COPY './logk.rpgleinc'
+/COPY './templatesk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+//
+// NOTE:
+// tpl_sdk4i_secusrt_ds cannot be initialized (INZ(*EXTDFT)) because it causes an error - the
+// compiler attempts to initialize the pwd column, defined as VARBINARY(64) (which is CCSID 65535),
+// with an empty string ('') - but the empty string has a CCSID equal to the job CCSID which
+// (hopefully) is not 65535 (*HEX).
+// -------------------------------------------------------------------------------------------------
+DCL-DS tpl_sdk4i_secactt_ds EXTNAME('SECACTT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT)
+END-DS;
+DCL-DS tpl_sdk4i_secusrt_ds EXTNAME('SECUSRT') QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures, and template variables.
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+///
+// Authenticate a user.
+//
+// Verify the provided username and password are valid credentials. If so, return a token (a UUID)
+// that will be used for subsequent requests.
+//
+// Example:
+// DCL-S username LIKE(tpl_sdk4i_secusrt_ds.usr);
+// DCL-S password LIKE(tpl_sdk4i_secusrt_ds.usr); // Yes, like tpl_sdk4i_secusrt_ds.usr!
+// DCL-S token LIKE(tpl_sdk4i_uuid);
+// IF (NOT SEC_Authenticate(username : password : token));
+//   // Log a message and inform user the credentials were not valid.
+// ENDIF;
+//
+// @param REQUIRED. The username of the user.
+// @param REQUIRED. The password of the user.
+// @param REQUIRED. This will hold a token (UUID) that can be used for subsequent requests.
+// @param REQUIRED. This will hold a Y/N flag indicating if a user is enabled or not.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the user authenticated successfully, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR SEC_Authenticate IND EXTPROC(*DCLCASE);
+  i_username LIKE(tpl_sdk4i_secusrt_ds.usr) OPTIONS(*TRIM) CONST;
+  i_password LIKE(tpl_sdk4i_secusrt_ds.usr) OPTIONS(*TRIM) CONST; // Yes, LIKE usr, not LIKE pwd.
+  o_token LIKE(tpl_sdk4i_uuid);
+  o_is_enabled LIKE(tpl_sdk4i_secusrt_ds.is_enabled);
+  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT);
+END-PR SEC_Authenticate;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Create a UUID (token).
+//
+// This procedure will create a type 4 Universally Unique IDentifier (UUID) which is currently in
+// common use.
+//
+// Example:
+// DCL-S token LIKE(tpl_sdk4i_uuid);
+// IF (NOT SEC_CreateUUID(token));
+//   // Log error and handle gracefully.
+// ENDIF;
+//
+// @param REQUIRED. This will hold a token (UUID) that can be used for subsequent requests.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the token was created successfully, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR SEC_CreateUUID IND EXTPROC(*DCLCASE);
+  o_token LIKE(tpl_sdk4i_uuid);
+  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) CONST OPTIONS(*NOPASS: *NULLIND: *OMIT);
+END-PR SEC_CreateUUID;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Check authentication.
+//
+// Given a token (UUID), determine if it is valid.
+//
+// Example:
+// IF (NOT SEC_IsAuthenticated(token));
+//   // Log message and handle appropriately.
+// ENDIF;
+//
+// @param REQUIRED. The token to be validated.
+// @param REQUIRED. Information about the user associated with this event.
+//
+// @return *ON if the token is valid, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR SEC_IsAuthenticated IND EXTPROC(*DCLCASE);
+  i_token LIKE(tpl_sdk4i_uuid) CONST;
+  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NULLIND);
+END-PR SEC_IsAuthenticated;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Check authorization.
+//
+// Given a token (UUID) and a security action code, determine if the user associated with the token
+// is authorized to the request security action.
+//
+// Example:
+// DCL-S action_id LIKE(tpl_sdk4i_secactt_ds.id) INZ('DELETE_USER');
+// IF (NOT SEC_IsAuthorized(token : action_id));
+//   // Log message and tell user they are not authorized.
+// ENDIF;
+//
+// @param REQUIRED. The token (UUID) for an active user.
+// @param REQUIRED. The ID of the action the user wants to perform.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return *ON if the user is authorized to perform the requested function, *OFF otherwise.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR SEC_IsAuthorized IND EXTPROC(*DCLCASE);
+  i_token LIKE(tpl_sdk4i_uuid) CONST;
+  i_action_id LIKE(tpl_sdk4i_secactt_ds.id) CONST;
+  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) CONST OPTIONS(*NOPASS: *NULLIND: *OMIT);
+END-PR SEC_IsAuthorized;

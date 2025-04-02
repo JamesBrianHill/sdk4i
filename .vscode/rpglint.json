@@ -1,0 +1,40 @@
+{
+  "BlankStructNamesCheck": true,
+  "CopybookDirective": "copy",
+  "DirectiveCase": "upper",
+  "ForceOptionalParens": true,
+  "IncludeMustBeRelative": true,
+  "IncorrectVariableCase": true,
+  "indent": 2,
+  "NoCTDATA": true,
+  "NoExecuteImmediate": true,
+  "NoExternalTo": [
+    "QCMD",
+    "QP2TERM",
+    "QSH",
+    "SYSTEM"
+  ],
+  "NoExtProgramVariable": false,
+  "NoGlobalsInProcedures": false,
+  "NoGlobalSubroutines": true,
+  "NoLocalSubroutines": true,
+  "NoOCCURS": true,
+  "NoSELECTAll": true,
+  "NoSQLJoins": true,
+  "NoUnreferenced": true,
+  "PrettyComments": true,
+  "PrototypeCheck": true,
+  "QualifiedCheck": true,
+  "RequireBlankSpecial": false,
+  "RequireOtherBlock": true,
+  "RequiresParameter": true,
+  "RequiresProcedureDescription": true,
+  "SpecificCasing": [
+    {"operation": "*BIF", "expected": "*upper"},
+    {"operation": "*DECLARE", "expected": "*upper"}
+  ],
+  "SQLHostVarCheck": false,
+  "StringLiteralDupe": true,
+  "UppercaseConstants": true,
+  "UselessOperationCheck": true
+}

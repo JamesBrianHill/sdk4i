@@ -1,0 +1,125 @@
+-- *************************************************************************************************
+--   This table will hold configuration settings for how long to retain log information.
+--
+-- purge_0 is the number of days to keep level 0 (EMERGENCY) events.
+-- purge_1 is the number of days to keep level 1 (ALERT) events.
+-- purge_2 is the number of days to keep level 2 (CRITICAL) events.
+-- purge_3 is the number of days to keep level 3 (ERROR) events.
+-- purge_4 is the number of days to keep level 4 (WARNING) events.
+-- purge_5 is the number of days to keep level 5 (NOTICE) events.
+-- purge_6 is the number of days to keep level 6 (INFORMATIONAL) events.
+-- purge_7 is the number of days to keep level 7 (DEBUG) events.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_purge FOR SYSTEM NAME logpurt (
+  -- Primary key column.
+  id
+    VARCHAR(8) NOT NULL, -- This is the system name
+
+  -- Audit columns.
+  audit_type
+    CHAR(1) NOT NULL GENERATED ALWAYS AS (DATA CHANGE OPERATION) IMPLICITLY HIDDEN,
+  audit_job
+    VARCHAR(28) NOT NULL GENERATED ALWAYS AS (QSYS2.JOB_NAME) IMPLICITLY HIDDEN,
+  audit_ts
+    TIMESTAMP NOT NULL FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP IMPLICITLY HIDDEN,
+  audit_user
+    VARCHAR(128) NOT NULL GENERATED ALWAYS AS (SESSION_USER) IMPLICITLY HIDDEN,
+
+  -- System Period Temporal Table columns.
+  system_beg
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS ROW BEGIN IMPLICITLY HIDDEN,
+  system_end
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS ROW END IMPLICITLY HIDDEN,
+  system_ts
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS TRANSACTION START ID IMPLICITLY HIDDEN,
+
+  -- Data columns.
+  purge_emergency FOR purge_0 -- Emergency level. Default to 2 years.
+    DECIMAL(3,0) NOT NULL DEFAULT 731,
+  purge_alert FOR purge_1 -- Alert level. Default to 1 year.
+    DECIMAL(3,0) NOT NULL DEFAULT 366,
+  purge_critical FOR purge_2 -- Critical level. Default to 6 months.
+    DECIMAL(3,0) NOT NULL DEFAULT 180,
+  purge_error FOR purge_3 -- Error level. Default to 6 months.
+    DECIMAL(3,0) NOT NULL DEFAULT 180,
+  purge_warning FOR purge_4 -- Warning level. Default to 3 months.
+    DECIMAL(3,0) NOT NULL DEFAULT 90,
+  purge_notification FOR purge_5 -- Notification level. Default to 2 months.
+    DECIMAL(3,0) NOT NULL DEFAULT 60,
+  purge_informational FOR purge_6 -- Informational level. Default to 1 month.
+    DECIMAL(3,0) NOT NULL DEFAULT 30,
+  purge_debug FOR purge_7 -- Debug level. Default to 10 days.
+    DECIMAL(3,0) NOT NULL DEFAULT 10,
+  purge_logcsit FOR purge_csi -- Default to 10 days.
+    DECIMAL(3,0) NOT NULL DEFAULT 10,
+  purge_logextt FOR purge_ext -- Default to 10 days.
+    DECIMAL(3,0) NOT NULL DEFAULT 10,
+  purge_logmett FOR purge_met -- Default to 2 years.
+    DECIMAL(3,0) NOT NULL DEFAULT 731,
+  purge_loguset FOR purge_use -- Default to 2 years.
+    DECIMAL(3,0) NOT NULL DEFAULT 731,
+  purge_logwblt FOR purge_wbl -- Default to 1 month.
+    DECIMAL(3,0) NOT NULL DEFAULT 30,
+  purge_logwbrt FOR purge_wbr -- Default to 1 month.
+    DECIMAL(3,0) NOT NULL DEFAULT 30,
+
+  -- Define the System Period.
+  PERIOD SYSTEM_TIME(system_beg, system_end),
+
+  -- Constraints.
+  CONSTRAINT logpurtpk PRIMARY KEY(id)
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logpurt IS 'SDK4i - LOG - Purge Configuration';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logpurt (
+  id         IS 'System Name',
+  audit_type IS 'Audit Type',
+  audit_job  IS 'Audit Job',
+  audit_ts   IS 'Audit Timestamp',
+  audit_user IS 'Audit User',
+  system_beg IS 'Period Begin',
+  system_end IS 'Period End',
+  system_ts  IS 'Transaction Timestamp',
+  purge_0    IS 'Purge Emergency (Days)',
+  purge_1    IS 'Purge Alert (Days)',
+  purge_2    IS 'Purge Critical (Days)',
+  purge_3    IS 'Purge Error (Days)',
+  purge_4    IS 'Purge Warning (Days)',
+  purge_5    IS 'Purge Notice (Days)',
+  purge_6    IS 'Purge Informational (Days)',
+  purge_7    IS 'Purge Debug (Days)',
+  purge_csi  IS 'Purge Call Stack Info (Days)',
+  purge_ext  IS 'Purge Extended Info (Days)',
+  purge_met  IS 'Purge Metrics (Days)',
+  purge_use  IS 'Purge Usage (Days)',
+  purge_wbl  IS 'Purge Local Web Service Info (Days)',
+  purge_wbr  IS 'Purge Remote Web Service Info (Days)'
+);

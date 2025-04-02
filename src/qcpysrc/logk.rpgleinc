@@ -1,0 +1,172 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   Define constants, variables, and procedures related to the LOG component.
+//
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(LOGK)
+/EOF
+/ENDIF
+/DEFINE LOGK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// TEMPLATESK - template variables used throughout our software.
+// WEBK - WEB constants, data structures, variables, and procedure definitions.
+// -------------------------------------------------------------------------------------------------
+/COPY './templatesk.rpgleinc'
+/COPY './webk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+DCL-DS tpl_sdk4i_logmett_ds EXTNAME('LOGMETT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
+DCL-DS tpl_sdk4i_logmsgt_ds EXTNAME('LOGMSGT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
+DCL-DS tpl_sdk4i_loguset_ds EXTNAME('LOGUSET') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
+DCL-DS tpl_sdk4i_logwblt_ds EXTNAME('LOGWBLT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
+DCL-DS tpl_sdk4i_logwblt_null_ds EXTNAME('LOGWBLT': *NULL) QUALIFIED TEMPLATE END-DS;
+DCL-DS tpl_sdk4i_logwbrt_ds EXTNAME('LOGWBRT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures and template variables.
+// -------------------------------------------------------------------------------------------------
+//   This data structure holds information about the cause of an event.
+DCL-DS tpl_sdk4i_log_cause_info_ds QUALIFIED TEMPLATE;
+  sstate LIKE(tpl_sdk4i_logmsgt_ds.sstate) INZ('') NULLIND;
+  sstmt LIKE(tpl_sdk4i_logmsgt_ds.sstmt) INZ('') NULLIND;
+END-DS tpl_sdk4i_log_cause_info_ds;
+
+//   This data structure holds information about an event.
+DCL-DS tpl_sdk4i_log_event_info_ds QUALIFIED TEMPLATE;
+  fac_id LIKE(tpl_sdk4i_logmsgt_ds.logfact_id) INZ(1); // Facility ID. Default to 1 (user-level msg)
+  ll_id LIKE(tpl_sdk4i_logmsgt_ds.loglvlt_id) INZ(C_SDK4I_LL_ERR); // Log level. Default to ERROR.
+END-DS tpl_sdk4i_log_event_info_ds;
+
+//   This data structure will allow us to store a numeric user ID and/or an alphanumeric username
+// not associated with an IBM i user profile.
+DCL-DS tpl_sdk4i_log_user_info_ds QUALIFIED TEMPLATE;
+  user_id LIKE(tpl_sdk4i_logmsgt_ds.user_id) INZ(0) NULLIND;
+  username LIKE(tpl_sdk4i_logmsgt_ds.username) INZ('') NULLIND;
+END-DS tpl_sdk4i_log_user_info_ds;
+
+// -------------------------------------------------------------------------------------------------
+///
+//   Build a data structure holding information for the LOGWBLT table. This data structure can then
+// be passed into the LOG_LogMsg procedure from our web services.
+//
+// @param REQUIRED. The number of elements in i_env_var_array.
+// @param REQUIRED. An array of data structures with information about environment variables.
+// @param REQUIRED. The tpl_sdk4i_logwblt_ds data structure built by this procedure.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR LOG_BuildLOGWBLT EXTPROC(*DCLCASE);
+  i_env_var_count LIKE(tpl_sdk4i_unsigned_binary4) CONST;
+  i_env_var_array LIKEDS(tpl_sdk4i_web_env_var_ds) DIM(C_SDK4I_WEB_ENV_VAR_ARRAY_COUNT)
+    OPTIONS(*NULLIND) CONST;
+  o_logwblt_ds LIKEDS(tpl_sdk4i_logwblt_ds) OPTIONS(*NULLIND);
+END-PR LOG_BuildLOGWBLT;
+
+// -------------------------------------------------------------------------------------------------
+///
+//   Log a message from an application.
+//
+//   Events of all kinds can happen in our applications. This procedure provides a way to log
+// messages and related information about those events.
+//
+//   This procedure will look at the configurations in LOGCFGT to determine if anything should be
+// written out to the following tables:
+// LOGCSIT - call stack information.
+// LOGEXTT - extended system information.
+// LOGMSGT - typical application logging.
+// LOGWBLT - local (running on the IBM i) web service.
+// LOGWBRT - remote web service.
+//
+//   In the examples below, it is assumed the SDK4i version of the PSDS was brought in somewhere by
+// the calling program:
+// /COPY '/path/to/sdk4i/qcpysrc/psdsk.rpgleinc'
+//
+//   It is also assumed the following copybook was brought into the calling procedure - this
+// copybook provides the log_cause_ds, log_event_ds, log_user_ds, log_proc, and other variables:
+// /COPY '/path/to/sdk4i/qcpysrc/logvark.rpgleinc'
+//
+// Common example:
+// LOG_LogMsg(psds_ds: log_proc: 'Something happened.');
+//
+// Example with SQL information:
+// log_cause_ds.sstate = SQLSTATE;
+// log_cause_ds.sstmt = s_stmt;
+// LOG_LogMsg(psds_ds: log_proc: 'Something happened.': log_cause_ds);
+//
+// Examples with non-default log level or facility:
+// log_event_ds.ll_id = 0; // Something catastrophic has happened.
+// LOG_LogMsg(psds_ds: log_proc: 'Apocalypse!': *OMIT: log_event_ds);
+// LOG_LogMsg(psds_ds: log_proc: 'Apocalypse!': log_cause_ds: log_event_ds);
+//
+// @param REQUIRED. A populated tpl_sdk4i_psds_ds data structure.
+// @param REQUIRED. The name of the calling procedure.
+// @param REQUIRED. The message to be logged.
+// @param OPTIONAL. A tpl_sdk4i_log_cause_info_ds data structure.
+// @param OPTIONAL. A tpl_sdk4i_log_event_info_ds data structure.
+// @param OPTIONAL. A tpl_sdk4i_log_user_info_ds data structure.
+// @param OPTIONAL. A tpl_logwblt_ds data structure containing info about a local web service.
+// @param OPTIONAL. A tpl_logwbrt_ds data structure containing info about a remote web service.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR LOG_LogMsg EXTPROC(*DCLCASE);
+  i_psds_ds LIKEDS(tpl_sdk4i_psds_ds) CONST;
+  i_prc LIKE(tpl_sdk4i_logmsgt_ds.prc) CONST;
+  i_msg LIKE(tpl_sdk4i_logmsgt_ds.msg) CONST;
+  i_cause_info_ds LIKEDS(tpl_sdk4i_log_cause_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_event_info_ds LIKEDS(tpl_sdk4i_log_event_info_ds) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_logwblt_ds LIKEDS(tpl_sdk4i_logwblt_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_logwbrt_ds LIKEDS(tpl_sdk4i_logwbrt_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR LOG_LogMsg;
+
+// -------------------------------------------------------------------------------------------------
+///
+//   Log the use of a program or procedure.
+//
+//   We need to know which programs and procedures are being used. It is also helpful to know how
+// often they are being used, if they are failing, how long they take to execute, etc.
+//
+//   This procedure will look at LOGCFGT to determine if anything should be written out to the
+// following tables:
+// LOGMETT - metrics such as beg/end timestamps, success, abnormal end, etc.
+// LOGUSET - a simple count of how many times a program/procedure/etc. is called every time period.
+//
+// @param REQUIRED. A populated tpl_sdk4i_psds_ds data structure.
+// @param REQUIRED. The name of the calling procedure.
+// @param REQUIRED. A timestamp for when this process began.
+// @param OPTIONAL. The return value (*ON/*OFF) of the process. Defaults to NULL.
+// @param OPTIONAL. The abnormal end indicator of a procedure. Defaults to NULL.
+// @param OPTIONAL. A tpl_sdk4i_log_user_info_ds data structure.
+// @param OPTIONAL. A timestamp for when this process ended. Defaults to the current time.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR LOG_LogUse EXTPROC(*DCLCASE);
+  i_psds_ds LIKEDS(tpl_sdk4i_psds_ds) CONST;
+  i_prc LIKE(tpl_sdk4i_logmett_ds.prc) CONST;
+  i_beg_ts LIKE(tpl_sdk4i_logmett_ds.beg_ts) CONST;
+  i_successful LIKE(tpl_sdk4i_is_successful) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_abend LIKE(tpl_sdk4i_is_abend) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_end_ts LIKE(tpl_sdk4i_logmett_ds.end_ts) OPTIONS(*NOPASS: *OMIT) CONST;
+END-PR LOG_LogUse;

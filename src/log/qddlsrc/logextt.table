@@ -1,0 +1,348 @@
+-- *************************************************************************************************
+--   This table will hold extended logging information obtained from table functions such as
+-- JOB_INFO, Db2 Special Registers, Built-in Global Variables, etc.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_extended_info FOR SYSTEM NAME logextt (
+  -- Primary key column.
+  id
+    DECIMAL(15,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  logmsgt_id
+    DECIMAL(15,0) NOT NULL,
+
+  -- Job information from JOB_INFO.
+  job_status
+    VARCHAR(6) DEFAULT NULL,
+  job_type
+    VARCHAR(3) DEFAULT NULL,
+  job_type_enhanced
+    VARCHAR(28) DEFAULT NULL,
+  job_subsystem
+    VARCHAR(10) DEFAULT NULL,
+  job_date
+    VARCHAR(10) DEFAULT NULL,
+  job_description_library
+    VARCHAR(10) DEFAULT NULL,
+  job_description
+    VARCHAR(10) DEFAULT NULL,
+  job_accounting_code
+    VARCHAR(15) DEFAULT NULL,
+  submitter_job_name
+    VARCHAR(28) DEFAULT NULL,
+  submitter_message_queue_library
+    VARCHAR(10) DEFAULT NULL,
+  submitter_message_queue
+    VARCHAR(10) DEFAULT NULL,
+  server_type
+    VARCHAR(30) DEFAULT NULL,
+  job_entered_system_time
+    TIMESTAMP(0) DEFAULT NULL,
+  job_scheduled_time
+    TIMESTAMP(0) DEFAULT NULL,
+  job_active_time
+    TIMESTAMP(0) DEFAULT NULL,
+  job_end_time
+    TIMESTAMP(0) DEFAULT NULL,
+  job_end_severity
+    SMALLINT DEFAULT NULL,
+  completion_status
+    VARCHAR(8) DEFAULT NULL,
+  job_end_reason
+    VARCHAR(60) DEFAULT NULL,
+  job_queue_library
+    VARCHAR(10) DEFAULT NULL,
+  job_queue_name
+    VARCHAR(10) DEFAULT NULL,
+  job_queue_status
+    VARCHAR(9) DEFAULT NULL,
+  job_queue_priority
+    SMALLINT DEFAULT NULL,
+  job_queue_time
+    TIMESTAMP(0) DEFAULT NULL,
+  job_message_queue_maximum_size
+    SMALLINT DEFAULT NULL,
+  job_message_queue_full_action
+    VARCHAR(8) DEFAULT NULL,
+  allow_multiple_threads
+    VARCHAR(3) DEFAULT NULL,
+  peak_temporary_storage
+    INTEGER DEFAULT NULL,
+  default_wait
+    INTEGER DEFAULT NULL,
+  maximum_processing_time_allowed
+    INTEGER DEFAULT NULL,
+  maximum_temporary_storage_allowed
+    INTEGER DEFAULT NULL,
+  time_slice
+    INTEGER DEFAULT NULL,
+  job_switches
+    CHAR(8) DEFAULT NULL,
+  routing_data
+    VARCHAR(80) DEFAULT NULL,
+  job_ccsid
+    INTEGER DEFAULT NULL,
+  character_identifier_control
+    VARCHAR(9) DEFAULT NULL,
+  sort_sequence_library
+    VARCHAR(10) DEFAULT NULL,
+  sort_sequence_name
+    VARCHAR(10) DEFAULT NULL,
+  language_id
+    CHAR(3) DEFAULT NULL,
+  country_id
+    CHAR(2) DEFAULT NULL,
+  date_format
+    CHAR(4) DEFAULT NULL,
+  date_separator
+    CHAR(1) DEFAULT NULL,
+  time_separator
+    CHAR(1) DEFAULT NULL,
+  decimal_format
+    VARCHAR(6) DEFAULT NULL,
+  time_zone_description_name
+    VARCHAR(10) DEFAULT NULL,
+  message_logging_level
+    SMALLINT DEFAULT NULL,
+  message_logging_severity
+    SMALLINT DEFAULT NULL,
+  message_logging_text
+    VARCHAR(7) DEFAULT NULL,
+  log_cl_program_commands
+    VARCHAR(4) DEFAULT NULL,
+  status_message
+    VARCHAR(7) DEFAULT NULL,
+  inquiry_message_reply
+    VARCHAR(8) DEFAULT NULL,
+  break_message
+    VARCHAR(7) DEFAULT NULL,
+  job_log_output
+    VARCHAR(10) DEFAULT NULL,
+  job_log_pending
+    VARCHAR(3) DEFAULT NULL,
+  output_queue_priority
+    SMALLINT DEFAULT NULL,
+  output_queue_library
+    VARCHAR(10) DEFAULT NULL,
+  output_queue_name
+    VARCHAR(10) DEFAULT NULL,
+  spooled_file_action
+    VARCHAR(7) DEFAULT NULL,
+  printer_device_name
+    VARCHAR(10) DEFAULT NULL,
+  print_key_format
+    VARCHAR(7) DEFAULT NULL,
+  print_text
+    VARCHAR(30) DEFAULT NULL,
+  device_name
+    VARCHAR(10) DEFAULT NULL,
+  device_recovery_action
+    VARCHAR(13) DEFAULT NULL,
+  ddm_conversation
+    VARCHAR(5) DEFAULT NULL,
+  mode_name
+    VARCHAR(8) DEFAULT NULL,
+  unit_of_work_id
+    CHAR(24) DEFAULT NULL,
+  internal_job_id
+    BINARY(16) DEFAULT NULL,
+
+  -- Special Registers.
+  client_acctng
+    VARCHAR(255) GENERATED ALWAYS AS (current client_acctng),
+  client_applname
+    VARCHAR(255) GENERATED ALWAYS AS (current client_applname),
+  client_programid
+    VARCHAR(255) GENERATED ALWAYS AS (current client_programid),
+  client_userid
+    VARCHAR(255) GENERATED ALWAYS AS (current client_userid),
+  client_wrkstnname
+    VARCHAR(255) GENERATED ALWAYS AS (current client_wrkstnname),
+  debug_mode -- current debug mode
+    VARCHAR(8) DEFAULT NULL,
+  decfloat_rounding_mode -- current decfloat rounding mode
+    VARCHAR(128) DEFAULT NULL,
+  degree -- current degree
+    CHAR(5) DEFAULT NULL,
+  implicit_xmlparse_option -- current implicit xmlparse option
+    VARCHAR(128) DEFAULT NULL,
+  current_path -- current path
+    VARCHAR(8843) DEFAULT NULL,
+  current_schm -- current schema
+    VARCHAR(128) DEFAULT NULL,
+  current_srvr
+    VARCHAR(18) GENERATED ALWAYS AS (current server),
+  current_timezone -- current timezone
+    DECIMAL(6,0) DEFAULT NULL,
+  cur_user -- current user
+    VARCHAR(128) DEFAULT NULL,
+  sess_user
+    VARCHAR(128) GENERATED ALWAYS AS (session_user),
+  sys_user -- current system_user
+    VARCHAR(128) DEFAULT NULL,
+  user
+    VARCHAR(18) GENERATED ALWAYS AS (user),
+
+  -- Built-in global variables.
+  client_host
+    VARCHAR(255) GENERATED ALWAYS AS (sysibm.client_host),
+  client_ipaddr
+    VARCHAR(128) GENERATED ALWAYS AS (sysibm.client_ipaddr),
+  client_port
+    INTEGER GENERATED ALWAYS AS (sysibm.client_port),
+  job_name
+    VARCHAR(28) GENERATED ALWAYS AS (qsys2.job_name),
+  package_name
+    VARCHAR(128) GENERATED ALWAYS AS (sysibm.package_name),
+  package_schema
+    VARCHAR(128) GENERATED ALWAYS AS (sysibm.package_schema),
+  package_version
+    VARCHAR(64) GENERATED ALWAYS AS (sysibm.package_version),
+  process_id -- qsys2.process_id
+    INTEGER DEFAULT NULL,
+  routine_schema
+    VARCHAR(128) GENERATED ALWAYS AS (sysibm.routine_schema),
+  routine_specific_name
+    VARCHAR(128) GENERATED ALWAYS AS (sysibm.routine_specific_name),
+  routine_type
+    CHAR(1) GENERATED ALWAYS AS (sysibm.routine_type),
+  server_mode_job_name
+    VARCHAR(28) GENERATED ALWAYS AS (qsys2.server_mode_job_name),
+  thread_id -- qsys2.thread_id
+    BIGINT DEFAULT NULL,
+
+  -- Constraints.
+  CONSTRAINT logexttpk PRIMARY KEY(id),
+  CONSTRAINT logexttf00 FOREIGN KEY(logmsgt_id) REFERENCES logmsgt(id) ON DELETE CASCADE
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logextt IS 'SDK4i - LOG - Extended Information';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logextt (
+  id                                IS 'ID',
+  logmsgt_id                        IS 'Application Log ID',
+  job_status                        IS 'Job Status',
+  job_type                          IS 'Job Type',
+  job_type_enhanced                 IS 'Job Type Enhanced',
+  job_subsystem                     IS 'Job Subsystem',
+  job_date                          IS 'Job Date',
+  job_description_library           IS 'Job Desc Lib',
+  job_description                   IS 'Job Desc',
+  job_accounting_code               IS 'Job Acct Code',
+  submitter_job_name                IS 'Submitter Job Name',
+  submitter_message_queue_library   IS 'Submitter MSGQ LIB',
+  submitter_message_queue           IS 'Submitter MSGQ',
+  server_type                       IS 'Server Type',
+  job_entered_system_time           IS 'Job Entered System Time',
+  job_scheduled_time                IS 'Job Scheduled Time',
+  job_active_time                   IS 'Job Active Time',
+  job_end_time                      IS 'Job End Time',
+  job_end_severity                  IS 'Job End Severity',
+  completion_status                 IS 'Completion Status',
+  job_end_reason                    IS 'Job End Reason',
+  job_queue_library                 IS 'JOBQ LIB',
+  job_queue_name                    IS 'JOBQ',
+  job_queue_status                  IS 'JOBQ Status',
+  job_queue_priority                IS 'JOBQ PTY',
+  job_queue_time                    IS 'JOBQ Time',
+  job_message_queue_maximum_size    IS 'Job MSGQ Max Size',
+  job_message_queue_full_action     IS 'Job MSGQ Full Action',
+  allow_multiple_threads            IS 'Allow Multiple Threads',
+  peak_temporary_storage            IS 'Peak Temporary Storage',
+  default_wait                      IS 'Default Wait',
+  maximum_processing_time_allowed   IS 'Max Proc Time Allowed',
+  maximum_temporary_storage_allowed IS 'Max Temp Stg Allowed',
+  time_slice                        IS 'Time Slice',
+  job_switches                      IS 'Job Switches',
+  routing_data                      IS 'Routing Data',
+  job_ccsid                         IS 'CCSID',
+  character_identifier_control      IS 'Char Identifier Control',
+  sort_sequence_library             IS 'Sort Sequence Lib',
+  sort_sequence_name                IS 'Sort Sequence Name',
+  language_id                       IS 'Language ID',
+  country_id                        IS 'Country ID',
+  date_format                       IS 'Date Format',
+  date_separator                    IS 'Date Separator',
+  time_separator                    IS 'Time Separator',
+  decimal_format                    IS 'Decimal Format',
+  time_zone_description_name        IS 'Time Zone Desc Name',
+  message_logging_level             IS 'MSG Logging Level',
+  message_logging_severity          IS 'MSG Logging Severity',
+  message_logging_text              IS 'MSG Logging Text',
+  log_cl_program_commands           IS 'Log CL PGM CMDs',
+  status_message                    IS 'Status MSG',
+  inquiry_message_reply             IS 'Inquiry MSG Reply',
+  break_message                     IS 'Break Message',
+  job_log_output                    IS 'Job Log Output',
+  job_log_pending                   IS 'Job Log Pending',
+  output_queue_priority             IS 'OUTQ PTY',
+  output_queue_library              IS 'OUTQ LIB',
+  output_queue_name                 IS 'OUTQ',
+  spooled_file_action               IS 'Spooled File Action',
+  printer_device_name               IS 'Printer Device Name',
+  print_key_format                  IS 'Print Key Format',
+  print_text                        IS 'Print Text',
+  device_name                       IS 'Device Name',
+  device_recovery_action            IS 'Device Recovery Action',
+  ddm_conversation                  IS 'DDM Conversation',
+  mode_name                         IS 'Mode Name',
+  unit_of_work_id                   IS 'Unit of Work ID',
+  internal_job_id                   IS 'Internal Job ID',
+  client_acctng                     IS 'Client Accounting',
+  client_applname                   IS 'Client Application Name',
+  client_programid                  IS 'Client Program ID',
+  client_userid                     IS 'Client User ID',
+  client_wrkstnname                 IS 'Client Workstation Name',
+  debug_mode                        IS 'Debug Mode',
+  decfloat_rounding_mode            IS 'DecFloat Rounding Mode',
+  degree                            IS 'Degree',
+  implicit_xmlparse_option          IS 'Implicit XMLPARSE option',
+  current_path                      IS 'Current Path',
+  current_schm                      IS 'Current Schema',
+  current_srvr                      IS 'Current Server',
+  cur_user                          IS 'Current User',
+  current_timezone                  IS 'Current Timezone',
+  sess_user                         IS 'Session User',
+  sys_user                          IS 'System User',
+  user                              IS 'User',
+  client_host                       IS 'Client Host',
+  client_ipaddr                     IS 'Client IP Addr',
+  client_port                       IS 'Client Port',
+  job_name                          IS 'Job Name',
+  package_name                      IS 'Package Name',
+  package_schema                    IS 'Package Schema',
+  package_version                   IS 'Package Version',
+  process_id                        IS 'Process ID',
+  routine_schema                    IS 'Routine Schema',
+  routine_specific_name             IS 'Routine Specific Name',
+  routine_type                      IS 'Routine Type',
+  server_mode_job_name              IS 'Server Mode Job Name',
+  thread_id                         IS 'Thread ID'
+);

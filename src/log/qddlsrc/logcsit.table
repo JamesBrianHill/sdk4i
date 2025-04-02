@@ -1,0 +1,173 @@
+-- *************************************************************************************************
+--   This table will hold callstack information. This information is obtained from the STACK_INFO
+-- table function in QSYS2.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_callstack_info FOR SYSTEM NAME logcsit (
+  -- Primary key column.
+  id
+    DECIMAL(15,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  logmsgt_id
+    DECIMAL(15,0) NOT NULL,
+
+  -- ILE and OPM information
+  thr_id
+    BIGINT DEFAULT NULL,
+  thr_type
+    VARCHAR(6) DEFAULT NULL,
+  ord_pos
+    INTEGER DEFAULT NULL,
+  entry_type
+    VARCHAR(4) DEFAULT NULL,
+  pgmlib
+    VARCHAR(10) DEFAULT NULL,
+  pgmnam
+    VARCHAR(10) DEFAULT NULL,
+  stmt_id
+    VARCHAR(109) DEFAULT NULL,
+  rqst_lvl
+    INTEGER DEFAULT NULL,
+  ctl_bnd
+    VARCHAR(3) DEFAULT NULL,
+  pgmaspnam
+    VARCHAR(10) DEFAULT NULL,
+  pgmaspnum
+    INTEGER DEFAULT NULL,
+  modlib
+    VARCHAR(10) DEFAULT NULL,
+  modnam
+    VARCHAR(10) DEFAULT NULL,
+  proc_name
+    VARCHAR(4096) DEFAULT NULL,
+  actgrpnum
+    DECIMAL(20,0) DEFAULT NULL,
+  actgrpnam
+    VARCHAR(10) DEFAULT NULL,
+  mi_num
+    INTEGER DEFAULT NULL,
+
+  -- Java information
+  j_line
+    INTEGER DEFAULT NULL,
+  j_bytoff
+      INTEGER DEFAULT NULL,
+  j_mtype
+    VARCHAR(9) DEFAULT NULL,
+  j_class
+    DBCLOB(64000) CCSID 1200 DEFAULT NULL,
+  j_mname
+    DBCLOB(64000) CCSID 1200 DEFAULT NULL,
+  j_msig
+    DBCLOB(64000) CCSID 1200 DEFAULT NULL,
+  j_fname
+    DBCLOB(64000) CCSID 1200 DEFAULT NULL,
+  j_srcnam
+    DBCLOB(64000) CCSID 1200 DEFAULT NULL,
+
+  -- PASE information
+  p_line
+    BIGINT DEFAULT NULL,
+  p_iaddr
+    DECIMAL(20,0) DEFAULT NULL,
+  p_ioff
+      BIGINT DEFAULT NULL,
+  p_kcode
+    VARCHAR(3) DEFAULT NULL,
+  p_bcode
+    INTEGER DEFAULT NULL,
+  p_altres
+    VARCHAR(3) DEFAULT NULL,
+  p_proc
+    DBCLOB(4000) CCSID 1200 DEFAULT NULL,
+  p_lmodnam
+    DBCLOB(1000) CCSID 1200 DEFAULT NULL,
+  p_lmodpth
+    DBCLOB(4000) CCSID 1200 DEFAULT NULL,
+  p_src
+    DBCLOB(1000) CCSID 1200 DEFAULT NULL,
+
+  -- LIC information
+  l_ioff
+    BIGINT DEFAULT NULL,
+  l_proc
+      VARCHAR(4096) DEFAULT NULL,
+  l_lmodnam
+    VARCHAR(64) DEFAULT NULL,
+
+  -- Constraints.
+  CONSTRAINT logcsitpk PRIMARY KEY(id),
+  CONSTRAINT logcsitf00 FOREIGN KEY(logmsgt_id) REFERENCES logmsgt(id) ON DELETE CASCADE
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logcsit IS 'SDK4i - LOG - Callstack Information';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logcsit (
+  id         IS 'ID',
+  logmsgt_id IS 'Log ID',
+  thr_id     IS 'Thread ID',
+  thr_type   IS 'Thread Type',
+  ord_pos    IS 'Ordinal Position',
+  entry_type IS 'Entry Type',
+  pgmlib     IS 'Program Library',
+  pgmnam     IS 'Program Name',
+  stmt_id    IS 'Statement Identifiers',
+  rqst_lvl   IS 'Request Level',
+  ctl_bnd    IS 'Control Boundary',
+  pgmaspnam  IS 'Pgm ASP Name',
+  pgmaspnum  IS 'Pgm ASP Number',
+  modlib     IS 'Module Library',
+  modnam     IS 'Module Name',
+  proc_name  IS 'Procedure Name',
+  actgrpnum  IS 'Activation Grp Num',
+  actgrpnam  IS 'Activation Grp Name',
+  mi_num     IS 'Machine Inst Number',
+  j_line     IS 'Java Line Number',
+  j_bytoff   IS 'Java Byte Code Offset',
+  j_mtype    IS 'Java Method Type',
+  j_class    IS 'Java Class',
+  j_mname    IS 'Java Method Name',
+  j_msig     IS 'Java Method Signature',
+  j_fname    IS 'Java File Name',
+  j_srcnam   IS 'Java Source File Name',
+  p_line     IS 'PASE Line Number',
+  p_iaddr    IS 'PASE Instruction Addr',
+  p_ioff     IS 'PASE Instruction Offset',
+  p_kcode    IS 'PASE Kernel Code',
+  p_bcode    IS 'PASE Bit Code',
+  p_altres   IS 'PASE Alt Res Pnt',
+  p_proc     IS 'PASE Procedure Name',
+  p_lmodnam  IS 'PASE Load Mod Name',
+  p_lmodpth  IS 'PASE Load Mod Path',
+  p_src      IS 'PASE Source Path/File',
+  l_ioff     IS 'LIC Instruction Offset',
+  l_proc     IS 'LIC Procedure Name',
+  l_lmodnam  IS 'LIC Load Mod Name'
+);

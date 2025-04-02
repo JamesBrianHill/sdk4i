@@ -1,0 +1,67 @@
+-- *************************************************************************************************
+--   This table holds members of alert groups.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_alt_group_member FOR SYSTEM NAME altgrmt (
+  -- Primary key column.
+  altgrpt_id
+    DECIMAL(5,0) NOT NULL,
+  secusrt_id
+    DECIMAL(9,0) NOT NULL,
+  
+  -- Data columns.
+  send_break_message FOR sndbrkmsg -- '1' indicates we should send a break message.
+    CHAR(1) NOT NULL DEFAULT '0',
+  send_email -- '1' indicates we should send an email.
+    CHAR(1) NOT NULL DEFAULT '0',
+  send_phone_call FOR sndphn -- '1' indicates we should send a phone call.
+    CHAR(1) NOT NULL DEFAULT '0',
+  send_text -- '1' indicates we should send a text message (SMS).
+    CHAR(1) NOT NULL DEFAULT '0',
+  
+  -- Constraints.
+  CONSTRAINT altgrmtpk PRIMARY KEY(altgrpt_id, secusrt_id),
+  CONSTRAINT altgrmtc00 CHECK (sndbrkmsg = '1' OR sndbrkmsg = '0'),
+  CONSTRAINT altgrmtc01 CHECK (send_email = '1' OR send_email = '0'),
+  CONSTRAINT altgrmtc02 CHECK (sndphn = '1' OR sndphn = '0'),
+  CONSTRAINT altgrmtc03 CHECK (send_text = '1' OR send_text = '0'),
+  CONSTRAINT altgrmtf00 FOREIGN KEY(altgrpt_id) REFERENCES altgrpt(id) ON DELETE CASCADE,
+  CONSTRAINT altgrmtf01 FOREIGN KEY(secusrt_id) REFERENCES secusrt(id) ON DELETE CASCADE
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE altgrmt IS 'SDK4i - ALT - Alert Group Member';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN altgrmt (
+  altgrpt_id IS 'Alert Group ID',
+  secusrt_id IS 'User ID',
+  sndbrkmsg IS 'Send Break Message',
+  send_email IS 'Send Email',
+  sndphn IS 'Send Phone Call',
+  send_text IS 'Send Text'
+);

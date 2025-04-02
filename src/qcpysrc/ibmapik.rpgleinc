@@ -1,0 +1,427 @@
+**FREE
+// TODO: Use the regular QtmhRdStin instead of QtmhRdStin2.
+// -------------------------------------------------------------------------------------------------
+// Description: Definitions of IBM APIs.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+// @link https://www.ibm.com/docs/en/i/7.5?topic=api-cgi-apis
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(IBMAPIK)
+/EOF
+/ENDIF
+/DEFINE IBMAPIK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in copybooks.
+//
+// TEMPLATESK: template data structures and variables.
+// -------------------------------------------------------------------------------------------------
+/COPY './templatesk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants and templates specific to this copybook.
+// -------------------------------------------------------------------------------------------------
+DCL-S tpl_sdk4i_ibm_qcmdexc_cmd CHAR(32702) TEMPLATE;
+DCL-S tpl_sdk4i_ibm_qcmdexc_igc CHAR(3) TEMPLATE;
+DCL-S tpl_sdk4i_ibm_qcmdexc_len PACKED(15:5) TEMPLATE;
+
+// -------------------------------------------------------------------------------------------------
+///
+// This is a template for the CKPR0100 format which is used by the QSYCHKPR API.
+//
+// Note that we have defined the password here as being 256 characters - this can be as large as you
+// want it to be up to system limits.
+//
+// Example usage:
+// DCL-DS ckpr0100 LIKEDS(tpl_sdk4i_ckpr0100_ds) INZ(*LIKEDS);
+//
+// @param REQUIRED. The offset to the password.
+// @param REQUIRED. The length of the password.
+// @param REQUIRED. The CCSID of the password.
+// @param REQUIRED. The password.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=ssw_ibm_i_75/apis/qsychkpr.html
+///
+// -------------------------------------------------------------------------------------------------
+DCL-DS tpl_sdk4i_ckpr0100_ds QUALIFIED TEMPLATE;
+  offset_to_password LIKE(tpl_sdk4i_binary4);
+  length_of_password LIKE(tpl_sdk4i_binary4);
+  ccsid_of_password LIKE(tpl_sdk4i_binary4);
+  password CHAR(256);
+END-DS tpl_sdk4i_ckpr0100_ds;
+
+// -------------------------------------------------------------------------------------------------
+///
+// This is a template for the ERRC0100 format which is used by various IBM APIs.
+//
+// bytes_provided is provided as input and is the size of this data structure.
+// bytes_available is returned by the called API.
+// exception_id is returned by the called API.
+// reserved is reserved for IBM use.
+// exception_data is returned by the called API.
+//
+// Example usage:
+// DCL-DS error_ds LIKEDS(tpl_sdk4i_errc0100_ds) INZ(*LIKEDS);
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=parameter-error-code-format
+///
+// -------------------------------------------------------------------------------------------------
+DCL-DS tpl_sdk4i_errc0100_ds QUALIFIED TEMPLATE;
+  bytes_provided LIKE(tpl_sdk4i_binary4) INZ(%SIZE(tpl_sdk4i_errc0100_ds));
+  bytes_available LIKE(tpl_sdk4i_binary4) INZ(0);
+  exception_id CHAR(7);
+  reserved CHAR(1);
+  exception_data VARCHAR(32767); // 32,767 is the maximum available from the API.
+END-DS tpl_sdk4i_errc0100_ds;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Define a data structure containing the information needed by _GENUUID.
+//
+// bytes_provided is provided as input and is the size of this data structure.
+// bytes_available is output by _GENUUID.
+// version is the version of UUID to be generated. We want version 4 (RFC 4122 UUID).
+// reserved MUST be set to hexadecimal zeros (NULLs) or you will receive an error.
+// uuid will contain the generated UUID.
+//
+// Example usage:
+// DCL-DS uuid_ds LIKEDS(tpl_sdk4i_uuid_ds) INZ(*LIKEDS);
+//
+// More about UUID versions. Note that _GENUUID supports a version = 0 or 1 (which returns a
+// version 1 DCE). Version = 4 generates an RFC 4122 UUID.
+// @link https://en.wikipedia.org/wiki/Universally_unique_identifier#Versions
+// @link https://www.ibm.com/docs/en/i/7.5?topic=instructions-generate-universal-unique-identifier-genuuid
+///
+// -------------------------------------------------------------------------------------------------
+DCL-DS tpl_sdk4i_uuid_ds QUALIFIED TEMPLATE;
+  bytes_provided LIKE(tpl_sdk4i_unsigned_binary4) INZ(%SIZE(tpl_sdk4i_uuid_ds));
+  bytes_available LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+  version LIKE(tpl_sdk4i_unsigned_binary1) INZ(4);
+  reserved CHAR(7) INZ(*ALLx'00');
+  uuid CHAR(16) INZ(*BLANKS);
+END-DS tpl_sdk4i_uuid_ds;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Convert a character string to a hexadecimal string.
+//
+// The C prototype we are calling can be found in QSYSINC/MIH/cvtch.c
+//
+// @param REQUIRED: address of hexadecimal string (target).
+// @param REQUIRED: address of binary character string (source).
+// @param REQUIRED. The length of the hexadecimal string (length of target).
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=instructions-convert-character-hex-cvtch
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR CharToHex EXTPROC('cvtch');
+  p_hex POINTER VALUE; // Address of hex string (target).
+  p_char POINTER VALUE; // Address of character string (source).
+  hex_length LIKE(tpl_sdk4i_binary4) VALUE; // Length of hex string (length of target).
+END-PR CharToHex;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Convert a hexadecimal string to a character string.
+//
+// The C prototype we are calling can be found in QSYSINC/MIH/cvthc.c
+//
+// @param REQUIRED. Address of a character string (target).
+// @param REQUIRED. Address of a hexadecimal string (source).
+// @param REQUIRED: length of binary character string (length of target).
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=instructions-convert-hex-character-cvthc
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR HexToChar EXTPROC('cvthc');
+  p_char POINTER VALUE; // Address of character string (target).
+  p_hex POINTER VALUE; // Address of hex string (source).
+  char_length LIKE(tpl_sdk4i_binary4) VALUE; // Length of the character string (length of target).
+END-PR HexToChar;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Copy data with pointers.
+//
+// Copy data from one location in memory to another using pointers. IBM says CPYBWP is preferred
+// over MEMCPY for performance reasons. Note that the target and source locations must be aligned
+// on a 16-byte boundary.
+//
+// @param REQUIRED. This is a pointer to where you want to copy the data to.
+// @param REQUIRED. This is a pointer to where the data is now.
+// @param REQUIRED. This is how long the source data is.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=instructions-copy-bytes-pointers-cpybwp
+// @link https://www.ibm.com/support/pages/node/1118397
+// @link https://www.ibm.com/docs/en/i/7.5?topic=keywords-alignfull#dalign
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR cpybwp EXTPROC('_CPYBWP');
+  target POINTER VALUE;
+  source POINTER VALUE;
+  length LIKE(tpl_sdk4i_unsigned_binary4) VALUE;
+END-PR cpybwp;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Generate a Universally Unique IDentifier (UUID).
+//
+// @param REQUIRED: the address of the uuid_ds data structure.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=instructions-generate-universal-unique-identifier-genuuid
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR GenerateUUID EXTPROC('_GENUUID');
+  p_uuid_ds POINTER VALUE; // Address of uuid_ds
+END-PR GenerateUUID;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Get the value of an environment variable.
+//
+// This procedure is found in IBM's QPOZCPA service program.
+//
+// Example:
+// DCL-S env_var VARCHAR(50);
+// env_var = %STR(GetEnv('REQUEST_METHOD'));
+//
+// @param REQUIRED. A string containing the name of the environment variable to be retrieved.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=ssw_ibm_i_75/apis/evgetenv.html
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR GetEnv POINTER EXTPROC('getenv');
+  env_var_name POINTER VALUE OPTIONS(*STRING: *TRIM);
+END-PR GetEnv;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Copy data from one location in memory to another.
+//
+// IBM says CPYBWP is preferred for performance reasons.
+//
+// @param REQUIRED. This is a pointer to where you want to copy the data to.
+// @param REQUIRED. This is a pointer to where the data is now.
+// @param REQUIRED. This is how long the source data is.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=instructions-memory-copy-memcpy
+// @link https://www.ibm.com/docs/en/i/7.5?topic=instructions-copy-bytes-pointers-cpybwp
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR memcpy EXTPROC('memcpy');
+  i_target POINTER VALUE;
+  i_source POINTER VALUE;
+  i_length LIKE(tpl_sdk4i_unsigned_binary4) VALUE;
+END-PR memcpy;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Have the system execute a command.
+//
+// Example:
+// DCL-S cmd LIKE(tpl_sdk4i_api_qcmdexc_cmd);
+// DCL-S cmd_len LIKE(tpl_sdk4i_api_qcmdexc_len);
+// cmd = 'CLRPFM LIB/FILE';
+// MONITOR;
+//   QCMDEXC(cmd: %LEN(cmd));
+// ON-ERROR;
+//   // Log the error and handle it gracefully.
+// ENDMON;
+//
+// @param REQUIRED. The command to be executed.
+// @param REQUIRED. The length of the command to be executed.
+// @param OPTIONAL. If provided, must be 'IGC'. Tells the system to accept double byte data.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=ssw_ibm_i_75/apis/qcmdexc.htm
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR QCMDEXC EXTPGM('QCMDEXC');
+  i_command LIKE(tpl_sdk4i_ibm_qcmdexc_cmd) CONST; // 32702 is maximum size allowed.
+  i_length LIKE(tpl_sdk4i_ibm_qcmdexc_len) CONST;
+  i_igc LIKE(tpl_sdk4i_ibm_qcmdexc_igc) CONST OPTIONS(*NOPASS);
+END-PR QCMDEXC;
+
+// -------------------------------------------------------------------------------------------------
+///
+//   Send a break message to an IBM i user.
+//
+// @param REQUIRED. *INFO (no reply necessary) or *INQ (reply required).
+// @param REQUIRED. *BREAK (break message) or *NORMAL (goes to message queue).
+// @param REQUIRED. The message to be sent.
+// @param REQUIRED. The length of the message to be sent.
+// @param REQUIRED. An array of user profiles to send the message to.
+// @param REQUIRED. The number of user profiles passed.
+// @param REQUIRED. 0=none, 1=one or more sent, 2=some not sent because invalid.
+// @param REQUIRED. 0=Send a Message display was not used.
+// @param REQUIRED. IBM error data structure.
+// @param REQUIRED. Y=Use the Send a Message display, N=do not use.
+// @param REQUIRED. Message queue to receive the reply for *INQ messages.
+// @param REQUIRED. *USR=User profiles, *DSP=display station names.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=ssw_ibm_i_75/apis/QEZSNDMG.html
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR QEZSNDMG EXTPGM('QEZSNDMG');
+  i_message_type CHAR(10) CONST;
+  i_delivery_mode CHAR(10) CONST;
+  i_message_text VARCHAR(494) CONST;
+  i_message_length LIKE(tpl_sdk4i_binary4) CONST;
+  i_usrprf_array CHAR(10) DIM(299) CONST;
+  i_usrprf_count LIKE(tpl_sdk4i_binary4) CONST;
+  o_message_sent LIKE(tpl_sdk4i_binary4);
+  o_function_requested LIKE(tpl_sdk4i_binary4);
+  o_error_ds LIKE(tpl_sdk4i_errc0100_ds);
+  i_show_display CHAR(1) CONST;
+  i_msgq CHAR(20) CONST;
+  i_name_type CHAR(4) CONST;
+END-PR QEZSNDMG;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Validate a password against the password rules defined by the system.
+//
+// @warning REQUIRES IBM i VERSION 7.5 OR HIGHER.
+//
+// @param REQUIRED The user profile being checked or *NONE or *CURRENT.
+// @param REQUIRED A data structure of the format CKPR0100, populated with password related information to be validated.
+// @param REQUIRED The string 'CKPR0100'.
+// @param REQUIRED The error data structure returned by the API.
+//
+// @link https://www.ibm.com/docs/en/i/7.4?topic=ssw_ibm_i_74/apis/qsychkpr.html#HDRCKPR100
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR QSYCHKPR EXTPGM('QSYCHKPR');
+  i_usrprf CHAR(10) CONST;
+  i_ckpr0100_ds LIKEDS(tpl_sdk4i_ckpr0100_ds) CONST;
+  i_format CHAR(8) CONST;
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR QSYCHKPR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Read from the STDIN file descriptor (stream).
+//
+// This procedure is in the QHTTPSVR/QZHBCGI service program provided by IBM. Note that it only
+// reads POST data.
+//
+// Example: see procedure WEB_GetHTTPRequest in /web/qrpglesrc/web.sqlrpgle.
+//
+// @param REQUIRED. A pointer which will point to the data.
+// @param REQUIRED. The length of the data to be read.
+// @param REQUIRED. The length of data actually read.
+// @param REQUIRED. An errc0100 data structure used by IBM APIs.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=ssw_ibm_i_75/rzaie/rzaieapi_qtmhrdstin.html
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR QtmhRdStin EXTPROC('QtmhRdStin');
+  i_data POINTER VALUE;
+  i_data_length LIKE(tpl_sdk4i_binary4) CONST;
+  o_available_length LIKE(tpl_sdk4i_binary4);
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR QtmhRdStin;
+
+// TODO: Use the regular QtmhRdStin above with the POINTER instead of this one with CHAR.
+DCL-PR QtmhRdStin2 EXTPROC('QtmhRdStin');
+  i_data CHAR(C_SDK4I_SIZE_2MI) CCSID(*UTF8);
+  i_data_length LIKE(tpl_sdk4i_binary4) CONST;
+  o_available_length LIKE(tpl_sdk4i_binary4) CONST;
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR QtmhRdStin2;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Write to the STDOUT file descriptor (stream).
+//
+// This procedure is in the QHTTPSVR/QZHBCGI service program provided by IBM.
+//
+// Example:
+// DCL-DS error_ds LIKEDS(tpl_sdk4i_errc0100_ds) INZ;
+// DCL-S data LIKE(tpl_sdk4i_db2_varchar);
+// data = 'This is my test string';
+// WriteStdout(%ADDR(data: *DATA): %LEN(data): error_ds);
+// IF (error_ds.bytes_available > 0);
+//   // Log the error and handle gracefully.
+// ENDIF;
+//
+// Also see procedure WEB_WriteStdout in /web/qrpglesrc/web.sqlrpgle.
+//
+// @param REQUIRED. A pointer to the data to be written.
+// @param REQUIRED. The length of data to be written.
+// @param REQUIRED. An errc0100 data structure used by IBM APIs.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=ssw_ibm_i_75/rzaie/rzaieapi_qtmhwrstout.html
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR QtmhWrStout EXTPROC('QtmhWrStout');
+  i_data POINTER VALUE;
+  i_data_length LIKE(tpl_sdk4i_binary4) CONST;
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR QtmhWrStout;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Define the call to the QtmsCreateSendEmail API from IBM.
+//
+// The only limit to the size of the message sent with this API is whatever is imposed by mail
+// servers between you and your recipient(s). This API is not limited to 5,000 characters like other
+// APIs and commands.
+//
+// The C prototype is in QSYSINC/H/QTMSCRTSNM.
+//
+// Also see procedure COM_SendEmail in /com/qrpglesrc/com.sqlrpgle.
+//
+// @param REQUIRED. A pointer to an array of tpl_sdk4i_rcpt0100_ds data structures.
+// @param REQUIRED. The number of elements in recipient_array - %ELEM(recipient_array).
+// @param REQUIRED. The format of the recipient data structures - DCL-S recipient_format CHAR(8) INZ('RCPT0100');
+// @param REQUIRED. A pointer to a tpl_sdk4i_note0100_ds data structure.
+// @param REQUIRED. The format of the note data structure - DCL-S note_format CHAR(8) INZ('NOTE0100');
+// @param OPTIONAL. A pointer to an array of tpl_sdk4i_atch0100_ds data structures.
+// @param OPTIONAL. The number of elements in attachment_array - %ELEM(attachment_array).
+// @param OPTIONAL. The format of the attachment data structures - DCL-S attachment_format CHAR(8) INZ('ATCH0000'); - or ATCH0100 if there are any attachments.
+// @param OPTIONAL. A tpl_sdk4i_errc0100_ds data structure.
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=ssw_ibm_i_75/apis/qtmscreatesendemail.html
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR QtmsCreateSendEmail EXTPROC('QtmsCreateSendEmail');
+  recipient_array POINTER VALUE; // char* = an actual pointer.
+  recipient_count LIKE(tpl_sdk4i_unsigned_binary4) VALUE; // unsigned int = UNS(10).
+  recipient_format POINTER VALUE; // char* = RPG CHAR(8) variable.
+  note POINTER VALUE; // char* = an actual pointer.
+  note_format POINTER VALUE; // char* = RPG CHAR(8) variable.
+  attachment_array POINTER VALUE OPTIONS(*NOPASS); // char* = an actual pointer.
+  attachment_count LIKE(tpl_sdk4i_unsigned_binary4) VALUE OPTIONS(*NOPASS); // unsigned int=UNS(10)
+  attachment_format POINTER VALUE OPTIONS(*NOPASS); // char* = RPG CHAR(8) variable.
+  error_ds LIKEDS(tpl_sdk4i_errc0100_ds) OPTIONS(*NOPASS); // char* = tpl_errc0100_ds.
+END-PR QtmsCreateSendEmail;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Display a command line.
+//
+// Example:
+// QUSCMDLN;
+//
+// @link https://www.ibm.com/docs/en/i/7.5?topic=ssw_ibm_i_75/apis/quscmdln.htm
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR QUSCMDLN EXTPGM('QUSCMDLN');
+END-PR QUSCMDLN;
