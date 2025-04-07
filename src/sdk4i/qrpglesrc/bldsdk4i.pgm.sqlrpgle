@@ -52,11 +52,11 @@ CTL-OPT TIMFMT(*ISO);
 // Define global constants, template data structures, and template variables.
 // -------------------------------------------------------------------------------------------------
 DCL-C C_ADD_RESTRICT_ON_DROP 'Y';
-DCL-C C_CLN_LIB 'HILLB1';
-DCL-C C_LIBDTA 'HILLB1';
-DCL-C C_LIBPGM 'HILLB2';
-DCL-C C_LIBWEB 'HILLB2';
-DCL-C C_IFS_BASE '/home/hillb/sdk4i/src/';
+DCL-C C_CLN_LIB 'SDK4IPGM';
+DCL-C C_LIBDTA 'SDK4IDTA';
+DCL-C C_LIBPGM 'SDK4IPGM';
+DCL-C C_LIBWEB 'SDK4IWEB';
+DCL-C C_IFS_BASE '/opt/sdk4i/yyyymmdd/';
 
 // -------------------------------------------------------------------------------------------------
 // Set SQL options before any executable code.
