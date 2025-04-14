@@ -78,10 +78,13 @@ CREATE OR REPLACE TABLE sdk4i_log_config FOR SYSTEM NAME logcfgt (
   
   -- 'D' indicates we should keep count by day.
   -- 'H' indicates we should keep count by hour.
-  -- 'M' indicates we should keep count by minute.
+  -- 'I' indicates we should keep count by minute.
+  -- 'M' indicates we should keep count by month.
   -- 'N' indicates we should not track usage at all.
+  -- 'W' indicates we should keep count by week.
+  -- 'Y' indicates we should keep count by year.
   loguset
-    CHAR(1) NOT NULL DEFAULT 'D', -- (D)ay/(H)our/(M)inute/(N)o
+    CHAR(1) NOT NULL DEFAULT 'D',
   
   logwblt -- 'Y' indicates we should write data to the LOGWBLT table.
     CHAR(1) NOT NULL DEFAULT 'N',
@@ -121,7 +124,7 @@ CREATE OR REPLACE TABLE sdk4i_log_config FOR SYSTEM NAME logcfgt (
   CONSTRAINT logcfgtc00 CHECK (logcsit = 'Y' OR logcsit = 'N'),
   CONSTRAINT logcfgtc01 CHECK (logextt = 'Y' OR logextt = 'N'),
   CONSTRAINT logcfgtc02 CHECK (logmett = 'Y' OR logmett = 'N'),
-  CONSTRAINT logcfgtc03 CHECK (loguset = 'D' OR loguset = 'H' OR loguset = 'M' OR loguset = 'N'),
+  CONSTRAINT logcfgtc03 CHECK (loguset = 'D' OR loguset = 'H' OR loguset = 'I' OR loguset = 'M' OR loguset = 'N' OR loguset = 'W' OR loguset = 'Y'),
   CONSTRAINT logcfgtc04 CHECK (logwblt = 'Y' OR logwblt = 'N'),
   CONSTRAINT logcfgtc05 CHECK (logwbrt = 'Y' OR logwbrt = 'N'),
   CONSTRAINT logcfgtf00 FOREIGN KEY(logmsgt_id) REFERENCES loglvlt(id) ON DELETE RESTRICT,

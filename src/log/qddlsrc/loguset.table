@@ -29,28 +29,40 @@ CREATE OR REPLACE TABLE sdk4i_log_usage FOR SYSTEM NAME loguset (
 
   -- Data columns.
   process_system FOR sys -- From PSDS position 396.
-    VARCHAR(8) DEFAULT NULL,
+    VARCHAR(8) NOT NULL,
 
   process_library FOR lib -- From PSDS position 81.
-    VARCHAR(10) DEFAULT NULL,
+    VARCHAR(10) NOT NULL,
 
   process_program FOR pgm -- From PSDS position 334.
-    VARCHAR(10) DEFAULT NULL,
+    VARCHAR(10) NOT NULL,
 
   process_module FOR mod -- From PSDS position 344.
-    VARCHAR(10) DEFAULT NULL,
+    VARCHAR(10) NOT NULL,
 
   process_procedure FOR prc -- Typically from the %PROC built-in function.
-    VARCHAR(128) DEFAULT NULL,
+    VARCHAR(128) NOT NULL,
 
-  dat
-    DATE NOT NULL,
+  yr
+    DECIMAL(4,0) NOT NULL,
 
-  tim
-    TIME NOT NULL,
+  mnth
+    DECIMAL(2,0) NOT NULL DEFAULT -1,
 
-  cnt
-    DECIMAL(7,0) NOT NULL,
+  wk
+    DECIMAL(2,0) NOT NULL DEFAULT -1,
+
+  d
+    DECIMAL(2,0) NOT NULL DEFAULT -1,
+
+  hr
+    DECIMAL(2,0) NOT NULL DEFAULT -1,
+  
+  mn
+    DECIMAL(2,0) NOT NULL DEFAULT -1,
+  
+  cnt -- Can count up to 19+ million transactions per minute, every hour of every day for a year.
+    DECIMAL(13,0) NOT NULL,
 
   -- Constraints.
   CONSTRAINT logusetpk PRIMARY KEY(id)
@@ -65,13 +77,17 @@ LABEL ON TABLE loguset IS 'SDK4i - LOG - Log Usage';
 -- Label the columns.
 -- *************************************************************************************************
 LABEL ON COLUMN loguset (
-  id  IS 'ID',
-  sys IS 'System',
-  lib IS 'Library',
-  pgm IS 'Program',
-  mod IS 'Module',
-  prc IS 'Procedure',
-  dat IS 'Date',
-  tim IS 'Time',
-  cnt IS 'Count'
+  id   IS 'ID',
+  sys  IS 'System',
+  lib  IS 'Library',
+  pgm  IS 'Program',
+  mod  IS 'Module',
+  prc  IS 'Procedure',
+  yr   IS 'Year',
+  mnth IS 'Month',
+  wk   IS 'Week',
+  d    IS 'Date',
+  hr   IS 'Hour',
+  mn   IS 'Minute',
+  cnt  IS 'Count'
 );

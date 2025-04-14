@@ -913,8 +913,16 @@ END-PROC SaveRemoteWebServiceInfo;
 // Save usage information.
 //
 // We may want to log the fact a program, procedure, etc. has been used. The LOGCFGT table allows us
-// to indicate if we should track usage and how fine-grained that tracking should be (daily, hourly,
-// or by the minute).
+// to indicate if we should track usage and how fine-grained that tracking should be (yearly,
+// monthly, weekly, daily, hourly, or by the minute).
+//
+// Note that we use the WEEK scalar function which returns a value between 1 and 54 and this week
+// value is always for the same/current year.
+//
+// If you want to use the WEEK_ISO scalar function instead, be aware that it returns a value between
+// 1 and 53 so it's possible for the function to return a week that is in the previous or next year
+// - which means you need to decide whether or not to change the year and month values to match the
+// previous/next year when you encounter an edge case.
 //
 // @param REQUIRED. This is the LOGMSGT.ID of the row just created in LOG_LogMsg.
 // @param REQUIRED. A tpl_sdk4i_logwbrt_ds data structure.
@@ -927,15 +935,17 @@ DCL-PROC SaveUseInfo;
     i_loguset LIKE(tpl_sdk4i_logcfgt_ds.loguset) CONST;
   END-PI;
 
-  DCL-S current_hour UNS(5) INZ(0);
-  DCL-S current_minute UNS(5) INZ(0);
-  DCL-S current_time LIKE(tpl_sdk4i_loguset_ds.tim) INZ(*SYS);
-  DCL-S dat LIKE(tpl_sdk4i_loguset_ds.dat) INZ(*SYS);
+  DCL-S cur_day LIKE(tpl_sdk4i_loguset_ds.d) INZ(-1);
+  DCL-S cur_hour LIKE(tpl_sdk4i_loguset_ds.hr) INZ(-1);
+  DCL-S cur_minute LIKE(tpl_sdk4i_loguset_ds.mn) INZ(-1);
+  DCL-S cur_month LIKE(tpl_sdk4i_loguset_ds.mnth) INZ(-1);
+  DCL-S cur_timestamp TIMESTAMP INZ(*SYS);
+  DCL-S cur_week LIKE(tpl_sdk4i_loguset_ds.wk) INZ(-1);
+  DCL-S cur_year LIKE(tpl_sdk4i_loguset_ds.yr);
   DCL-S lib LIKE(i_psds_ds.lib);
   DCL-S mod LIKE(i_psds_ds.mod_prc);
   DCL-S pgm LIKE(i_psds_ds.pgm_prc);
   DCL-S sys LIKE(i_psds_ds.sys);
-  DCL-S tim LIKE(tpl_sdk4i_loguset_ds.tim);
   
   // Extract data from i_psds_ds
   lib = i_psds_ds.lib;
@@ -943,15 +953,40 @@ DCL-PROC SaveUseInfo;
   pgm = i_psds_ds.pgm_prc;
   sys = i_psds_ds.sys;
 
-  tim = %TIME('00.00.00': *ISO);
+  cur_year = %SUBDT(cur_timestamp: *YEARS: 4);
+
+  // Populate values based on the granularity needed.
+  // Nothing needs to be done for i_loguset = 'Y' since we have already populated cur_year.
   SELECT;
-    WHEN (i_loguset = 'H');
-      current_hour = %SUBDT(current_time: *HOURS: 2);
-      tim = tim + %HOURS(current_hour);
-    WHEN (i_loguset = 'M');
-      current_hour = %SUBDT(current_time: *HOURS: 2);
-      current_minute = %SUBDT(current_time: *MINUTES: 2);
-      tim = tim + %HOURS(current_hour) + %MINUTES(current_minute);
+    WHEN (i_loguset = 'M'); // Log usage by month.
+      cur_month = %SUBDT(cur_timestamp: *MONTHS: 2);
+    
+    WHEN (i_loguset = 'W'); // Log usage by week.
+      cur_month = %SUBDT(cur_timestamp: *MONTHS: 2);
+      EXEC SQL
+        VALUES(WEEK(:cur_timestamp)) INTO :cur_week;
+    
+    WHEN (i_loguset = 'D'); // Log usage by day.
+      cur_month = %SUBDT(cur_timestamp: *MONTHS: 2);
+      EXEC SQL
+        VALUES(WEEK(:cur_timestamp)) INTO :cur_week;
+      cur_day = %SUBDT(cur_timestamp: *DAYS: 2);
+
+    WHEN (i_loguset = 'H'); // Log usage by hour.
+      cur_month = %SUBDT(cur_timestamp: *MONTHS: 2);
+      EXEC SQL
+        VALUES(WEEK(:cur_timestamp)) INTO :cur_week;
+      cur_day = %SUBDT(cur_timestamp: *DAYS: 2);
+      cur_hour = %SUBDT(cur_timestamp: *HOURS: 2);
+    
+    WHEN (i_loguset = 'I'); // Log usage by minute.
+      cur_month = %SUBDT(cur_timestamp: *MONTHS: 2);
+      EXEC SQL
+        VALUES(WEEK(:cur_timestamp)) INTO :cur_week;
+      cur_day = %SUBDT(cur_timestamp: *DAYS: 2);
+      cur_hour = %SUBDT(cur_timestamp: *HOURS: 2);
+      cur_minute = %SUBDT(cur_timestamp: *MINUTES: 2);
+
     OTHER; // Nothing to be done here.
   ENDSL;
 
@@ -959,13 +994,24 @@ DCL-PROC SaveUseInfo;
     -- MERGE or "UPSERT" (UPDATE/INSERT) for loguset.
     -- @link https://www.ibm.com/docs/en/i/7.5?topic=statements-merge
     MERGE INTO loguset AS tgt USING (
-      VALUES(:sys, :lib, :pgm, :mod, :i_proc, :dat, :tim)
-    ) AS src (sys, lib, pgm, mod, prc, dat, tim)
-    ON (tgt.sys = src.sys AND tgt.lib = src.lib AND tgt.pgm = src.pgm AND tgt.mod = src.mod AND tgt.prc = src.prc AND tgt.dat = src.dat AND tgt.tim = src.tim)
+      VALUES(:sys, :lib, :pgm, :mod, :i_proc, :cur_year, :cur_month, :cur_week, :cur_day, :cur_hour, :cur_minute)
+    ) AS src (sys, lib, pgm, mod, prc, yr, mnth, wk, d, hr, mn)
+    ON (tgt.sys = src.sys
+        AND tgt.lib = src.lib
+        AND tgt.pgm = src.pgm
+        AND tgt.mod = src.mod
+        AND tgt.prc = src.prc
+        AND tgt.yr = src.yr
+        AND tgt.mnth = src.mnth
+        AND tgt.wk = src.wk
+        AND tgt.d = src.d
+        AND tgt.hr = src.hr
+        AND tgt.mn = src.mn)
     WHEN MATCHED THEN
       UPDATE SET (cnt) = (tgt.cnt + 1)
     WHEN NOT MATCHED THEN
-      INSERT (sys, lib, pgm, mod, prc, dat, tim, cnt) VALUES (src.sys, src.lib, src.pgm, src.mod, src.prc, src.dat, src.tim, 1)
+      INSERT (sys, lib, pgm, mod, prc, yr, mnth, wk, d, hr, mn, cnt) 
+      VALUES (src.sys, src.lib, src.pgm, src.mod, src.prc, src.yr, src.mnth, src.wk, src.d, src.hr, src.mn, 1)
     ELSE IGNORE
     WITH NC;
 END-PROC SaveUseInfo;
