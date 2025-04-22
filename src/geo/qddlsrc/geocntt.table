@@ -35,7 +35,7 @@ CREATE OR REPLACE TABLE sdk4i_geo_country FOR SYSTEM NAME geocntt (
   isonum -- Three digit code.
     CHAR(3) NOT NULL,
   name -- Full name of the country.
-    VARCHAR(50) NOT NULL CCSID 1208,
+    VARCHAR(52) NOT NULL CCSID 1208,
   tld -- Top-level domain like ca, mx, or us.
     CHAR(2) DEFAULT NULL,
 

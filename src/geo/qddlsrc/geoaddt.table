@@ -29,14 +29,18 @@ CREATE OR REPLACE TABLE sdk4i_geo_address FOR SYSTEM NAME geoaddt (
     DECIMAL(9,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
 
   -- Data columns.
+  country_id
+    CHAR(2) NOT NULL,
+  state_code
+    VARCHAR(50) NOT NULL CCSID 1208,
   street1 -- 64 characters is a recommendation from the USPS.
     VARCHAR(64) NOT NULL CCSID 1208,
   street2 -- 64 characters is a recommendation from the USPS.
     VARCHAR(64) DEFAULT NULL CCSID 1208,
-  city_id
-    DECIMAL(7,0) DEFAULT NULL,
-  county_id
-    DECIMAL(7,0) DEFAULT NULL,
+  city_name
+    VARCHAR(60) DEFAULT NULL CCSID 1208,
+  county_name
+    VARCHAR(50) DEFAULT NULL CCSID 1208,
   zip
     VARCHAR(15) NOT NULL CCSID 1208,
   zip4 -- Only valid for US addresses.
@@ -48,8 +52,8 @@ CREATE OR REPLACE TABLE sdk4i_geo_address FOR SYSTEM NAME geoaddt (
 
   -- Constraints.
   CONSTRAINT geoaddtpk PRIMARY KEY(id),
-  CONSTRAINT geoaddtf00 FOREIGN KEY(city_id) REFERENCES geocitt(id) ON DELETE CASCADE,
-  CONSTRAINT geoaddtf01 FOREIGN KEY(county_id) REFERENCES geocout(id) ON DELETE CASCADE
+  CONSTRAINT geoaddtf00 FOREIGN KEY(country_id, state_code, city_name) REFERENCES geocitt(country_id, state_code, name) ON DELETE CASCADE,
+  CONSTRAINT geoaddtf01 FOREIGN KEY(country_id, state_code, county_name) REFERENCES geocout(country_id, state_code, name) ON DELETE CASCADE
 );
 
 -- *************************************************************************************************
@@ -61,13 +65,15 @@ LABEL ON TABLE geoaddt IS 'SDK4i - GEO - Address';
 -- Label the columns.
 -- *************************************************************************************************
 LABEL ON COLUMN geoaddt (
-  id         IS 'ID',
-  street1    IS 'Street 1',
-  street2    IS 'Street 2',
-  city_id    IS 'City',
-  county_id  IS 'County',
-  zip        IS 'Zip',
-  zip4       IS 'Zip+4',
-  lat        IS 'Latitude',
-  lon        IS 'Long'
+  id IS 'ID',
+  country_id IS 'Country ID',
+  state_code IS 'State Code',
+  street1 IS 'Street 1',
+  street2 IS 'Street 2',
+  city_name IS 'City Name',
+  county_name IS 'County Name',
+  zip IS 'Zip',
+  zip4 IS 'Zip+4',
+  lat IS 'Latitude',
+  lon IS 'Long'
 );

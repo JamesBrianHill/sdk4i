@@ -25,18 +25,22 @@
 -- *************************************************************************************************
 CREATE OR REPLACE TABLE sdk4i_geo_city FOR SYSTEM NAME geocitt (
   -- Primary key column.
-  id
-    DECIMAL(7,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
 
   -- Data columns.
-  state_id
-    DECIMAL(7,0) NOT NULL,
+  country_id
+    CHAR(2) NOT NULL,
+  state_code
+    VARCHAR(50) NOT NULL CCSID 1208,
   name -- Full name of the city.
     VARCHAR(60) NOT NULL CCSID 1208,
+  lat
+    DECIMAL(8,6) DEFAULT NULL,
+  lon
+    DECIMAL(9,6) DEFAULT NULL,
 
   -- Constraints.
-  CONSTRAINT geocittpk PRIMARY KEY(id),
-  CONSTRAINT geocittf00 FOREIGN KEY(state_id) REFERENCES geostat(id) ON DELETE CASCADE
+  CONSTRAINT geocittpk PRIMARY KEY(country_id, state_code, name),
+  CONSTRAINT geocittf00 FOREIGN KEY(country_id, state_code) REFERENCES geostat(country_id, code) ON DELETE CASCADE
 );
 
 -- *************************************************************************************************
@@ -48,7 +52,9 @@ LABEL ON TABLE geocitt IS 'SDK4i - GEO - City';
 -- Label the columns.
 -- *************************************************************************************************
 LABEL ON COLUMN geocitt (
-  id         IS 'ID',
-  state_id   IS 'State ID',
-  name       IS 'City Name'
+  country_id IS 'Country ID',
+  state_code IS 'State Code',
+  name IS 'City Name',
+  lat IS 'Latitude',
+  lon IS 'Longitude'
 );

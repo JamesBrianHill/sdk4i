@@ -131,6 +131,9 @@ DCL-PROC BLDSDK4I;
   CreateCLProgram(C_CLN_LIB: 'CLNSDK4I': C_IFS_BASE + 'sdk4i/qcllesrc/clnsdk4i.pgm.clp':
     'SDK4i - Delete all SDK4i objects');
   
+  // Compile any test/demonstration programs.
+  CreateSQLRPGLEProgram(C_LIBPGM: 'TSTLOG': C_IFS_BASE + 'tst/qrpglesrc/tstlog.pgm.sqlrpgle');
+
 END-PROC BLDSDK4I;
 
 // -------------------------------------------------------------------------------------------------
@@ -238,6 +241,9 @@ DCL-PROC BuildTables;
 
   // Create tables that have dependencies.
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geostat.table': C_LIBDTA); // geocntt
+  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geostaz_ca.sql'); // Populate states - Canada.
+  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geostaz_mx.sql'); // Populate states - Mexico.
+  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geostaz_us.sql'); // Populate states - United States.
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geocitt.table': C_LIBDTA); // geostat
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geocout.table': C_LIBDTA); // geostat
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geoaddt.table': C_LIBDTA); // geocitt, geocout, geostat
