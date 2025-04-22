@@ -25,7 +25,7 @@
 // Control Specifications.
 // -------------------------------------------------------------------------------------------------
 /COPY '../../qcpysrc/ctloptpgmk.rpgleinc'
-CTL-OPT MAIN(tstlog);
+CTL-OPT MAIN(tstlog2);
 CTL-OPT TEXT('SDK4i - TST - Test logging utilities');
 
 // -------------------------------------------------------------------------------------------------
@@ -36,12 +36,6 @@ CTL-OPT TEXT('SDK4i - TST - Test logging utilities');
 // -------------------------------------------------------------------------------------------------
 /COPY '../../qcpysrc/logk.rpgleinc'
 /COPY '../../qcpysrc/psdsk.rpgleinc'
-
-// -------------------------------------------------------------------------------------------------
-// Define external programs and procedures.
-// -------------------------------------------------------------------------------------------------
-DCL-PR tstlog2 EXTPGM;
-END-PR tstlog2;
 
 // -------------------------------------------------------------------------------------------------
 // Pull in column definitions.
@@ -63,14 +57,14 @@ END-PR tstlog2;
 //   Description.
 ///
 // -------------------------------------------------------------------------------------------------
-DCL-PROC tstlog;
-  DCL-PI tstlog;
+DCL-PROC tstlog2;
+  DCL-PI tstlog2;
   END-PI;
 
   /COPY '../../qcpysrc/logvar2k.rpgleinc'
 
   // Log that we were here.
-  log_msg = 'Entering the TSTLOG program...';
+  log_msg = 'Entering the TSTLOG2 program...';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   do_level0_emergency();
@@ -82,12 +76,10 @@ DCL-PROC tstlog;
   do_level6_informational();
   do_level7_debug();
 
-  tstlog2();
-
   ON-EXIT log_is_abend;
     LOG_LogUse(psds_ds: log_proc: log_beg_ts: log_is_successful: log_is_abend: log_user_info_ds);
     EXEC SQL COMMIT;
-END-PROC tstlog;
+END-PROC tstlog2;
 
 // -------------------------------------------------------------------------------------------------
 ///
@@ -104,7 +96,7 @@ DCL-PROC do_level0_emergency;
 
   // Log a message at the emergency level.
   log_event_info_ds.ll_id = C_SDK4I_LL_EMG;
-  log_msg = 'This is an emergency level (0) message.';
+  log_msg = 'This is an emergency level (0) message from TSTLOG2.';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   ON-EXIT log_is_abend;
@@ -126,7 +118,7 @@ DCL-PROC do_level1_alert;
 
   // Log a message at the alert level.
   log_event_info_ds.ll_id = C_SDK4I_LL_ALT;
-  log_msg = 'This is an alert level (1) message.';
+  log_msg = 'This is an alert level (1) message from TSTLOG2.';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   ON-EXIT log_is_abend;
@@ -148,7 +140,7 @@ DCL-PROC do_level2_critical;
 
   // Log a message at the critical level.
   log_event_info_ds.ll_id = C_SDK4I_LL_CRT;
-  log_msg = 'This is a critical level (2) message.';
+  log_msg = 'This is a critical level (2) message from TSTLOG2.';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   ON-EXIT log_is_abend;
@@ -170,7 +162,7 @@ DCL-PROC do_level3_error;
   /COPY '../../qcpysrc/logvar2k.rpgleinc'
 
   // Log a message at the error level.
-  log_msg = 'This is an error level (3) message.';
+  log_msg = 'This is an error level (3) message from TSTLOG2.';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   ON-EXIT log_is_abend;
@@ -192,7 +184,7 @@ DCL-PROC do_level4_warning;
 
   // Log a message at the warning level.
   log_event_info_ds.ll_id = C_SDK4I_LL_WRN;
-  log_msg = 'This is a warning level (4) message.';
+  log_msg = 'This is a warning level (4) message from TSTLOG2.';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   ON-EXIT log_is_abend;
@@ -214,7 +206,7 @@ DCL-PROC do_level5_notice;
 
   // Log a message at the notice level.
   log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
-  log_msg = 'This is a notice level (5) message.';
+  log_msg = 'This is a notice level (5) message from TSTLOG2.';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   ON-EXIT log_is_abend;
@@ -236,7 +228,7 @@ DCL-PROC do_level6_informational;
 
   // Log a message at the informational level.
   log_event_info_ds.ll_id = C_SDK4I_LL_INF;
-  log_msg = 'This is an informational level (6) message.';
+  log_msg = 'This is an informational level (6) message from TSTLOG2.';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   ON-EXIT log_is_abend;
@@ -258,7 +250,7 @@ DCL-PROC do_level7_debug;
 
   // Log a message at the debug level.
   log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
-  log_msg = 'This is a debug level (7) message.';
+  log_msg = 'This is a debug level (7) message from TSTLOG2.';
   LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
 
   ON-EXIT log_is_abend;

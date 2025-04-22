@@ -133,6 +133,7 @@ DCL-PROC BLDSDK4I;
   
   // Compile any test/demonstration programs.
   CreateSQLRPGLEProgram(C_LIBPGM: 'TSTLOG': C_IFS_BASE + 'tst/qrpglesrc/tstlog.pgm.sqlrpgle');
+  CreateSQLRPGLEProgram(C_LIBPGM: 'TSTLOG2': C_IFS_BASE + 'tst/qrpglesrc/tstlog2.pgm.sqlrpgle');
 
 END-PROC BLDSDK4I;
 
