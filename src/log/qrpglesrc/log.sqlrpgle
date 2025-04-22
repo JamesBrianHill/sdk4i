@@ -464,9 +464,9 @@ DCL-PROC LOG_LogUse EXPORT;
       UNION
       SELECT priority, logmett, loguset FROM pty2
       UNION
-      SELECT priority, logmett, loguset FROM pty1
+      SELECT priority, logmett, loguset FROM pty3
       UNION
-      SELECT priority, logmett, loguset FROM pty1
+      SELECT priority, logmett, loguset FROM pty4
       UNION
       SELECT priority, logmett, loguset FROM pty5
       UNION
