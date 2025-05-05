@@ -32,28 +32,30 @@ CREATE OR REPLACE TABLE sdk4i_geo_address FOR SYSTEM NAME geoaddt (
   country_id
     CHAR(2) NOT NULL,
   state_code
-    VARCHAR(50) NOT NULL CCSID 1208,
+    VARCHAR(4) NOT NULL CCSID 1208,
   street1 -- 64 characters is a recommendation from the USPS.
     VARCHAR(64) NOT NULL CCSID 1208,
   street2 -- 64 characters is a recommendation from the USPS.
     VARCHAR(64) DEFAULT NULL CCSID 1208,
   city_name
-    VARCHAR(60) DEFAULT NULL CCSID 1208,
+    VARCHAR(75) DEFAULT NULL CCSID 1208,
   county_name
-    VARCHAR(50) DEFAULT NULL CCSID 1208,
+    VARCHAR(75) DEFAULT NULL CCSID 1208,
   zip
     VARCHAR(15) NOT NULL CCSID 1208,
   zip4 -- Only valid for US addresses.
     CHAR(4) DEFAULT NULL,
   lat
-    DECIMAL(8,6) DEFAULT NULL,
+    DECIMAL(9,7) DEFAULT NULL,
   lon
-    DECIMAL(9,6) DEFAULT NULL,
+    DECIMAL(10,7) DEFAULT NULL,
 
   -- Constraints.
   CONSTRAINT geoaddtpk PRIMARY KEY(id),
-  CONSTRAINT geoaddtf00 FOREIGN KEY(country_id, state_code, city_name) REFERENCES geocitt(country_id, state_code, name) ON DELETE CASCADE,
-  CONSTRAINT geoaddtf01 FOREIGN KEY(country_id, state_code, county_name) REFERENCES geocout(country_id, state_code, name) ON DELETE CASCADE
+  CONSTRAINT geoaddtf00 FOREIGN KEY(country_id) REFERENCES geocntt(id) ON DELETE CASCADE,
+  CONSTRAINT geoaddtf01 FOREIGN KEY(country_id, state_code) REFERENCES geostat(country_id, code) ON DELETE CASCADE,
+  CONSTRAINT geoaddtf02 FOREIGN KEY(country_id, state_code, city_name) REFERENCES geocitt(country_id, state_code, name) ON DELETE CASCADE,
+  CONSTRAINT geoaddtf03 FOREIGN KEY(country_id, state_code, county_name) REFERENCES geocout(country_id, state_code, name) ON DELETE CASCADE
 );
 
 -- *************************************************************************************************

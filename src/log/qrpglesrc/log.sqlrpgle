@@ -488,7 +488,7 @@ DCL-PROC LOG_LogUse EXPORT;
 
   // Log metrics if configured to do so.
   IF (do_logmett = 'Y');
-    IF (%PARMS > %PARMNUM(i_successful) AND %ADDR(i_successful) <> *NULL);
+    IF (%PARMS >= %PARMNUM(i_successful) AND %ADDR(i_successful) <> *NULL);
       temp_successful = i_successful;
       %NULLIND(temp_successful) = *OFF;
     ELSE;
@@ -517,7 +517,7 @@ DCL-PROC LOG_LogUse EXPORT;
       ENDIF;
     ENDIF;
 
-    IF (%PARMS > %PARMNUM(i_end_ts) AND %ADDR(i_end_ts) <> *NULL);
+    IF (%PARMS >= %PARMNUM(i_end_ts) AND %ADDR(i_end_ts) <> *NULL);
       temp_end_ts = i_end_ts;
     ENDIF;
 

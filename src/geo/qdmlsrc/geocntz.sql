@@ -1,11 +1,10 @@
 -- *************************************************************************************************
---   This source member will insert country information into GEOCNTT.
+--   This source member will insert data into GEOCNTT.
 --
 -- @author James Brian Hill
 -- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
 -- @license GNU General Public License version 3
 -- @link https://www.gnu.org/licenses/gpl-3.0.html
---
 -- *************************************************************************************************
 
 -- *************************************************************************************************

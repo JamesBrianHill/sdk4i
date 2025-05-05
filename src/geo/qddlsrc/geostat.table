@@ -31,17 +31,17 @@ CREATE OR REPLACE TABLE sdk4i_geo_state FOR SYSTEM NAME geostat (
   country_id
     CHAR(2) NOT NULL,
   code
-    VARCHAR(50) NOT NULL CCSID 1208,
+    VARCHAR(4) NOT NULL CCSID 1208,
   name -- Full name of the state.
-    VARCHAR(50) NOT NULL CCSID 1208,
+    VARCHAR(43) NOT NULL CCSID 1208,
   lat
-    DECIMAL(8,6) DEFAULT NULL,
+    DECIMAL(9,7) DEFAULT NULL,
   lon
-    DECIMAL(9,6) DEFAULT NULL,
+    DECIMAL(10,7) DEFAULT NULL,
 
   -- Constraints.
   CONSTRAINT geostatpk PRIMARY KEY(country_id, code),
-  CONSTRAINT geostatu00 UNIQUE(country_id, name)
+  CONSTRAINT geostatf00 FOREIGN KEY(country_id) REFERENCES geocntt(id) ON DELETE CASCADE
 );
 
 -- *************************************************************************************************

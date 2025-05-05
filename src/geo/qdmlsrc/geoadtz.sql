@@ -22,3 +22,4 @@
 INSERT INTO geoadtt (id, dsc) VALUES
 ('M', 'Mailing'),
 ('P', 'Physical');
+COMMIT;

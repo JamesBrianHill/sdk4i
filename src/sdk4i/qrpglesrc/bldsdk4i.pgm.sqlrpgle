@@ -56,7 +56,7 @@ DCL-C C_CLN_LIB 'SDK4IPGM';
 DCL-C C_LIBDTA 'SDK4IDTA';
 DCL-C C_LIBPGM 'SDK4IPGM';
 DCL-C C_LIBWEB 'SDK4IWEB';
-DCL-C C_IFS_BASE '/opt/sdk4i/yyyymmdd/';
+DCL-C C_IFS_BASE '/opt/sdk4i/src/';
 
 // -------------------------------------------------------------------------------------------------
 // Set SQL options before any executable code.
@@ -109,12 +109,17 @@ END-PROC AddBindingDirectoryEntry;
 // -------------------------------------------------------------------------------------------------
 DCL-PROC BLDSDK4I;
   DCL-PI BLDSDK4I;
+    i_populate_tables CHAR(1) OPTIONS(*NOPASS) CONST;
   END-PI;
 
   SetupLibraryList();
-  
+
   BuildTables();
-  
+
+  IF (%PARMS >= %PARMNUM(i_populate_tables) AND i_populate_tables = 'Y');
+    PopulateTables();
+  ENDIF;
+
   BuildBindingDirectories();
 
   BuildComponent('NIL': 'SDK4i - NIL - NULL handling procedures': 'SDK4I');
@@ -130,7 +135,7 @@ DCL-PROC BLDSDK4I;
   // Create a CL program to delete all SDK4i objects.
   CreateCLProgram(C_CLN_LIB: 'CLNSDK4I': C_IFS_BASE + 'sdk4i/qcllesrc/clnsdk4i.pgm.clp':
     'SDK4i - Delete all SDK4i objects');
-  
+
   // Compile any test/demonstration programs.
   CreateSQLRPGLEProgram(C_LIBPGM: 'TSTLOG': C_IFS_BASE + 'tst/qrpglesrc/tstlog.pgm.sqlrpgle');
   CreateSQLRPGLEProgram(C_LIBPGM: 'TSTLOG2': C_IFS_BASE + 'tst/qrpglesrc/tstlog2.pgm.sqlrpgle');
@@ -214,42 +219,29 @@ DCL-PROC BuildTables;
   // Create tables that have no dependencies other than the tables above.
   RunSQLStatement(C_IFS_BASE + 'alt/qddlsrc/altgrpt.table': C_LIBDTA);
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geoadtt.table': C_LIBDTA);
-  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geoadtz.sql'); // Populate address types.
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geocntt.table': C_LIBDTA);
-  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geocntz.sql'); // Populate countries.
   RunSQLStatement(C_IFS_BASE + 'lng/qddlsrc/lngt.table': C_LIBDTA);
-  RunSQLStatement(C_IFS_BASE + 'lng/qdmlsrc/lngz.sql'); // Populate languages.
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logmett.table': C_LIBDTA);
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logpurt.temporal': C_LIBDTA);
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logpurth.history': C_LIBDTA); // logpurt
-  RunSQLStatement(C_IFS_BASE + 'log/qdmlsrc/logpurz.sql'); // Populate log purge configurations.
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/loguset.table': C_LIBDTA);
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logwblt.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logwbrt.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_IFS_BASE + 'psn/qddlsrc/psnhont.table': C_LIBDTA);
-  RunSQLStatement(C_IFS_BASE + 'psn/qdmlsrc/psnhonz.sql'); // Populate honorifics.
   RunSQLStatement(C_IFS_BASE + 'psn/qddlsrc/psnsfxt.table': C_LIBDTA);
-  RunSQLStatement(C_IFS_BASE + 'psn/qdmlsrc/psnsfxz.sql'); // Populate suffixes.
   RunSQLStatement(C_IFS_BASE + 'rgx/qddlsrc/rgxt.table': C_LIBDTA);
-  RunSQLStatement(C_IFS_BASE + 'rgx/qdmlsrc/rgxz.sql'); // Populate regular expressions.
   RunSQLStatement(C_IFS_BASE + 'sec/qddlsrc/secactt.temporal': C_LIBDTA);
   RunSQLStatement(C_IFS_BASE + 'sec/qddlsrc/secactth.history': C_LIBDTA); // secactt
-  RunSQLStatement(C_IFS_BASE + 'sec/qdmlsrc/secactz.sql'); // Populate security actions.
   RunSQLStatement(C_IFS_BASE + 'sec/qddlsrc/secgrpt.temporal': C_LIBDTA);
   RunSQLStatement(C_IFS_BASE + 'sec/qddlsrc/secgrpth.history': C_LIBDTA); // secgrpt
   RunSQLStatement(C_IFS_BASE + 'tme/qddlsrc/tmetznt.table': C_LIBDTA);
-  RunSQLStatement(C_IFS_BASE + 'tme/qdmlsrc/tmetznz.sql'); // Populate timezones.
 
   // Create tables that have dependencies.
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geostat.table': C_LIBDTA); // geocntt
-  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geostaz_ca.sql'); // Populate states - Canada.
-  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geostaz_mx.sql'); // Populate states - Mexico.
-  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geostaz_us.sql'); // Populate states - United States.
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geocitt.table': C_LIBDTA); // geostat
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geocout.table': C_LIBDTA); // geostat
   RunSQLStatement(C_IFS_BASE + 'geo/qddlsrc/geoaddt.table': C_LIBDTA); // geocitt, geocout, geostat
   RunSQLStatement(C_IFS_BASE + 'msg/qddlsrc/msgt.table': C_LIBDTA); // lngt
-  RunSQLStatement(C_IFS_BASE + 'msg/qdmlsrc/msgz.sql'); // Populate messages.
   RunSQLStatement(C_IFS_BASE + 'sec/qddlsrc/secacgt.temporal': C_LIBDTA); // secactt, secgrpt
   RunSQLStatement(C_IFS_BASE + 'sec/qddlsrc/secacgth.history': C_LIBDTA); // secacgt
   RunSQLStatement(C_IFS_BASE + 'sec/qddlsrc/secusrt.temporal': C_LIBDTA); // lngt, psnhont, psnsfxt, tmetznt
@@ -262,12 +254,10 @@ DCL-PROC BuildTables;
   RunSQLStatement(C_IFS_BASE + 'alt/qddlsrc/altgrmt.table': C_LIBDTA); // altgrpt, secusrt
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logcfgt.temporal': C_LIBDTA); // altgrpt
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logcfgth.history': C_LIBDTA); // logcfgt
-  RunSQLStatement(C_IFS_BASE + 'log/qdmlsrc/logcfgz.sql'); // Populate log configurations.
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logcsit.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_IFS_BASE + 'log/qddlsrc/logextt.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_IFS_BASE + 'vld/qddlsrc/vldt.temporal': C_LIBDTA); // msgt, rgxt
   RunSQLStatement(C_IFS_BASE + 'vld/qddlsrc/vldth.history': C_LIBDTA); // vldt
-  RunSQLStatement(C_IFS_BASE + 'vld/qdmlsrc/vldz.sql'); // Populate validation rules.
 
   // After all temporal/history tables have been created, add versioning.
   RunSQLStatement(C_IFS_BASE + 'sdk4i/qddlsrc/temporal.sql');
@@ -304,8 +294,8 @@ DCL-PROC CreateBindingDirectory;
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
-  cmd = 'CRTBNDDIR BNDDIR('+ i_lib +'/'+ i_binding_directory +') AUT(*EXCLUDE) TEXT('''+
-    i_text +''')';
+  cmd = 'CRTBNDDIR BNDDIR('+ i_lib +'/'+ i_binding_directory +') AUT(*EXCLUDE) TEXT('+
+    C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +')';
   MONITOR;
     QCMDEXC(cmd: %LEN(cmd));
   ON-EXCP 'CPF2112'; // The binding directory already exists.
@@ -354,8 +344,8 @@ DCL-PROC CreateCLProgram;
     do_log_msg = i_log_msg;
   ENDIF;
 
-  cmd = 'CRTBNDCL PGM('+ i_lib +'/'+ i_pgm + ') SRCSTMF('''+ i_src + ''') ' +
-        'TEXT('''+ dsc + ''') ALWRTVSRC(*NO)';
+  cmd = 'CRTBNDCL PGM('+ i_lib +'/'+ i_pgm + ') SRCSTMF('+ C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +
+    ') TEXT('+ C_SDK4I_QUOTE + dsc + C_SDK4I_QUOTE +') ALWRTVSRC(*NO)';
   MONITOR;
     QCMDEXC(cmd: %LEN(cmd));
   ON-ERROR;
@@ -392,10 +382,12 @@ DCL-PROC CreateModule;
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
-  cmd = 'CRTSQLRPGI CLOSQLCSR(*ENDACTGRP) COMPILEOPT(''PPMINOUTLN(240) TGTCCSID(*JOB)'') ' +
+  cmd = 'CRTSQLRPGI CLOSQLCSR(*ENDACTGRP) COMPILEOPT('+ C_SDK4I_QUOTE +
+          'PPMINOUTLN(240) TGTCCSID(*JOB)' + C_SDK4I_QUOTE +') ' +
         'DATFMT(*ISO) DATSEP(/) DBGVIEW(*SOURCE) OBJ('+ i_lib +'/'+ i_module + ') ' +
         'OBJTYPE(*MODULE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL1) ' +
-        'SRCSTMF('''+ i_src +''') TGTRLS(*CURRENT) TIMFMT(*ISO) TIMSEP('':'')';
+        'SRCSTMF('+ C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +
+        ') TGTRLS(*CURRENT) TIMFMT(*ISO) TIMSEP('+ C_SDK4I_QUOTE +':'+ C_SDK4I_QUOTE +')';
   MONITOR;
     QCMDEXC(cmd: %LEN(cmd));
   ON-ERROR;
@@ -441,21 +433,25 @@ DCL-PROC CreateServiceProgram;
 
   /IF DEFINED(*V7R5M0)
   IF (allow_unresolved = 'N');
-    cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('''+ i_src +''') ' +
-          'OPTION(*EVENTF) DETAIL(*FULL) TEXT('''+ i_text +''')';
+    cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
+      C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') ' +
+      'OPTION(*EVENTF) DETAIL(*FULL) TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE + ')';
   ELSE;
-    cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('''+ i_src +''') ' +
-          'OPTION(*EVENTF *UNRSLVREF) DETAIL(*FULL) TEXT('''+ i_text +''')';
+    cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
+      C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') ' +
+      'OPTION(*EVENTF *UNRSLVREF) DETAIL(*FULL) TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +')';
   ENDIF;
 
   /ELSE
 
   IF (allow_unresolved = 'N');
-    cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('''+ i_src +''') ' +
-          'DETAIL(*FULL) TEXT('''+ i_text +''')';
+    cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
+      C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') ' +
+      'DETAIL(*FULL) TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +')';
   ELSE;
-    cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('''+ i_src +''') ' +
-          'OPTION(*UNRSLVREF) DETAIL(*FULL) TEXT('''+ i_text +''')';
+    cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
+      C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE') ' +
+      'OPTION(*UNRSLVREF) DETAIL(*FULL) TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +')';
   ENDIF;
   /ENDIF
 
@@ -493,10 +489,12 @@ DCL-PROC CreateSQLRPGLEProgram;
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
-  cmd = 'CRTSQLRPGI CLOSQLCSR(*ENDACTGRP) COMPILEOPT(''PPMINOUTLN(240) TGTCCSID(*JOB)'') ' +
+  cmd = 'CRTSQLRPGI CLOSQLCSR(*ENDACTGRP) COMPILEOPT('+ C_SDK4I_QUOTE +
+          'PPMINOUTLN(240) TGTCCSID(*JOB)'+ C_SDK4I_QUOTE +') ' +
         'DATFMT(*ISO) DATSEP(/) DBGVIEW(*SOURCE) OBJ('+ i_lib +'/'+ i_pgm + ') ' +
         'OBJTYPE(*PGM) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL1) ' +
-        'SRCSTMF('''+ i_src +''') TGTRLS(*CURRENT) TIMFMT(*ISO) TIMSEP('':'')';
+        'SRCSTMF('+ C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +
+        ') TGTRLS(*CURRENT) TIMFMT(*ISO) TIMSEP('+ C_SDK4I_QUOTE + ':' + C_SDK4I_QUOTE + ')';
   MONITOR;
     QCMDEXC(cmd: %LEN(cmd));
   ON-ERROR;
@@ -578,9 +576,10 @@ DCL-PROC LogMsg;
   s_stmt = 'INSERT INTO logmsgt(usrprf_cur, logfact_id, loglvlt_id, msg, sys, lib, pgm, prc, ' +
     'job_number, job_user, job_name, errcode, errline, errrout, errdata) ' +
     'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) WITH NC';
-  
+
   EXEC SQL PREPARE s_logmsg FROM :s_stmt;
   IF (SQLSTATE <> C_SDK4I_SQLSTATE_OK);
+    SND-MSG *INFO 'PREPARE failed: '+ s_stmt;
     RETURN;
   ENDIF;
 
@@ -588,10 +587,55 @@ DCL-PROC LogMsg;
     :psds_ds.lib, :psds_ds.pgm_prc, :prc, :psds_ds.job_number, :psds_ds.username, :psds_ds.job_name,
     :errcode, :psds_ds.line, :psds_ds.routine, :psds_ds.exc_data;
   IF (SQLSTATE <> C_SDK4I_SQLSTATE_OK);
+    SND-MSG *INFO 'EXECUTE failed: '+ s_stmt;
     RETURN;
   ENDIF;
 
+  ON-EXIT;
+    EXEC SQL COMMIT;
 END-PROC LogMsg;
+
+// -------------------------------------------------------------------------------------------------
+///
+// Populate tables.
+//
+// Run SQL scripts and use the CPYFRMIMPF command to populate data in the tables we just created.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PROC PopulateTables;
+  DCL-PI PopulateTables;
+  END-PI;
+
+  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+
+  // Note that the order in which some of these SQL scripts are executed is important due to
+  // foreign key relationships.
+  RunSQLStatement(C_IFS_BASE + 'lng/qdmlsrc/lngz.sql'); // Populate languages.
+  RunSQLStatement(C_IFS_BASE + 'log/qdmlsrc/logcfgz.sql'); // Populate log configurations.
+  RunSQLStatement(C_IFS_BASE + 'log/qdmlsrc/logpurz.sql'); // Populate log purge configurations.
+  RunSQLStatement(C_IFS_BASE + 'psn/qdmlsrc/psnhonz.sql'); // Populate honorifics.
+  RunSQLStatement(C_IFS_BASE + 'psn/qdmlsrc/psnsfxz.sql'); // Populate suffixes.
+  RunSQLStatement(C_IFS_BASE + 'rgx/qdmlsrc/rgxz.sql'); // Populate regular expressions.
+  RunSQLStatement(C_IFS_BASE + 'sec/qdmlsrc/secactz.sql'); // Populate security actions.
+  RunSQLStatement(C_IFS_BASE + 'tme/qdmlsrc/tmetznz.sql'); // Populate timezones.
+  RunSQLStatement(C_IFS_BASE + 'msg/qdmlsrc/msgz.sql'); // Populate messages.
+  RunSQLStatement(C_IFS_BASE + 'vld/qdmlsrc/vldz.sql'); // Populate validation rules.
+
+  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geoadtz.sql'); // Populate address types.
+  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geocntz.sql'); // Populate countries.
+  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geostaz.sql'); // Populate states.
+  RunSQLStatement(C_IFS_BASE + 'geo/qdmlsrc/geocouz.sql'); // Populate counties.
+  cmd = 'CPYFRMIMPF FROMSTMF('+ C_SDK4I_QUOTE + C_IFS_BASE +'geo/qdmlsrc/geocitt.csv' +
+    C_SDK4I_QUOTE +') TOFILE('+ C_LIBDTA + '/GEOCITT) MBROPT(*REPLACE) RCDDLM(*ALL)';
+  MONITOR;
+    QCMDEXC(cmd: %LEN(cmd));
+    LogMsg(*ON: cmd);
+  ON-ERROR;
+    LogMsg(*OFF: cmd);
+  ENDMON;
+
+  RETURN;
+END-PROC PopulateTables;
 
 // -------------------------------------------------------------------------------------------------
 ///
@@ -660,11 +704,13 @@ DCL-PROC RunSQLStatement;
   ENDIF;
 
   IF (%ADDR(i_lib) <> *NULL AND i_lib <> *BLANKS);
-    cmd = 'RUNSQLSTM DATFMT(*ISO) DATSEP(''-'') DECMPT(*PERIOD) DFTRDBCOL('+ i_lib + ') ' +
-      'MARGINS(240) SRCSTMF('''+ i_src + ''') TIMFMT(*ISO) TIMSEP('':'') COMMIT(*NONE)';
+    cmd = 'RUNSQLSTM DATFMT(*ISO) DATSEP('+ C_SDK4I_QUOTE +'-'+ C_SDK4I_QUOTE +
+    ') DECMPT(*PERIOD) DFTRDBCOL('+ i_lib +') MARGINS(240) SRCSTMF('+ C_SDK4I_QUOTE + i_src +
+    C_SDK4I_QUOTE +') TIMFMT(*ISO) TIMSEP('+ C_SDK4I_QUOTE +':'+ C_SDK4I_QUOTE +') COMMIT(*NONE)';
   ELSE;
-    cmd = 'RUNSQLSTM DATFMT(*ISO) DATSEP(''-'') DECMPT(*PERIOD) ' +
-      'MARGINS(240) SRCSTMF('''+ i_src +''') TIMFMT(*ISO) TIMSEP('':'') COMMIT(*NONE)';
+    cmd = 'RUNSQLSTM DATFMT(*ISO) DATSEP('+ C_SDK4I_QUOTE +'-'+ C_SDK4I_QUOTE +
+    ') DECMPT(*PERIOD) MARGINS(240) SRCSTMF('+ C_SDK4I_QUOTE + i_src +
+    C_SDK4I_QUOTE +') TIMFMT(*ISO) TIMSEP('+ C_SDK4I_QUOTE +':'+ C_SDK4I_QUOTE +') COMMIT(*NONE)';
   ENDIF;
   MONITOR;
     QCMDEXC(cmd: %LEN(cmd));
@@ -673,7 +719,8 @@ DCL-PROC RunSQLStatement;
   ENDMON;
 
   IF (do_log_msg);
-    LogMsg(is_successful: 'SQL statement: ' + i_src);
+    // LogMsg(is_successful: 'SQL statement: ' + i_src);
+    LogMsg(is_successful: cmd);
   ENDIF;
 
   RETURN is_successful;

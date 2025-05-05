@@ -30,17 +30,18 @@ CREATE OR REPLACE TABLE sdk4i_geo_county FOR SYSTEM NAME geocout (
   country_id
     CHAR(2) NOT NULL,
   state_code
-    VARCHAR(50) NOT NULL CCSID 1208,
+    VARCHAR(4) NOT NULL CCSID 1208,
   name -- Full name of the county.
-    VARCHAR(50) NOT NULL CCSID 1208,
+    VARCHAR(75) NOT NULL CCSID 1208,
   lat
-    DECIMAL(8,6) DEFAULT NULL,
+    DECIMAL(9,7) DEFAULT NULL,
   lon
-    DECIMAL(9,6) DEFAULT NULL,
+    DECIMAL(10,7) DEFAULT NULL,
 
   -- Constraints
   CONSTRAINT geocoutpk PRIMARY KEY(country_id, state_code, name),
-  CONSTRAINT geocoutf00 FOREIGN KEY(country_id, state_code) REFERENCES geostat(country_id, code) ON DELETE CASCADE
+  CONSTRAINT geocoutf00 FOREIGN KEY(country_id) REFERENCES geocntt(id) ON DELETE CASCADE,
+  CONSTRAINT geocoutf01 FOREIGN KEY(country_id, state_code) REFERENCES geostat(country_id, code) ON DELETE CASCADE
 );
 
 -- *************************************************************************************************
