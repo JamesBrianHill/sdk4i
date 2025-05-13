@@ -32,10 +32,10 @@ CREATE OR REPLACE TABLE sdk4i_lng_language FOR SYSTEM NAME lngt (
 
   -- Data columns.
   description FOR dsc -- Description
-    VARCHAR(20) NOT NULL,
+    VARCHAR(51) NOT NULL,
 
   description_native FOR dsc_native -- Description in native script.
-    VARCHAR(80) DEFAULT NULL CCSID 1208,
+    VARCHAR(70) DEFAULT NULL CCSID 1208,
 
     -- Constraints.
   CONSTRAINT lngtpk PRIMARY KEY(id),
