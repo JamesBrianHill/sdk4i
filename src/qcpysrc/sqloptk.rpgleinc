@@ -2,10 +2,18 @@
 // -------------------------------------------------------------------------------------------------
 // Set SQL options.
 //
+// DATFMT, DATSEP, DECMPT, TIMFMT, and TIMSEP are set to ISO standards.
+//
+// DLYPRP and SQLCA are set to optimize performance.
+//
+// EXTIND is set to provide all possible functionality to the programmer.
+//
 // @author James Brian Hill
 // @copyright Copyright (c) 2015 - 2025 by James Brian Hill
 // @license GNU General Public License version 3
 // @link https://www.gnu.org/licenses/gpl-3.0.html
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=statements-set-option
+// https://www.ibm.com/docs/en/i/7.6.0?topic=sql-indicator-variables-used-assign-special-values
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
@@ -27,5 +35,6 @@
 /DEFINE SQLOPTK
 
 // -------------------------------------------------------------------------------------------------
-EXEC SQL SET OPTION DATFMT=*ISO, DATSEP=*DASH, DECMPT=*PERIOD, TIMFMT=*ISO, TIMSEP=*COLON;
+EXEC SQL SET OPTION DATFMT=*ISO, DATSEP=*DASH, DECMPT=*PERIOD, DLYPRP=*YES, EXTIND=*YES, SQLCA=*NO,
+  TIMFMT=*ISO, TIMSEP=*COLON;
 // -------------------------------------------------------------------------------------------------
