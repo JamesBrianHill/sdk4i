@@ -71,18 +71,10 @@ CREATE OR REPLACE TABLE sdk4i_log_purge FOR SYSTEM NAME logpurt (
     DECIMAL(3,0) NOT NULL DEFAULT 30,
   purge_debug FOR purge_7 -- Debug level. Default to 10 days.
     DECIMAL(3,0) NOT NULL DEFAULT 10,
-  purge_logcsit FOR purge_csi -- Default to 10 days.
-    DECIMAL(3,0) NOT NULL DEFAULT 10,
-  purge_logextt FOR purge_ext -- Default to 10 days.
-    DECIMAL(3,0) NOT NULL DEFAULT 10,
   purge_logmett FOR purge_met -- Default to 2 years.
     DECIMAL(3,0) NOT NULL DEFAULT 731,
   purge_loguset FOR purge_use -- Default to 2 years.
     DECIMAL(3,0) NOT NULL DEFAULT 731,
-  purge_logwblt FOR purge_wbl -- Default to 1 month.
-    DECIMAL(3,0) NOT NULL DEFAULT 30,
-  purge_logwbrt FOR purge_wbr -- Default to 1 month.
-    DECIMAL(3,0) NOT NULL DEFAULT 30,
 
   -- Define the System Period.
   PERIOD SYSTEM_TIME(system_beg, system_end),
@@ -116,10 +108,6 @@ LABEL ON COLUMN logpurt (
   purge_5    IS 'Purge Notice (Days)',
   purge_6    IS 'Purge Informational (Days)',
   purge_7    IS 'Purge Debug (Days)',
-  purge_csi  IS 'Purge Call Stack Info (Days)',
-  purge_ext  IS 'Purge Extended Info (Days)',
   purge_met  IS 'Purge Metrics (Days)',
-  purge_use  IS 'Purge Usage (Days)',
-  purge_wbl  IS 'Purge Local Web Service Info (Days)',
-  purge_wbr  IS 'Purge Remote Web Service Info (Days)'
+  purge_use  IS 'Purge Usage (Days)'
 );

@@ -29,9 +29,13 @@ CTL-OPT TEXT('SDK4i - NIL - NULL handling utilities');
 // -------------------------------------------------------------------------------------------------
 // Bring in the copybooks we will use.
 //
+// LOGK - LOG constants, data structures, variables, and procedure definitions
 // NILK - NIL constants, data structures, variables, and procedure definitions
+// PSDSK - Definition of the Program Status Data Structure (PSDS).
 // -------------------------------------------------------------------------------------------------
+/COPY '../../qcpysrc/logk.rpgleinc'
 /COPY '../../qcpysrc/nilk.rpgleinc'
+/COPY '../../qcpysrc/psdsk.rpgleinc'
 
 // -------------------------------------------------------------------------------------------------
 // Pull in column definitions.
@@ -58,12 +62,22 @@ DCL-PROC NIL_IndToInt EXPORT;
     i_ind IND CONST;
   END-PI;
 
+  // Bring in variables associated with logging.
+  /COPY '../../qcpysrc/logvar2k.rpgleinc'
+
   IF (i_ind = *ON);
     RETURN C_SDK4I_NULL;
   ELSE;
     RETURN C_SDK4I_NOT_NULL;
   ENDIF;
 
+  ON-EXIT log_is_abend;
+    IF (log_is_abend);
+      log_is_successful = *OFF;
+      log_msg = 'Procedure ended abnormally.';
+      LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
+    ENDIF;
+    LOG_LogUse(psds_ds: log_proc: log_beg_ts: log_is_successful: log_is_abend: log_user_info_ds);
 END-PROC NIL_IndToInt;
 
 // -------------------------------------------------------------------------------------------------
@@ -83,12 +97,22 @@ DCL-PROC NIL_IntToInd EXPORT;
     i_int LIKE(tpl_sdk4i_nil_null_int) CONST;
   END-PI;
 
+  // Bring in variables associated with logging.
+  /COPY '../../qcpysrc/logvar2k.rpgleinc'
+
   IF (i_int < C_SDK4I_NOT_NULL);
     RETURN *ON;
   ELSE;
     RETURN *OFF;
   ENDIF;
 
+  ON-EXIT log_is_abend;
+    IF (log_is_abend);
+      log_is_successful = *OFF;
+      log_msg = 'Procedure ended abnormally.';
+      LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
+    ENDIF;
+    LOG_LogUse(psds_ds: log_proc: log_beg_ts: log_is_successful: log_is_abend: log_user_info_ds);
 END-PROC NIL_IntToInd;
 
 // -------------------------------------------------------------------------------------------------
@@ -117,6 +141,9 @@ DCL-PROC NIL_IntArrayToIndArray EXPORT;
 
   DCL-S x LIKE(i_int_array_size);
 
+  // Bring in variables associated with logging.
+  /COPY '../../qcpysrc/logvar2k.rpgleinc'
+
   o_indicator_array_ds.indicator_string = *ALL'0';
 
   FOR x = 1 TO %MIN(i_int_array_size: %SIZE(i_int_array_ds));
@@ -125,4 +152,11 @@ DCL-PROC NIL_IntArrayToIndArray EXPORT;
     ENDIF;
   ENDFOR;
 
+  ON-EXIT log_is_abend;
+    IF (log_is_abend);
+      log_is_successful = *OFF;
+      log_msg = 'Procedure ended abnormally.';
+      LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
+    ENDIF;
+    LOG_LogUse(psds_ds: log_proc: log_beg_ts: log_is_successful: log_is_abend: log_user_info_ds);
 END-PROC NIL_IntArrayToIndArray;

@@ -122,8 +122,10 @@ DCL-PROC BLDSDK4I;
 
   BuildBindingDirectories();
 
-  BuildComponent('NIL': 'SDK4i - NIL - NULL handling procedures': 'SDK4I');
+  BuildComponent('NIL': 'SDK4i - NIL - NULL handling procedures': 'SDK4I': 'Y');
   BuildComponent('LOG': 'SDK4i - LOG - Logging procedures': 'SDK4I');
+  RemoveBindingDirectoryEntry(C_LIBPGM: 'SDK4I': C_LIBPGM: 'NIL');
+  BuildComponent('NIL': 'SDK4i - NIL - NULL handling procedures': 'SDK4I');
   BuildComponent('ERR': 'SDK4i - ERR - Error handling procedures': 'SDK4I');
   BuildComponent('TXT': 'SDK4i - TXT - Text utilities': 'SDK4I');
   BuildComponent('COM': 'SDK4i - COM - Communication utilities': 'SDK4I');
@@ -135,6 +137,9 @@ DCL-PROC BLDSDK4I;
   // Create a CL program to delete all SDK4i objects.
   CreateCLProgram(C_CLN_LIB: 'CLNSDK4I': C_IFS_BASE + 'sdk4i/qcllesrc/clnsdk4i.pgm.clp':
     'SDK4i - Delete all SDK4i objects');
+  
+  // Compile a program to purge log information.
+  CreateSQLRPGLEProgram(C_LIBPGM: 'LOGPURP': C_IFS_BASE + 'log/qrpglesrc/logpurp.pgm.sqlrpgle');
 
   // Compile any test/demonstration programs.
   CreateSQLRPGLEProgram(C_LIBPGM: 'TSTLOG': C_IFS_BASE + 'tst/qrpglesrc/tstlog.pgm.sqlrpgle');
@@ -178,16 +183,22 @@ DCL-PROC BuildComponent;
     i_name VARCHAR(10) CONST;
     i_text VARCHAR(50) CONST;
     i_bnddir VARCHAR(10) CONST;
+    i_allow_unresolved CHAR(1) OPTIONS(*NOPASS) CONST;
   END-PI;
 
+  DCL-S allow_unresolved LIKE(i_allow_unresolved) INZ('N');
   DCL-S temp_module_path VARCHAR(1024);
   DCL-S temp_srvpgm_path VARCHAR(1024);
+
+  IF (%PARMS >= %PARMNUM(i_allow_unresolved));
+    allow_unresolved = i_allow_unresolved;
+  ENDIF;
 
   temp_module_path = C_IFS_BASE + %LOWER(i_name) + '/qrpglesrc/' + %LOWER(i_name) + '.sqlrpgle';
   temp_srvpgm_path = C_IFS_BASE + %LOWER(i_name) + '/qsrvsrc/' + %LOWER(i_name) + '.bnd';
 
   IF (CreateModule(C_LIBPGM: %UPPER(i_name): temp_module_path));
-    IF (CreateServiceProgram(C_LIBPGM: %UPPER(i_name): temp_srvpgm_path: i_text));
+    IF (CreateServiceProgram(C_LIBPGM: %UPPER(i_name): temp_srvpgm_path: i_text: allow_unresolved));
       AddBindingDirectoryEntry(C_LIBPGM: i_bnddir: C_LIBPGM: %UPPER(i_name));
     ENDIF;
     // We do not need the module any more so delete it.

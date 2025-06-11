@@ -105,6 +105,11 @@ DCL-PROC ERR_IsSQLError EXPORT;
   // You cannot retrieve ROW_COUNT or any of the other values listed in the
   // "statement-information-item" section of the documentation using the GET DIAGNOSTICS CONDITION 1
   // above. Instead, you must retrieve them as below.
+  // DB2_NUMBER_ROWS - number of rows associated with an OPEN or FETCH.
+  // DB2_ROW_COUNT_SECONDARY - 
+  //   For DELETE/MERGE: number of rows affected by referential constraints and triggers.
+  //   For INSERT/UPDATE: total number of rows affected by triggers.
+  // ROW_COUNT - total number of rows deleted, inserted, or updated. (not counting constraints/triggers)
   EXEC SQL GET DIAGNOSTICS
     :o_diagnostics_ds.db2_last_row = DB2_LAST_ROW,
     :o_diagnostics_ds.db2_number_rows = DB2_NUMBER_ROWS,
