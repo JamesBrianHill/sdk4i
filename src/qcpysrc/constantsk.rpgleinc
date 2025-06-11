@@ -29,6 +29,10 @@
 // Define global constants, template data structures and template variables.
 // -------------------------------------------------------------------------------------------------
 
+// Data mappers use this value when parsing JSON strings. The value of 100 is arbitrary but should
+// be large enough to represent the table with the highest number of columns that will be processed.
+DCL-C C_SDK4I_COLUMN_COUNT 100;
+
 // Db2 for i maximums.
 // DCL-C C_SDK4I_DB2_COLUMN_MAX_COUNT 8000;
 DCL-C C_SDK4I_DB2_COLUMN_NAME_MAX_LEN 128;

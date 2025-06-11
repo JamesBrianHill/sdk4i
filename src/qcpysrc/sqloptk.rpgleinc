@@ -2,7 +2,7 @@
 // -------------------------------------------------------------------------------------------------
 // Set SQL options.
 //
-// DATFMT, DATSEP, DECMPT, TIMFMT, and TIMSEP are set to ISO standards.
+// DATFMT and TIMSEP are set to ISO standards.
 //
 // DLYPRP and SQLCA are set to optimize performance.
 //
@@ -35,6 +35,5 @@
 /DEFINE SQLOPTK
 
 // -------------------------------------------------------------------------------------------------
-EXEC SQL SET OPTION DATFMT=*ISO, DATSEP=*DASH, DECMPT=*PERIOD, DLYPRP=*YES, EXTIND=*YES, SQLCA=*NO,
-  TIMFMT=*ISO, TIMSEP=*COLON;
+EXEC SQL SET OPTION DATFMT=*ISO, DECMPT=*PERIOD, DLYPRP=*YES, EXTIND=*YES, SQLCA=*NO, TIMFMT=*ISO;
 // -------------------------------------------------------------------------------------------------

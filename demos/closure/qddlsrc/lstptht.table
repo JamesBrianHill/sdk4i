@@ -1,0 +1,58 @@
+-- *************************************************************************************************
+--   This table will hold "list paths" that describe the hierarchical relationship between rows in a
+-- table.
+--
+--   This is being used to demonstrate how a Closure (sometimes called "bridge") table works. This
+-- is an efficient way of working with hierarchical data.
+--
+-- @copyright Copyright (c) 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_demo_list_path FOR SYSTEM NAME lstptht (
+  -- Primary key column.
+  anc_id -- Ancestor ID
+    DECIMAL(3,0) NOT NULL,
+  dsc_id -- Descendent ID
+    DECIMAL(3,0) NOT NULL,
+
+  -- Data columns.
+  lvl -- Number of levels between ancestor and descendent.
+    DECIMAL(3,0) NOT NULL,
+
+  -- Constraints.
+  CONSTRAINT lstpthtpk PRIMARY KEY(anc_id, dsc_id),
+  CONSTRAINT lstpthtf00 FOREIGN KEY(anc_id) REFERENCES lstt(id) ON DELETE CASCADE,
+  CONSTRAINT lstpthtf01 FOREIGN KEY(dsc_id) REFERENCES lstt(id) ON DELETE CASCADE
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE lstptht IS 'SDK4i - Demo - List Paths';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN lstptht (
+  anc_id IS 'Ancestor ID',
+  dsc_id IS 'Descendent ID',
+  lvl IS 'Level'
+);

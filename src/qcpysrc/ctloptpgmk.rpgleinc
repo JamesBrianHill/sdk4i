@@ -37,7 +37,7 @@ CTL-OPT DATFMT(*ISO);
 CTL-OPT DEBUG(*CONSTANTS: *DUMP: *INPUT: *RETVAL: *XMLSAX);
 CTL-OPT DECEDIT('0.'); // JSON needs a leading zero.
 CTL-OPT EXPROPTS(*USEDECEDIT); // Use the DECEDIT setting for built-in functions like %DEC.
-CTL-OPT EXTBININT(*YES);
+CTL-OPT EXTBININT(*YES); // Use external integer format instead of binary-decimal format.
 CTL-OPT OPTIMIZE(*NONE); // Change to *FULL for production code.
 CTL-OPT OPTION(*NODEBUGIO: *NOSHOWCPY: *NOUNREF: *SRCSTMT);
 CTL-OPT TIMFMT(*ISO);

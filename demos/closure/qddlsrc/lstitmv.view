@@ -1,0 +1,50 @@
+-- *************************************************************************************************
+--   This view will provide read-only access to the underlying table.
+--
+-- @copyright Copyright (c) 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the view.
+-- *************************************************************************************************
+CREATE OR REPLACE VIEW sdk4i_demo_list_item_v FOR SYSTEM NAME lstitmv AS
+  SELECT
+    lst_id,
+    itm_id,
+    quantity
+  FROM lstitmt
+
+  -- The CROSS JOIN below makes this view READ ONLY.
+  CROSS JOIN
+  TABLE (
+    VALUES(1)
+  );
+
+-- *************************************************************************************************
+-- Label the view.
+-- *************************************************************************************************
+LABEL ON TABLE lstitmv IS 'SDK4i - Demo - List Items';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN lstitmv (
+  lst_id IS 'List ID',
+  itm_id IS 'Item ID',
+  quantity IS 'Quantity'
+);

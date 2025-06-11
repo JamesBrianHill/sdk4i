@@ -29,7 +29,7 @@
 // -------------------------------------------------------------------------------------------------
 CTL-OPT ALWNULL(*USRCTL);
 CTL-OPT BNDDIR('SDK4I');
-CTL-OPT CCSID(*EXACT);
+CTL-OPT CCSID(*EXACT); // this can have unexpected side effects such as %LOOKUP('x': my_array:...) <-- constant and my_array may not be the same CCSID
 CTL-OPT CCSIDCVT(*EXCP: *LIST); // list all the source statements that have a CCSID conversion.
 CTL-OPT COPYRIGHT('Copyright (c) 2015 - 2025 by James Brian Hill');
 CTL-OPT DATFMT(*ISO);
@@ -37,7 +37,7 @@ CTL-OPT DATFMT(*ISO);
 CTL-OPT DEBUG(*CONSTANTS: *DUMP: *INPUT: *RETVAL: *XMLSAX);
 CTL-OPT DECEDIT('0.'); // JSON needs a leading zero.
 CTL-OPT EXPROPTS(*USEDECEDIT); // Use the DECEDIT setting for built-in functions like %DEC.
-CTL-OPT EXTBININT(*YES);
+CTL-OPT EXTBININT(*YES); // Use external integer format instead of binary-decimal format.
 CTL-OPT NOMAIN;
 CTL-OPT OPTIMIZE(*NONE); // Change to *FULL for production code.
 CTL-OPT OPTION(*NODEBUGIO: *NOSHOWCPY: *NOUNREF: *SRCSTMT);

@@ -96,7 +96,7 @@ DCL-S tpl_sdk4i_err_sqlstate_count PACKED(2:0) TEMPLATE;
 //   INTO :fname
 //   FROM my_table
 //   WHERE id = 1;
-// IF (ERR_IsSQLError(s_diagnostics_ds));
+// IF (ERR_IsSQLError(s_diagnostics_ds: *OMIT: *OMIT: log_user_info_ds));
 //   // Log error and handle gracefully.
 // ENDIF;
 //

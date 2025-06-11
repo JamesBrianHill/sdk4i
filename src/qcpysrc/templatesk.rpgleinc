@@ -45,6 +45,8 @@ DCL-S tpl_sdk4i_column_count PACKED(4: 0) TEMPLATE;
 DCL-S tpl_sdk4i_db2_column_name VARCHAR(C_SDK4I_DB2_COLUMN_NAME_MAX_LEN) TEMPLATE;
 DCL-S tpl_sdk4i_db2_table_name VARCHAR(C_SDK4I_DB2_TABLE_NAME_MAX_LEN) TEMPLATE;
 
+DCL-S tpl_sdk4i_http_status_code PACKED(3: 0) TEMPLATE;
+
 //   Most of the procedures we write have an indicator that gets turned *ON if the procedure ends
 // abnormally, and another indicator that gets turned *OFF if the procedure was unable to do
 // whatever it was supposed to do.

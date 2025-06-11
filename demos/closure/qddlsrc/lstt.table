@@ -1,0 +1,53 @@
+-- *************************************************************************************************
+--   This table will hold "lists" - shopping lists, to-do lists, whatever.
+--
+--   This is being used to demonstrate how a Closure (sometimes called "bridge") table works. This
+-- is an efficient way of working with hierarchical data.
+--
+-- @copyright Copyright (c) 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_demo_list FOR SYSTEM NAME lstt (
+  -- Primary key column.
+  id
+    DECIMAL(3,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  name
+    VARCHAR(50) NOT NULL,
+
+  -- Constraints.
+  CONSTRAINT lsttpk PRIMARY KEY(id),
+  CONSTRAINT lsttu00 UNIQUE(name)
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE lstt IS 'SDK4i - Demo - Lists';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN lstt (
+  id IS 'ID',
+  name IS 'Name'
+);

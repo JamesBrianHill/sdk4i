@@ -346,7 +346,7 @@ DCL-PROC SEC_CreateUUID EXPORT;
   ENDIF;
 
   // Convert the binary character string to hexadecimal so we can display it.
-  CharToHex(%ADDR(uuid_hex_string) : %ADDR(uuid_ds.uuid) : %LEN(uuid_hex_string));
+  CharToHex(%ADDR(uuid_hex_string): %ADDR(uuid_ds.uuid): %LEN(uuid_hex_string));
 
   // Now format our hexadecimal UUID for display.
   o_token = %SUBST(uuid_hex_string: 1: 8) + '-' +
