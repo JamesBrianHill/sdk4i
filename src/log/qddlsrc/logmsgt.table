@@ -1,0 +1,135 @@
+-- *************************************************************************************************
+--   This table will hold messages from our programs.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_message FOR SYSTEM NAME logmsgt (
+  -- Primary key column.
+  id
+    DECIMAL(15,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Data columns.
+  ts
+    TIMESTAMP NOT NULL FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP,
+
+  user_profile_current FOR usrprf_cur -- From PSDS position 358.
+    VARCHAR(10) DEFAULT NULL,
+
+  user_profile_session FOR usrprf_ses
+    VARCHAR(128) NOT NULL GENERATED ALWAYS AS (SESSION_USER),
+
+  external_user_id FOR user_id
+    DECIMAL(15,0) DEFAULT NULL, -- 1 quadrillion (999,999,999,999,999) users.
+
+  external_username FOR username
+    VARCHAR(128) DEFAULT NULL CCSID 1208, -- Allow UTF-8.
+
+  event_facility FOR logfact_id
+    DECIMAL(2,0) NOT NULL,
+
+  event_level FOR loglvlt_id
+    DECIMAL(1,0) NOT NULL,
+
+  event_message FOR msg
+    VARCHAR(8192) NOT NULL CCSID 1208, -- Allow UTF-8.
+
+  process_system FOR sys -- From PSDS position 396.
+    VARCHAR(8) DEFAULT NULL,
+
+  process_library FOR lib -- From PSDS position 81.
+    VARCHAR(10) DEFAULT NULL,
+
+  process_program FOR pgm -- From PSDS position 334.
+    VARCHAR(10) DEFAULT NULL,
+
+  process_module FOR mod -- From PSDS position 344.
+    VARCHAR(10) DEFAULT NULL,
+
+  process_procedure FOR prc -- From built-in function %PROC.
+    VARCHAR(128) DEFAULT NULL,
+
+  process_job_number FOR job_number -- From PSDS position 264.
+    DECIMAL(6,0) DEFAULT NULL,
+
+  process_job_user FOR job_user -- From PSDS position 254.
+    VARCHAR(10) DEFAULT NULL,
+
+  process_job_name FOR job_name -- From PSDS position 244.
+    VARCHAR(10) DEFAULT NULL,
+
+  cause_sqlstate FOR sstate -- From GET DIAGNOSTICS.
+    CHAR(5) DEFAULT NULL,
+
+  cause_sql_statement FOR sstmt -- The SQL statement that was executed.
+    VARCHAR(16384) DEFAULT NULL CCSID 1208,
+
+  cause_error_code FOR errcode -- From PSDS positions 40 and 43.
+    CHAR(7) DEFAULT NULL,
+
+  cause_error_line FOR errline -- From PSDS position 21.
+    CHAR(8) DEFAULT NULL,
+
+  cause_error_routine FOR errrout -- From PSDS position 29.
+    VARCHAR(8) DEFAULT NULL,
+
+  cause_error_data FOR errdata -- From PSDS position 91.
+    VARCHAR(80) DEFAULT NULL,
+
+  -- Constraints.
+  CONSTRAINT logmsgtpk PRIMARY KEY(id),
+  CONSTRAINT logmsgtf00 FOREIGN KEY(logfact_id) REFERENCES logfact(id) ON DELETE RESTRICT,
+  CONSTRAINT logmsgtf01 FOREIGN KEY(loglvlt_id) REFERENCES loglvlt(id) ON DELETE RESTRICT
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logmsgt IS 'SDK4i - LOG - Log Messages';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logmsgt (
+  id         IS 'ID',
+  ts         IS 'Timestamp',
+  usrprf_cur IS 'Current USRPRF',
+  usrprf_ses IS 'Session USRPRF',
+  user_id    IS 'External User ID',
+  username   IS 'External Username',
+  logfact_id IS 'Facility ID',
+  loglvlt_id IS 'Log Level',
+  msg        IS 'Message',
+  sys        IS 'System',
+  lib        IS 'Library',
+  pgm        IS 'Program',
+  mod        IS 'Module',
+  prc        IS 'Procedure',
+  job_number IS 'Job Number',
+  job_user   IS 'Job User',
+  job_name   IS 'Job Name',
+  sstate     IS 'SQLSTATE',
+  sstmt      IS 'SQL Statement',
+  errcode    IS 'Error Code',
+  errline    IS 'Error Line',
+  errrout    IS 'Error Routine',
+  errdata    IS 'Error Data'
+);

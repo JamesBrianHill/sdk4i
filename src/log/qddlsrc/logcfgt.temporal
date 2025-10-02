@@ -1,0 +1,180 @@
+-- *************************************************************************************************
+--   This table holds configuration settings for the LOG module.
+--
+-- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @license GNU General Public License version 3
+-- @link https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+--   This program is free software: you can redistribute it and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation, either version 3 of the
+-- License, or (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+-- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License along with this program. If
+-- not, see https://www.gnu.org/licenses/gpl-3.0.html
+-- *************************************************************************************************
+
+-- *************************************************************************************************
+-- Create the table.
+-- *************************************************************************************************
+CREATE OR REPLACE TABLE sdk4i_log_config FOR SYSTEM NAME logcfgt (
+  -- Primary key column.
+  id
+    DECIMAL(15,0) GENERATED ALWAYS AS IDENTITY (START WITH 1 CYCLE),
+
+  -- Audit columns.
+  audit_type FOR audtype
+    CHAR(1) NOT NULL GENERATED ALWAYS AS (DATA CHANGE OPERATION) IMPLICITLY HIDDEN,
+  audit_job FOR audjob
+    VARCHAR(28) NOT NULL GENERATED ALWAYS AS (QSYS2.JOB_NAME) IMPLICITLY HIDDEN,
+  audit_timestamp FOR audts
+    TIMESTAMP NOT NULL FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP IMPLICITLY HIDDEN,
+  audit_user FOR audusr
+    VARCHAR(128) NOT NULL GENERATED ALWAYS AS (SESSION_USER) IMPLICITLY HIDDEN,
+
+  -- System Period Temporal Table columns.
+  sys_start
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS ROW BEGIN IMPLICITLY HIDDEN,
+  sys_end
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS ROW END IMPLICITLY HIDDEN,
+  sys_ts
+    TIMESTAMP(12) NOT NULL GENERATED ALWAYS AS TRANSACTION START ID IMPLICITLY HIDDEN,
+
+  -- Data columns.
+  sys -- System name.
+    VARCHAR(8) DEFAULT NULL,
+
+  lib -- Library/schema name.
+    VARCHAR(10) DEFAULT NULL,
+
+  pgm -- Program name.
+    VARCHAR(10) DEFAULT NULL,
+
+  mod -- Module name.
+    VARCHAR(10) DEFAULT NULL,
+
+  prc -- Procedure name.
+    VARCHAR(128) DEFAULT NULL,
+
+  usr -- User profile.
+    VARCHAR(10) DEFAULT NULL,
+
+  logcsit -- 'Y' indicates we should write data to the LOGCSIT table.
+    CHAR(1) NOT NULL DEFAULT 'N',
+
+  logextt -- 'Y' indicates we should write data to the LOGEXTT table.
+    CHAR(1) NOT NULL DEFAULT 'N',
+
+  logmett -- 'Y' indicates we should write data to the LOGMETT table.
+    CHAR(1) NOT NULL DEFAULT 'N',
+
+  logmsgt_id -- The log level at which we should write data to the LOGMSGT table.
+    DECIMAL(1,0) DEFAULT NULL,
+
+  -- 'D' indicates we should keep count by day.
+  -- 'H' indicates we should keep count by hour.
+  -- 'I' indicates we should keep count by minute.
+  -- 'M' indicates we should keep count by month.
+  -- 'N' indicates we should not track usage at all.
+  -- 'W' indicates we should keep count by week.
+  -- 'Y' indicates we should keep count by year.
+  loguset
+    CHAR(1) NOT NULL DEFAULT 'D',
+
+  logwblt -- 'Y' indicates we should write data to the LOGWBLT table.
+    CHAR(1) NOT NULL DEFAULT 'N',
+
+  logwbrt -- 'Y' indicates we should write data to the LOGWBRT table.
+    CHAR(1) NOT NULL DEFAULT 'N',
+
+  --   The following columns define commands that can executed when a certain event level is logged.
+  -- These are expected to be SBMJOB commands but anything that can be executed by QCMDEXC will
+  -- work. QCMDEXC can execute a command up to 32702 characters long so you can increase the length
+  -- of any of these column if you wish.
+  --   If you embed the string SDK4I_ID in the command, it will be replaced with the newly created
+  -- ID in the LOGMSGT table. Here is an example:
+  -- SBMJOB JOB(MYJOB) JOBD(MYJOBD) CMD(CALL PGM(MYPGM) PARM('&SDK4I_ID'))
+  --   That would submit a job to call program MYPGM and send it the newly created ID from table
+  -- LOGMSGT.
+  emgcmd -- Command to execute when an EMERGENCY level (0) event is logged.
+    VARCHAR(1024) DEFAULT NULL,
+
+  altcmd -- Command to execute when an ALERT level event (1) is logged.
+    VARCHAR(1024) DEFAULT NULL,
+
+  crtcmd -- Command to execute when a CRITICAL level event (2) is logged.
+    VARCHAR(1024) DEFAULT NULL,
+
+  errcmd -- Command to execute when an ERROR level event (3) is logged.
+    VARCHAR(1024) DEFAULT NULL,
+
+  wrncmd -- Command to execute when a WARNING level event (4) is logged.
+    VARCHAR(1024) DEFAULT NULL,
+
+  notcmd -- Command to execute when a NOTICE level event (5) is logged.
+    VARCHAR(1024) DEFAULT NULL,
+
+  infcmd -- Command to execute when an INFORMATION level event (6) is logged.
+    VARCHAR(1024) DEFAULT NULL,
+
+  dbgcmd -- Command to execute when a DEBUG level event (7) is logged.
+    VARCHAR(1024) DEFAULT NULL,
+
+  -- Define the System Period.
+  PERIOD SYSTEM_TIME(sys_start, sys_end),
+
+  -- Constraints.
+  CONSTRAINT logcfgtpk PRIMARY KEY(id),
+  CONSTRAINT logcfgtc00 CHECK (logcsit = 'Y' OR logcsit = 'N'),
+  CONSTRAINT logcfgtc01 CHECK (logextt = 'Y' OR logextt = 'N'),
+  CONSTRAINT logcfgtc02 CHECK (logmett = 'Y' OR logmett = 'N'),
+  CONSTRAINT logcfgtc03 CHECK (loguset = 'D' OR loguset = 'H' OR loguset = 'I' OR loguset = 'M' OR loguset = 'N' OR loguset = 'W' OR loguset = 'Y'),
+  CONSTRAINT logcfgtc04 CHECK (logwblt = 'Y' OR logwblt = 'N'),
+  CONSTRAINT logcfgtc05 CHECK (logwbrt = 'Y' OR logwbrt = 'N'),
+  CONSTRAINT logcfgtf00 FOREIGN KEY(logmsgt_id) REFERENCES loglvlt(id) ON DELETE RESTRICT
+);
+
+-- *************************************************************************************************
+-- Label the table.
+-- *************************************************************************************************
+LABEL ON TABLE logcfgt IS 'SDK4i - LOG - Config';
+
+-- *************************************************************************************************
+-- Label the columns.
+-- *************************************************************************************************
+LABEL ON COLUMN logcfgt (
+  id         IS 'ID',
+  audtype    IS 'Audit Type',
+  audjob     IS 'Audit Job',
+  audts      IS 'Audit Timestamp',
+  audusr     IS 'Audit User',
+  sys_start  IS 'Period Start',
+  sys_end    IS 'Period End',
+  sys_ts     IS 'Transaction         Timestamp',
+  sys        IS 'System',
+  lib        IS 'Library',
+  pgm        IS 'Program',
+  mod        IS 'Module',
+  prc        IS 'Procedure',
+  usr        IS 'User Profile',
+  logcsit    IS 'Log to LOGCSIT?',
+  logextt    IS 'Log to LOGEXTT?',
+  logmett    IS 'Log to LOGMETT?',
+  logmsgt_id IS 'Log Msg >= Lvl',
+  loguset    IS 'Log to LOGUSET?',
+  logwblt    IS 'Log to LOGWBLT?',
+  logwbrt    IS 'Log to LOGWBRT?',
+  emgcmd     IS 'Emergency (0)       Level Event Handler',
+  altcmd     IS 'Alert (1)           Level Event Handler',
+  crtcmd     IS 'Critical (2)        Level Event Handler',
+  errcmd     IS 'Error (3)           Level Event Handler',
+  wrncmd     IS 'Warning (4)         Level Event Handler',
+  notcmd     IS 'Notify (5)          Level Event Handler',
+  infcmd     IS 'Informational (6)   Level Event Handler',
+  dbgcmd     IS 'Debug (7)           Level Event Handler'
+);

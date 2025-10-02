@@ -1,0 +1,112 @@
+/* -------------------------------------------------------------------------- */
+/* This program will delete all objects in the SDK4i-related libraries        */
+/* defined below.                                                             */
+/*                                                                            */
+/* @author James Brian Hill                                                   */
+/* @copyright Copyright (c) 2015 - 2025 by James Brian Hill                   */
+/* @license GNU General Public License version 3                              */
+/* @link https://www.gnu.org/licenses/gpl-3.0.html                            */
+/* -------------------------------------------------------------------------- */
+
+/*----------------------------------------------------------------------------*/
+/*   This program is free software: you can redistribute it and/or modify it  */
+/* under the terms of the GNU General Public License as published by the Free */
+/* Software Foundation, either version 3 of the License, or (at your option)  */
+/* any later version.                                                         */
+/*                                                                            */
+/*   This program is distributed in the hope that it will be useful, but      */
+/* WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY */
+/* or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License    */
+/* for more details.                                                          */
+/*                                                                            */
+/*   You should have received a copy of the GNU General Public License along  */
+/* with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html   */
+/*----------------------------------------------------------------------------*/
+PGM
+
+/* DCL VAR(&LIBDTA) TYPE(*CHAR) LEN(10) VALUE('HILLB') */
+/* DCL VAR(&LIBPGM) TYPE(*CHAR) LEN(10) VALUE('HILLB') */
+/* DCL VAR(&LIBWEB) TYPE(*CHAR) LEN(10) VALUE('HILLB') */
+
+DCL VAR(&LIBDTA) TYPE(*CHAR) LEN(10) VALUE('SDK4IDTA')
+DCL VAR(&LIBPGM) TYPE(*CHAR) LEN(10) VALUE('SDK4IPGM')
+DCL VAR(&LIBWEB) TYPE(*CHAR) LEN(10) VALUE('SDK4IWEB')
+
+MONMSG MSGID(CPF0000)
+
+/* Delete all of my spool files. */
+DLTSPLF FILE(*SELECT)
+
+/*----------------------------------------------------------------------------*/
+/* Delete all service programs, programs, modules, and binding directories.   */
+/*----------------------------------------------------------------------------*/
+DLTOBJ &LIBDTA/EVFEVENT *FILE
+DLTOBJ &LIBPGM/EVFEVENT *FILE
+DLTOBJ &LIBWEB/EVFEVENT *FILE
+
+/* Web service programs */
+/* DLTOBJ &LIBWEB/*ALL *PGM */
+
+/* Service programs and programs. Modules were cleaned up by the build pgm.   */
+DLTOBJ &LIBPGM/ERR *SRVPGM
+DLTOBJ &LIBPGM/LOG *SRVPGM
+DLTOBJ &LIBPGM/NIL *SRVPGM
+DLTOBJ &LIBPGM/TXT *SRVPGM
+DLTOBJ &LIBPGM/VLD *SRVPGM
+
+DLTOBJ &LIBPGM/LOGPURP *PGM
+
+/* Binding Directories */
+DLTOBJ &LIBPGM/SDK4I *BNDDIR
+
+/*----------------------------------------------------------------------------*/
+/* Delete all tables.                                                         */
+/*----------------------------------------------------------------------------*/
+
+/* First, drop the RESTRICT ON DROP protection on all tables. */
+/* This can be done in any order so tables are listed alphabetically. */
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGCFGT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGCFGTH DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGCSIT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGEXTT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGFACT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGLVLT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGMETT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGMSGT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGPURT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGPURTH DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGUSET DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGWBLT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LOGWBRT DROP RESTRICT ON DROP')
+
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/LNGT DROP RESTRICT ON DROP')
+
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/RGXT DROP RESTRICT ON DROP')
+
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/VLDMSGT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/VLDRULT DROP RESTRICT ON DROP')
+RUNSQL SQL('ALTER TABLE ' *CAT &LIBDTA *CAT '/VLDRULTH DROP RESTRICT ON DROP')
+
+RUNSQL SQL('COMMIT')
+
+/* Now drop tables in the reverse order they were created. */
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/VLDRULT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGEXTT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGCSIT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGCFGT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/VLDMSGT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/RGXT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGWBRT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGWBLT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGUSET')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGPURT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGMETT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LNGT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGMSGT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGLVLT')
+RUNSQL SQL('DROP TABLE ' *CAT &LIBDTA *CAT '/LOGFACT')
+RUNSQL SQL('COMMIT')
+
+/*----------------------------------------------------------------------------*/
+DLTOBJ &LIBPGM/CLNSDK4I *PGM
+ENDPGM
