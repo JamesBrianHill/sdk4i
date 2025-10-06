@@ -238,9 +238,9 @@ DCL-PROC VLD_IsValid EXPORT;
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvark.rpgleinc'
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
 
   // Set our variables to NULL.
   %NULLIND(temp_str) = *ON;

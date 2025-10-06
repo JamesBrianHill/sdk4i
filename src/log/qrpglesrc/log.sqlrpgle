@@ -86,9 +86,9 @@ DCL-PROC LOG_LogMsg EXPORT;
     i_logwbrt_ds LIKEDS(tpl_sdk4i_logwbrt_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
   END-PI;
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Define local variables.
-  // --------------------------------------------------
+  // -----------------------------------------------
   DCL-S emgcmd LIKE(tpl_sdk4i_logcfgt_ds.emgcmd);
   DCL-S altcmd LIKE(tpl_sdk4i_logcfgt_ds.altcmd);
   DCL-S crtcmd LIKE(tpl_sdk4i_logcfgt_ds.crtcmd);
@@ -104,7 +104,6 @@ DCL-PROC LOG_LogMsg EXPORT;
   DCL-S do_logwblt LIKE(tpl_sdk4i_logcfgt_ds.logwblt) INZ('N');
   DCL-S do_logwbrt LIKE(tpl_sdk4i_logcfgt_ds.logwbrt) INZ('N');
   DCL-S new_id LIKE(tpl_sdk4i_logmsgt_ds.id);
-  DCL-S rpl_string1 CHAR(9) CCSID(1208) INZ('&SDK4I_ID') CONST;
   DCL-S temp_new_id CHAR(15) CCSID(1208);
 
   // Variables associated with LOGMSGT.
@@ -140,9 +139,9 @@ DCL-PROC LOG_LogMsg EXPORT;
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvark.rpgleinc'
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Extract data from i_psds_ds
   job_name = i_psds_ds.job_name;
   job_number = i_psds_ds.job_number;
@@ -396,9 +395,9 @@ DCL-PROC LOG_LogUse EXPORT;
     i_end_ts LIKE(tpl_sdk4i_logmett_ds.end_ts) CONST OPTIONS(*NOPASS: *OMIT);
   END-PI;
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Define local variables.
-  // --------------------------------------------------
+  // -----------------------------------------------
   DCL-DS temp_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) INZ(*LIKEDS);
 
   DCL-S do_logmett LIKE(tpl_sdk4i_logcfgt_ds.logmett);
@@ -416,9 +415,9 @@ DCL-PROC LOG_LogUse EXPORT;
   DCL-S usrprf_cur LIKE(i_psds_ds.cur_usr);
   DCL-S usrprf_ses LIKE(i_psds_ds.username);
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Extract data from i_psds_ds
   job_name = i_psds_ds.job_name;
   job_number = i_psds_ds.job_number;
@@ -553,9 +552,9 @@ DCL-PROC SaveCallStackInfo;
     i_id LIKE(tpl_sdk4i_logmsgt_ds.id) CONST;
   END-PI;
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
   EXEC SQL
     INSERT INTO logcsit (logmsgt_id, thr_id, thr_type, ord_pos, entry_type, pgmlib, pgmnam, stmt_id,
       rqst_lvl, ctl_bnd, pgmaspnam, pgmaspnum, modlib, modnam, proc_name, actgrpnum, actgrpnam,
@@ -592,9 +591,9 @@ DCL-PROC SaveExtendedInfo;
     i_id LIKE(tpl_sdk4i_logmsgt_ds.id) CONST;
   END-PI;
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
   EXEC SQL
     INSERT INTO logextt (logmsgt_id, job_status, job_type, job_type_enhanced, job_subsystem, job_date,
       job_description_library, job_description, job_accounting_code, submitter_job_name,
@@ -664,9 +663,9 @@ DCL-PROC SaveLocalWebServiceInfo;
     i_logwblt_ds LIKEDS(tpl_sdk4i_logwblt_ds) OPTIONS(*NULLIND) CONST;
   END-PI;
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Define local variables.
-  // --------------------------------------------------
+  // -----------------------------------------------
   DCL-S srv_ipv4 LIKE(tpl_sdk4i_logwblt_ds.srv_ipv4);
   DCL-S srv_port LIKE(tpl_sdk4i_logwblt_ds.srv_port);
   DCL-S rmt_ipv4 LIKE(tpl_sdk4i_logwblt_ds.rmt_ipv4);
@@ -691,9 +690,9 @@ DCL-PROC SaveLocalWebServiceInfo;
   DCL-S script_null INT(5) INZ(C_SDK4I_NULL); // Assume NULL
   DCL-S libl_null INT(5) INZ(C_SDK4I_NULL); // Assume NULL
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
   srv_ipv4 = i_logwblt_ds.srv_ipv4;
   srv_ipv4_null = NIL_IndToInt(%NULLIND(i_logwblt_ds.srv_ipv4));
   srv_port = i_logwblt_ds.srv_port;
@@ -758,9 +757,9 @@ DCL-PROC SaveMetrics;
     i_end_ts LIKE(tpl_sdk4i_logmett_ds.end_ts) CONST OPTIONS(*NOPASS: *NULLIND: *OMIT);
   END-PI;
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Define local variables.
-  // --------------------------------------------------
+  // -----------------------------------------------
   DCL-S abend LIKE(tpl_sdk4i_logmett_ds.abend) INZ(*OFF);
   DCL-S end_ts LIKE(i_end_ts) INZ(*SYS);
   DCL-S job_name LIKE(tpl_sdk4i_logmett_ds.job_name);
@@ -781,9 +780,9 @@ DCL-PROC SaveMetrics;
   DCL-S user_id_null INT(5) INZ(C_SDK4I_NULL); // Assume NULL
   DCL-S username_null INT(5) INZ(C_SDK4I_NULL); // Assume NULL
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Extract data from i_psds_ds
   job_name = i_psds_ds.job_name;
   job_number = i_psds_ds.job_number;
@@ -867,9 +866,9 @@ DCL-PROC SaveRemoteWebServiceInfo;
     i_logwbrt_ds LIKEDS(tpl_sdk4i_logwbrt_ds) OPTIONS(*NULLIND) CONST;
   END-PI;
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Define local variables.
-  // --------------------------------------------------
+  // -----------------------------------------------
   DCL-S protocol LIKE(tpl_sdk4i_logwbrt_ds.protocol);
   DCL-S rmt_fqdn LIKE(tpl_sdk4i_logwbrt_ds.rmt_fqdn);
   DCL-S rmt_ipv4 LIKE(tpl_sdk4i_logwbrt_ds.rmt_ipv4);
@@ -896,9 +895,9 @@ DCL-PROC SaveRemoteWebServiceInfo;
   DCL-S rsp_head_null INT(5) INZ(C_SDK4I_NULL); // Assume NULL
   DCL-S rsp_body_null INT(5) INZ(C_SDK4I_NULL); // Assume NULL
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
   protocol = i_logwbrt_ds.protocol;
   protocol_null = NIL_IndToInt(%NULLIND(i_logwbrt_ds.protocol));
   rmt_fqdn = i_logwbrt_ds.rmt_fqdn;
@@ -972,9 +971,9 @@ DCL-PROC SaveUseInfo;
     i_loguset LIKE(tpl_sdk4i_logcfgt_ds.loguset) CONST;
   END-PI;
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Define local variables.
-  // --------------------------------------------------
+  // -----------------------------------------------
   DCL-S cur_day LIKE(tpl_sdk4i_loguset_ds.d) INZ(C_SDK4I_NULL);
   DCL-S cur_hour LIKE(tpl_sdk4i_loguset_ds.hr) INZ(C_SDK4I_NULL);
   DCL-S cur_minute LIKE(tpl_sdk4i_loguset_ds.mn) INZ(C_SDK4I_NULL);
@@ -987,9 +986,9 @@ DCL-PROC SaveUseInfo;
   DCL-S pgm LIKE(i_psds_ds.pgm_prc);
   DCL-S sys LIKE(i_psds_ds.sys);
 
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Main logic.
-  // --------------------------------------------------
+  // -----------------------------------------------
   // Extract data from i_psds_ds
   lib = i_psds_ds.lib;
   mod = i_psds_ds.mod_prc;

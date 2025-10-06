@@ -73,8 +73,8 @@ CREATE OR REPLACE TABLE sdk4i_log_config FOR SYSTEM NAME logcfgt (
   logmett -- 'Y' indicates we should write data to the LOGMETT table.
     CHAR(1) NOT NULL DEFAULT 'N',
 
-  logmsgt_id -- The log level at which we should write data to the LOGMSGT table.
-    DECIMAL(1,0) DEFAULT NULL,
+  logmsgt_id -- The log level at which we should write data to the LOGMSGT table. Default to ERROR.
+    DECIMAL(1,0) DEFAULT 3,
 
   -- 'D' indicates we should keep count by day.
   -- 'H' indicates we should keep count by hour.

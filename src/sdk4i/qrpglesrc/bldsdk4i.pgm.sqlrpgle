@@ -102,9 +102,16 @@ DCL-PROC AddBindingDirectoryEntry;
     i_obj LIKE(tpl_sdk4i_system_object_name) OPTIONS(*TRIM) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   cmd = 'ADDBNDDIRE BNDDIR('+ i_lib +'/'+ i_binding_directory +') OBJ(('+ i_obj_lib +'/'+
     i_obj +'))';
   MONITOR;
@@ -117,6 +124,14 @@ DCL-PROC AddBindingDirectoryEntry;
     i_obj_lib + '/' + i_obj);
 
   RETURN;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure AddBindingDirectoryEntry ended abnormally trying to execute: '+ cmd;
+    ENDIF;
 END-PROC AddBindingDirectoryEntry;
 
 // -------------------------------------------------------------------------------------------------
@@ -131,6 +146,14 @@ DCL-PROC BLDSDK4I;
     i_populate_tables CHAR(1) OPTIONS(*NOPASS) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
+
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   SetupLibraryList();
 
   BuildTables();
@@ -156,6 +179,14 @@ DCL-PROC BLDSDK4I;
   // Compile a program to purge log information.
   CreateSQLRPGLEProgram(C_LIBPGM: 'LOGPURP': C_SRC_ROOT + 'log/qrpglesrc/logpurp.pgm.sqlrpgle');
 
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    EXEC SQL COMMIT; // Make sure everything is committed and any record locks released.
+    IF (is_abend);
+      SND-MSG 'Procedure BLDSDK4I ended abnormally.';
+    ENDIF;
 END-PROC BLDSDK4I;
 
 // -------------------------------------------------------------------------------------------------
@@ -169,6 +200,15 @@ DCL-PROC BuildBindingDirectories;
   DCL-PI BuildBindingDirectories;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
+
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
+
   // Create binding directory for SDK4i.
   CreateBindingDirectory(C_LIBPGM: 'SDK4I': 'SDK4i Binding Directory');
 
@@ -179,6 +219,14 @@ DCL-PROC BuildBindingDirectories;
   // encoding/decoding.
   AddBindingDirectoryEntry(C_LIBPGM: 'SDK4I': 'QHTTPSVR': 'QZHBCGI');
   AddBindingDirectoryEntry(C_LIBPGM: 'SDK4I': 'QSYSDIR': 'QAXIS10HT');
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure BuildBindingDirectories ended abnormally.';
+    ENDIF;
 END-PROC BuildBindingDirectories;
 
 // -------------------------------------------------------------------------------------------------
@@ -197,10 +245,17 @@ DCL-PROC BuildComponent;
     i_allow_unresolved CHAR(1) OPTIONS(*NOPASS) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S allow_unresolved LIKE(i_allow_unresolved) INZ('N');
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S temp_module_path VARCHAR(1024);
   DCL-S temp_srvpgm_path VARCHAR(1024);
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   IF (%PARMS >= %PARMNUM(i_allow_unresolved));
     allow_unresolved = i_allow_unresolved;
   ENDIF;
@@ -215,6 +270,14 @@ DCL-PROC BuildComponent;
     // We do not need the module any more so delete it.
     DeleteObject(C_LIBPGM: i_name: '*MODULE');
   ENDIF;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure BuildComponent ended abnormally while building '+ i_name;
+    ENDIF;
 END-PROC BuildComponent;
 
 // -------------------------------------------------------------------------------------------------
@@ -234,10 +297,17 @@ DCL-PROC BuildSRVPGM;
     i_allow_unresolved CHAR(1) OPTIONS(*NOPASS) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S allow_unresolved LIKE(i_allow_unresolved) INZ('N');
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S temp_module_path VARCHAR(1024);
   DCL-S temp_srvpgm_path VARCHAR(1024);
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   IF (%PARMS >= %PARMNUM(i_allow_unresolved));
     allow_unresolved = i_allow_unresolved;
   ENDIF;
@@ -252,6 +322,14 @@ DCL-PROC BuildSRVPGM;
     // We do not need the module any more so delete it.
     DeleteObject(C_LIBPGM: i_name: '*MODULE');
   ENDIF;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure BuildSRVPGM ended abnormally while building '+ i_name;
+    ENDIF;
 END-PROC BuildSRVPGM;
 
 // -------------------------------------------------------------------------------------------------
@@ -268,22 +346,36 @@ DCL-PROC BuildTables;
   DCL-PI BuildTables;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
+
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   // Create the tables we need to start logging messages.
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logfact.table': C_LIBDTA: *OFF);
   RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logfacz.sql': *OMIT: *OFF);
+
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/loglvlt.table': C_LIBDTA: *OFF);
   RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/loglvlz.sql': *OMIT: *OFF);
+
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logmsgt.table': C_LIBDTA: *OFF); // logfact, loglvlt
 
   // Create tables that have no dependencies other than the tables above.
   RunSQLStatement(C_SRC_ROOT + 'lng/qddlsrc/lngt.table': C_LIBDTA);
+  RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngz.sql'); // Populate languages.
+
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logmett.table': C_LIBDTA);
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logpurt.temporal': C_LIBDTA);
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logpurth.history': C_LIBDTA); // logpurt
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/loguset.table': C_LIBDTA);
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logwblt.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logwbrt.table': C_LIBDTA); // logmsgt
+
   RunSQLStatement(C_SRC_ROOT + 'rgx/qddlsrc/rgxt.table': C_LIBDTA);
+  RunSQLStatement(C_SRC_ROOT + 'rgx/qdmlsrc/rgxz.sql'); // Populate regular expressions.
 
   // Create tables/views that have dependencies.
   RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldmsgt.table': C_LIBDTA); // lngt
@@ -293,6 +385,16 @@ DCL-PROC BuildTables;
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logextt.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldrult.temporal': C_LIBDTA); // vldmsgt, rgxt
   RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldrulth.history': C_LIBDTA); // vldrult
+
+  // Populate validation messages and rules.
+  RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngmsgz.sql'); // Add validation messages.
+  RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngrulz.sql'); // Add validation rules.
+
+  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logmsgz.sql'); // Add validation messages.
+  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logrulz.sql'); // Add validation rules.
+
+  RunSQLStatement(C_SRC_ROOT + 'vld/qdmlsrc/vldmsgz.sql'); // Add validation messages.
+  RunSQLStatement(C_SRC_ROOT + 'vld/qdmlsrc/vldrulz.sql'); // Add validation rules.
 
   // After all tables have been created, add versioning to temporal tables.
   RunSQLStatement(C_SRC_ROOT + 'sdk4i/qddlsrc/temporal.sql');
@@ -304,6 +406,14 @@ DCL-PROC BuildTables;
     RunSQLStatement(C_SRC_ROOT + 'sdk4i/qddlsrc/restrict.sql');
     /ENDIF
   ENDIF;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure BuildTables ended abnormally.';
+    ENDIF;
 END-PROC BuildTables;
 
 // -------------------------------------------------------------------------------------------------
@@ -326,9 +436,16 @@ DCL-PROC CreateBindingDirectory;
     i_text VARCHAR(50) OPTIONS(*TRIM) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   cmd = 'CRTBNDDIR BNDDIR('+ i_lib +'/'+ i_binding_directory +') AUT(*EXCLUDE) TEXT('+
     C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +')';
   MONITOR;
@@ -341,6 +458,14 @@ DCL-PROC CreateBindingDirectory;
   LogMsg(is_successful: 'create binding directory: '+ i_lib +'/'+ i_binding_directory);
 
   RETURN is_successful;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure CreateBindingDirectory ended abnormally executing: '+ cmd;
+    ENDIF;
 END-PROC CreateBindingDirectory;
 
 // -------------------------------------------------------------------------------------------------
@@ -366,11 +491,18 @@ DCL-PROC CreateCLProgram;
     i_log_msg IND OPTIONS(*NOPASS) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
   DCL-S do_log_msg LIKE(i_log_msg) INZ(*ON);
   DCL-S dsc LIKE(i_dsc) INZ('');
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   IF (%PARMS >= %PARMNUM(i_dsc) AND %ADDR(i_dsc) <> *NULL);
     dsc = i_dsc;
   ENDIF;
@@ -392,6 +524,14 @@ DCL-PROC CreateCLProgram;
   ENDIF;
 
   RETURN is_successful;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure CreateCLProgram ended abnormally executing command: '+ cmd;
+    ENDIF;
 END-PROC CreateCLProgram;
 
 // -------------------------------------------------------------------------------------------------
@@ -414,9 +554,16 @@ DCL-PROC CreateModule;
     i_src LIKE(tpl_sdk4i_ifs_source_path) OPTIONS(*TRIM) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   cmd = 'CRTSQLRPGI OBJ('+ i_lib +'/'+ i_module +') SRCSTMF('+ C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE+
         ') CLOSQLCSR(*ENDACTGRP) '+
         'COMPILEOPT('+ C_SDK4I_QUOTE +'PPMINOUTLN(240) TGTCCSID(*JOB)' + C_SDK4I_QUOTE +') ' +
@@ -431,6 +578,14 @@ DCL-PROC CreateModule;
   LogMsg(is_successful: 'create module: '+ i_lib +'/'+ i_module);
 
   RETURN is_successful;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure CreateModule ended abnormally executing command: '+ cmd;
+    ENDIF;
 END-PROC CreateModule;
 
 // -------------------------------------------------------------------------------------------------
@@ -457,10 +612,17 @@ DCL-PROC CreateServiceProgram;
     i_allow_unresolved CHAR(1) OPTIONS(*NOPASS) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S allow_unresolved LIKE(i_allow_unresolved) INZ('N');
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   IF (%PARMS >= %PARMNUM(i_allow_unresolved) AND %ADDR(i_allow_unresolved) <> *NULL);
     allow_unresolved = i_allow_unresolved;
   ENDIF;
@@ -498,6 +660,14 @@ DCL-PROC CreateServiceProgram;
   LogMsg(is_successful: 'create service program: '+ i_lib +'/'+ i_srvpgm);
 
   RETURN is_successful;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure CreateServiceProgram ended abnormally executing command: '+ cmd;
+    ENDIF;
 END-PROC CreateServiceProgram;
 
 // -------------------------------------------------------------------------------------------------
@@ -520,9 +690,16 @@ DCL-PROC CreateSQLRPGLEProgram;
     i_src LIKE(tpl_sdk4i_ifs_source_path) OPTIONS(*TRIM) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   cmd = 'CRTSQLRPGI OBJ('+ i_lib +'/'+ i_pgm +') SRCSTMF('+ C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE+
         ') CLOSQLCSR(*ENDACTGRP) '+
         'COMPILEOPT('+ C_SDK4I_QUOTE +'PPMINOUTLN(240) TGTCCSID(*JOB)' + C_SDK4I_QUOTE +') ' +
@@ -537,6 +714,14 @@ DCL-PROC CreateSQLRPGLEProgram;
   LogMsg(is_successful: 'create program: '+ i_lib +'/'+ i_pgm);
 
   RETURN is_successful;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure CreateSQLRPGLEProgram ended abnormally executing command: '+ cmd;
+    ENDIF;
 END-PROC CreateSQLRPGLEProgram;
 
 // -------------------------------------------------------------------------------------------------
@@ -559,9 +744,16 @@ DCL-PROC DeleteObject;
     i_type LIKE(tpl_sdk4i_system_object_name) OPTIONS(*TRIM) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   cmd = 'DLTOBJ OBJ('+ i_lib +'/'+ i_object +') OBJTYPE('+ i_type +')';
   MONITOR;
     IBM_ExecuteCommand(cmd: %LEN(cmd));
@@ -572,6 +764,14 @@ DCL-PROC DeleteObject;
   LogMsg(is_successful: 'delete object: '+ i_lib +'/'+ i_object + ' of type '+ i_type);
 
   RETURN is_successful;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure DeleteObject ended abnormally executing command: '+ cmd;
+    ENDIF;
 END-PROC DeleteObject;
 
 // -------------------------------------------------------------------------------------------------
@@ -590,13 +790,20 @@ DCL-PROC LogMsg;
     i_msg LIKE(tpl_sdk4i_ifs_source_path) OPTIONS(*TRIM) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S errcode VARCHAR(7);
   DCL-S fac_id PACKED(2:0) INZ(1); // Default to User-Level Messages.
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S ll_id PACKED(1:0) INZ(C_SDK4I_LL_INF); // Default to INFORMATIONAL.
   DCL-S msg VARCHAR(1024) CCSID(*UTF8);
   DCL-S prc VARCHAR(128);
   DCL-S s_stmt VARCHAR(1024) CCSID(*UTF8);
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   prc = %PROC();
   errcode = psds_ds.exc_type + psds_ds.exc_num;
 
@@ -624,8 +831,14 @@ DCL-PROC LogMsg;
     RETURN;
   ENDIF;
 
-  ON-EXIT;
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
     EXEC SQL COMMIT;
+    IF (is_abend);
+      SND-MSG 'Procedure LogMsg ended abnormally.';
+    ENDIF;
 END-PROC LogMsg;
 
 // -------------------------------------------------------------------------------------------------
@@ -639,23 +852,29 @@ DCL-PROC PopulateTables;
   DCL-PI PopulateTables;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
+
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   // Note that the order in which some of these SQL scripts are executed is important due to
   // foreign key relationships.
-  RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngz.sql'); // Populate languages.
-  RunSQLStatement(C_SRC_ROOT + 'rgx/qdmlsrc/rgxz.sql'); // Populate regular expressions.
-
-  RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngmsgz.sql'); // Add validation messages.
-  RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngrulz.sql'); // Add validation rules.
 
   RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logcfgz.sql'); // Populate log configurations.
-  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logmsgz.sql'); // Add validation messages.
-  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logrulz.sql'); // Add validation rules.
   RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logpurz.sql'); // Populate log purge configurations.
 
-  RunSQLStatement(C_SRC_ROOT + 'vld/qdmlsrc/vldmsgz.sql'); // Add validation messages.
-  RunSQLStatement(C_SRC_ROOT + 'vld/qdmlsrc/vldrulz.sql'); // Add validation rules.
-
   RETURN;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure PopulateTables ended abnormally.';
+    ENDIF;
 END-PROC PopulateTables;
 
 // -------------------------------------------------------------------------------------------------
@@ -678,9 +897,16 @@ DCL-PROC RemoveBindingDirectoryEntry;
     i_obj LIKE(tpl_sdk4i_system_object_name) OPTIONS(*TRIM) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   cmd = 'RMVBNDDIRE BNDDIR('+ i_lib +'/'+ i_binding_directory +') OBJ(('+ i_obj_lib +'/'+
     i_obj +'))';
   MONITOR;
@@ -693,6 +919,14 @@ DCL-PROC RemoveBindingDirectoryEntry;
     i_obj_lib + '/' + i_obj);
 
   RETURN;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure RemoveBindingDirectoryEntry ended abnormally executing command: '+ cmd;
+    ENDIF;
 END-PROC RemoveBindingDirectoryEntry;
 
 // -------------------------------------------------------------------------------------------------
@@ -716,10 +950,17 @@ DCL-PROC RunSQLStatement;
     i_log_msg IND OPTIONS(*NOPASS) CONST;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
   DCL-S do_log_msg IND INZ(*ON);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   IF (%PARMS >= %PARMNUM(i_log_msg) AND %ADDR(i_log_msg) <> *NULL);
     do_log_msg = i_log_msg;
   ENDIF;
@@ -742,6 +983,14 @@ DCL-PROC RunSQLStatement;
   ENDIF;
 
   RETURN is_successful;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure RunSQLStatement ended abnormally executing command: '+ cmd;
+    ENDIF;
 END-PROC RunSQLStatement;
 
 // -------------------------------------------------------------------------------------------------
@@ -759,9 +1008,16 @@ DCL-PROC SetupLibraryList;
   DCL-PI SetupLibraryList IND;
   END-PI;
 
+  // -----------------------------------------------
+  // Define local variables.
+  // -----------------------------------------------
   DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
+  // -----------------------------------------------
+  // Main logic.
+  // -----------------------------------------------
   cmd = 'ADDLIBLE '+ C_LIBPGM + ' *FIRST';
   MONITOR;
     IBM_ExecuteCommand(cmd: %LEN(cmd));
@@ -793,4 +1049,12 @@ DCL-PROC SetupLibraryList;
   psds_ds.exc_data = *BLANKS;
 
   RETURN is_successful;
+
+  // -----------------------------------------------
+  // Clean up.
+  // -----------------------------------------------
+  ON-EXIT is_abend;
+    IF (is_abend);
+      SND-MSG 'Procedure SetupLibraryList ended abnormally executing command: '+ cmd;
+    ENDIF;
 END-PROC SetupLibraryList;

@@ -123,4 +123,8 @@ result = TXT_Q('He said ''Hello''.');
 * **Optional Parameters:** Both `i_prefix` and `i_suffix` are optional and safe to omit.
 
 ---
-This documentation was generated using ChatGPT with a final edit done by a human.
+
+### Related Procedures
+
+* [`LOG_LogMsg`](../../log/qrpglesrc/LOG_LogMsg.md) — Write messages to the application log.
+* [`LOG_LogUse`](../../log/qrpglesrc/LOG_LogUse.md) — Record procedure usage and capture metrics.
