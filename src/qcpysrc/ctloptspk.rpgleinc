@@ -47,4 +47,5 @@ CTL-OPT EXTBININT(*YES); // Use external integer format instead of binary-decima
 CTL-OPT NOMAIN;
 CTL-OPT OPTIMIZE(*NONE); // Change to *FULL for production code.
 CTL-OPT OPTION(*NODEBUGIO: *NOSHOWCPY: *NOUNREF: *SRCSTMT);
+CTL-OPT STGMDL(*INHERIT);
 CTL-OPT TIMFMT(*ISO);

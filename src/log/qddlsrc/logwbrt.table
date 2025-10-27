@@ -1,6 +1,11 @@
 -- *************************************************************************************************
 --   This table will hold log information related to remotely hosted web services.
 --
+-- IMPORTANT: if you change the size of req_body or rsp_body, you MUST change the definition of
+-- those fields in:
+-- * The DCL-DS tpl_sdk4i_logwbrt_ds definition in src/qcpysrc/logk.rpgleinc.
+-- * The SaveRemoteWebServiceInfo procedure in src/log/qrpglesrc/log.sqlrpgle.
+--
 -- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
 -- @license GNU General Public License version 3
 -- @link https://www.gnu.org/licenses/gpl-3.0.html
@@ -31,41 +36,26 @@ CREATE OR REPLACE TABLE sdk4i_log_remote_web_svc FOR SYSTEM NAME logwbrt (
   logmsgt_id
     DECIMAL(15,0) NOT NULL,
 
-  protocol -- From environment variable SERVER_PROTOCOL.
-    VARCHAR(25) DEFAULT NULL,
-
-  rmt_fqdn
-    VARCHAR(255) DEFAULT NULL,
-
-  rmt_ipv4
-    VARCHAR(15) DEFAULT NULL,
-
-  rmt_port
-    DECIMAL(5,0) DEFAULT NULL,
-
-  rmt_api -- Length of 255 is arbitrary.
-    VARCHAR(255) DEFAULT NULL,
-
-  query -- Length of 2048 is arbitrary.
+  request_url FOR req_url -- Length of 2048 is arbitrary.
     VARCHAR(2048) DEFAULT NULL,
 
-  request_method FOR req_method
+  request_method FOR req_method -- GET, POST, etc.
     VARCHAR(7) DEFAULT NULL,
 
-  request_headers FOR req_head -- Length of 2048 is arbitrary.
+  request_options FOR req_opt -- Length of 2048 (2K) is arbitrary.
     VARCHAR(2048) DEFAULT NULL,
 
-  request_body FOR req_body -- Length of 4096 is arbitrary.
-    VARCHAR(4096) DEFAULT NULL,
+  request_body FOR req_body -- Length of 2097152 (2M) is arbitrary.
+    CLOB(2097152) DEFAULT NULL,
 
   response_code FOR rsp_code -- The HTTP Status Code returned from the web service.
     DECIMAL(3,0) DEFAULT NULL,
 
-  response_headers FOR rsp_head -- Length of 2048 is arbitrary.
+  response_headers FOR rsp_head -- Length of 2048 (2K) is arbitrary.
     VARCHAR(2048) DEFAULT NULL,
 
-  response_body FOR rsp_body -- Length of 16384 is arbitrary.
-    VARCHAR(16384) DEFAULT NULL,
+  response_body FOR rsp_body -- Length of 4194304 (4M) is arbitrary.
+    CLOB(4194304) DEFAULT NULL CCSID 1208,
 
   -- Constraints.
   CONSTRAINT logwbrtpk PRIMARY KEY(id),
@@ -83,14 +73,9 @@ LABEL ON TABLE logwbrt IS 'SDK4i - LOG - Log Remote Web Service Information';
 LABEL ON COLUMN logwbrt (
   id         IS 'ID',
   logmsgt_id IS 'LOGMSGT Key',
-  protocol   IS 'Protocol',
-  rmt_fqdn   IS 'Remote FQDN',
-  rmt_ipv4   IS 'Remote IPv4',
-  rmt_port   IS 'Remote Port',
-  rmt_api    IS 'Remote API',
-  query      IS 'Query String',
+  req_url    IS 'Request URL',
   req_method IS 'Request Method',
-  req_head   IS 'Request Headers',
+  req_opt    IS 'HTTP Options',
   req_body   IS 'Request Body',
   rsp_code   IS 'Response Code',
   rsp_head   IS 'Response Headers',

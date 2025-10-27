@@ -135,6 +135,11 @@ DCL-DS tpl_sdk4i_ibm_uuid_ds QUALIFIED TEMPLATE;
   uuid CHAR(16) INZ(*BLANKS);
 END-DS tpl_sdk4i_ibm_uuid_ds;
 
+// For use with the SYSTOOLS.BASE64ENCODE scalar function. (Now used with QSYS.BASE64_ENCODE)
+DCL-S tpl_sdk4i_ibm_base64_input VARCHAR(2732) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_ibm_base64_result VARCHAR(3643) TEMPLATE;
+
+// For use with the QCMDEXC command.
 DCL-S tpl_sdk4i_ibm_qcmdexc_cmd CHAR(32702) TEMPLATE;
 DCL-S tpl_sdk4i_ibm_qcmdexc_igc CHAR(3) TEMPLATE;
 DCL-S tpl_sdk4i_ibm_qcmdexc_len PACKED(15:5) TEMPLATE;
@@ -296,7 +301,7 @@ END-PR IBM_DisplayCmdLine;
 DCL-PR IBM_ExecuteCommand EXTPGM('QCMDEXC');
   i_command LIKE(tpl_sdk4i_ibm_qcmdexc_cmd) CONST; // 32702 is maximum size allowed.
   i_length LIKE(tpl_sdk4i_ibm_qcmdexc_len) CONST;
-  i_igc LIKE(tpl_sdk4i_ibm_qcmdexc_igc) CONST OPTIONS(*NOPASS);
+  i_igc LIKE(tpl_sdk4i_ibm_qcmdexc_igc) OPTIONS(*NOPASS) CONST;
 END-PR IBM_ExecuteCommand;
 
 // -----------------------------------------------
@@ -411,7 +416,7 @@ END-PR IBM_ReceivePgmMsg;
 //
 //   Remove one or more messages from call message queues (such as a joblog).
 //
-// @see https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/QMHRMVPM.html
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/QMHRMVPM.html
 ///
 // -----------------------------------------------
 DCL-PR IBM_RemovePgmMsg EXTPGM('QMHRMVPM');

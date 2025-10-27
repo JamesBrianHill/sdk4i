@@ -1,7 +1,7 @@
 **FREE
 // -------------------------------------------------------------------------------------------------
 //   This program will delete rows from various LOG-related tables based on settings found in the
-// LOGCFGT table. This program should be scheduled to run regularly.
+// LOGPURT table. This program should be scheduled to run regularly.
 //
 //   Because of ON DELETE clauses associated with foreign key definitions in LOGCSIT, LOGEXTT,
 // LOGWBLT, and LOGWBRT we will not need to purge those tables directly. Instead, the appropriate
@@ -159,7 +159,7 @@ DCL-PROC GetConfiguredDays;
     WHERE id = (SELECT host_name FROM qsys2.system_status_info)
     WITH NC;
 
-  IF (ERR_IsSQLError(s_diagnostics_ds: *OMIT: *OMIT: log_user_info_ds));
+  IF (ERR_IsSQLError(s_diagnostics_ds));
     log_is_successful = *OFF;
     log_msg = 'PREPARE failed. '+ s_diagnostics_ds.err_msg;
     log_cause_info_ds.sstate = s_diagnostics_ds.returned_sqlstate;
@@ -174,7 +174,6 @@ DCL-PROC GetConfiguredDays;
   // Clean up.
   // --------------------------------------------------
   ON-EXIT log_is_abend;
-    EXEC SQL CLOSE c_GetConfiguredDays; // Guarantee our SQL cursor gets closed.
     IF (log_is_abend);
       log_is_successful = *OFF;
       log_msg = 'Procedure ended abnormally.';

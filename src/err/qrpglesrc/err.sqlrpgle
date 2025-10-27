@@ -52,26 +52,35 @@ CTL-OPT TEXT('SDK4i - ERR - Error handling procedures');
 
 // -------------------------------------------------------------------------------------------------
 ///
-//   Determine if an unexpected SQL error has occurred.
+// Procedure: ERR_IsSQLError
 //
+// Overview:
 //   Using information from SQL DIAGNOSTICS we check the SQLSTATE for the most recently executed SQL
-// statement.
+// statement to determine if an unexpected SQL error has occurred.
 //
+//   To see examples of how you might code this in your own programs, look at these procedures in
+// the src/log/qrpglesrc/logpurp.pgm.sqlrpgle source file that is part of the SDK4i software:
+//
+// GetConfiguredDays for a basic example.
+//
+// PurgeLOGMETT for an example permitting an additional SQLSTATE value.
+//
+// Parameters:
 // @param REQUIRED. A data structure to hold information retrieved from GET DIAGNOSTICS.
-// @param OPTIONAL. The number of entries in the i_permit_sqlstates array.
+// @param OPTIONAL. The number of entries in the i_permit_sqlstates array. You should use the %ELEM
+// built-in function to get this number.
 // @param OPTIONAL. A list of SQLSTATEs that should be permitted or ignored.
 // @param OPTIONAL. Information about the user associated with this event.
-//
 // @return *ON if an SQLSTATE besides 00000 or one found in i_permit_sqlstates, *OFF otherwise.
 ///
 // -------------------------------------------------------------------------------------------------
 DCL-PROC ERR_IsSQLError EXPORT;
   DCL-PI ERR_IsSQLError IND;
-    o_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds) OPTIONS(*EXACT);
-    i_permit_sqlstates_count LIKE(tpl_sdk4i_err_sqlstate_count) OPTIONS(*NOPASS: *OMIT) CONST;
+    o_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds);
+    i_permit_sqlstates_count LIKE(tpl_sdk4i_ibm_elem) OPTIONS(*NOPASS: *OMIT) CONST;
     i_permit_sqlstates LIKE(tpl_sdk4i_err_sqlstate) DIM(C_SDK4I_ERR_PERMIT_SQLSTATE_COUNT)
     OPTIONS(*NOPASS: *OMIT) CONST;
-    i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT);
+    i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
   END-PI;
 
   // --------------------------------------------------

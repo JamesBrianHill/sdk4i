@@ -93,6 +93,10 @@ DCL-S tpl_sdk4i_ibm_binary2 INT(5) TEMPLATE; // 2-byte integer.
 DCL-S tpl_sdk4i_ibm_binary4 INT(10) TEMPLATE; // 4-byte integer.
 DCL-S tpl_sdk4i_ibm_binary8 INT(20) TEMPLATE; // 8-byte integer.
 
+DCL-S tpl_sdk4i_ibm_elem UNS(20) TEMPLATE; // %ELEM returns an UNS(20).
+DCL-S tpl_sdk4i_ibm_len INT(20) TEMPLATE; // %LEN returns an INT(20).
+DCL-S tpl_sdk4i_ibm_size UNS(20) TEMPLATE; // %SIZE returns an UNS(20).
+
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=type-unsigned-format
 DCL-S tpl_sdk4i_ibm_unsigned_binary1 UNS(3) TEMPLATE; // 1-byte unsigned int.
 DCL-S tpl_sdk4i_ibm_unsigned_binary2 UNS(5) TEMPLATE; // 2-byte unsigned int.

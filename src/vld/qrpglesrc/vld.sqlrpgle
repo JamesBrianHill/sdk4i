@@ -32,10 +32,12 @@ CTL-OPT TEXT('SDK4i - VLD - Validation procedures');
 // Bring in the copybooks we will use.
 //
 // ERRK - ERR constants, data structures, variables, and procedure definitions.
+// NILK - NIL constants, data structures, variables, and procedure definitions.
 // PSDSK - Definition of the Program Status Data Structure (PSDS).
 // VLDK - VLD constants, data structures, variables, and procedure definitions.
 // -------------------------------------------------------------------------------------------------
 /COPY '../../qcpysrc/errk.rpgleinc'
+/COPY '../../qcpysrc/nilk.rpgleinc'
 /COPY '../../qcpysrc/psdsk.rpgleinc'
 /COPY '../../qcpysrc/vldk.rpgleinc'
 
@@ -217,23 +219,23 @@ DCL-PROC VLD_IsValid EXPORT;
   DCL-S temp_time LIKE(i_time) NULLIND;
   DCL-S temp_ts LIKE(i_ts) NULLIND;
 
-  DCL-S fcol_null       INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S fhost_null      INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S flib_null       INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S ftbl_null       INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S max_date_null   INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S min_date_null   INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S max_len_null    INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S min_len_null    INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S max_num_null    INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S min_num_null    INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S max_time_null   INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S min_time_null   INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S max_ts_null     INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S min_ts_null     INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S vldmsgt_id_null INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S rgx_null        INT(5) INZ(C_SDK4I_NULL); // Default to NULL
-  DCL-S rgx_id_null     INT(5) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S fcol_null       LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S fhost_null      LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S flib_null       LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S ftbl_null       LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S max_date_null   LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S min_date_null   LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S max_len_null    LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S min_len_null    LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S max_num_null    LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S min_num_null    LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S max_time_null   LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S min_time_null   LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S max_ts_null     LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S min_ts_null     LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S vldmsgt_id_null LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S rgx_null        LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
+  DCL-S rgx_id_null     LIKE(tpl_sdk4i_nil_null_int) INZ(C_SDK4I_NULL); // Default to NULL
 
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvark.rpgleinc'
@@ -374,54 +376,54 @@ DCL-PROC VLD_IsValid EXPORT;
   ENDIF;
 
   // If we are validating a date and no maximum was provided, log a message and default to *HIVAL.
-  IF (%PARMS >= %PARMNUM(i_date) AND max_date_null = -1);
+  IF (%PARMS >= %PARMNUM(i_date) AND max_date_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
     log_msg = 'Max date is NULL, defaulting to *HIVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     max_date = *HIVAL;
   ENDIF;
 
   // If we are validating a date and no minimum was provided, log a message and default to *LOVAL.
-  IF (%PARMS >= %PARMNUM(i_date) AND min_date_null = -1);
+  IF (%PARMS >= %PARMNUM(i_date) AND min_date_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
     log_msg = 'Min date is NULL, defaulting to *LOVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     min_date = *LOVAL;
   ENDIF;
 
   // If we are validating a number and no maximum was provided, log a message and default to *HIVAL.
-  IF (%PARMS >= %PARMNUM(i_num) AND max_num_null = -1);
+  IF (%PARMS >= %PARMNUM(i_num) AND max_num_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
     log_msg = 'Max num is NULL, defaulting to *HIVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     max_num = *HIVAL;
   ENDIF;
 
   // If we are validating a number and no maximum was provided, log a message and default to *LOVAL.
-  IF (%PARMS >= %PARMNUM(i_num) AND min_num_null = -1);
+  IF (%PARMS >= %PARMNUM(i_num) AND min_num_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
     log_msg = 'Min num is NULL, defaulting to *LOVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     min_num = *LOVAL;
   ENDIF;
 
   // If we are validating a time and no maximum was provided, log a message and default to *HIVAL.
-  IF (%PARMS >= %PARMNUM(i_time) AND max_time_null = -1);
+  IF (%PARMS >= %PARMNUM(i_time) AND max_time_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
     log_msg = 'Max time is NULL, defaulting to *HIVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     max_time = *HIVAL;
   ENDIF;
 
   // If we are validating a time and no maximum was provided, log a message and default to *LOVAL.
-  IF (%PARMS >= %PARMNUM(i_time) AND min_time_null = -1);
+  IF (%PARMS >= %PARMNUM(i_time) AND min_time_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
     log_msg = 'Min time is NULL, defaulting to *LOVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     min_time = *LOVAL;
@@ -429,9 +431,9 @@ DCL-PROC VLD_IsValid EXPORT;
 
   // If we are validating a timestamp and no maximum was provided, log a message and default to
   // *HIVAL.
-  IF (%PARMS >= %PARMNUM(i_ts) AND max_ts_null = -1);
+  IF (%PARMS >= %PARMNUM(i_ts) AND max_ts_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
     log_msg = 'Max timestamp is NULL, defaulting to *HIVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     max_ts = *HIVAL;
@@ -439,9 +441,9 @@ DCL-PROC VLD_IsValid EXPORT;
 
   // If we are validating a timestamp and no maximum was provided, log a message and default to
   // *LOVAL.
-  IF (%PARMS >= %PARMNUM(i_ts) AND min_ts_null = -1);
+  IF (%PARMS >= %PARMNUM(i_ts) AND min_ts_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_DBG;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
     log_msg = 'Min timestamp is NULL, defaulting to *LOVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     min_ts = *LOVAL;

@@ -86,32 +86,33 @@ DCL-S tpl_sdk4i_err_sqlstate_count PACKED(2:0) TEMPLATE;
 
 // -------------------------------------------------------------------------------------------------
 ///
-//   Return SQL GET DIAGNOSTICS information if an unexpected SQLSTATE is encountered.
+// Procedure: ERR_IsSQLError
 //
-// Example:
-// DCL-DS s_diagnotics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds) INZ;
-// DCL-S fname LIKE(tpl_my_table_ds.fname) INZ;
-// EXEC SQL
-//   SELECT fname
-//   INTO :fname
-//   FROM my_table
-//   WHERE id = 1;
-// IF (ERR_IsSQLError(s_diagnostics_ds: *OMIT: *OMIT: log_user_info_ds));
-//   // Log error and handle gracefully.
-// ENDIF;
+// Overview:
+//   Using information from SQL DIAGNOSTICS we check the SQLSTATE for the most recently executed SQL
+// statement to determine if an unexpected SQL error has occurred.
 //
+//   To see examples of how you might code this in your own programs, look at these procedures in
+// the src/log/qrpglesrc/logpurp.pgm.sqlrpgle source file that is part of the SDK4i software:
+//
+// GetConfiguredDays for a basic example.
+//
+// PurgeLOGMETT for an example permitting an additional SQLSTATE value.
+//
+// Parameters:
 // @param REQUIRED. A data structure to hold information retrieved from GET DIAGNOSTICS.
-// @param OPTIONAL. The number of entries in the i_permit_sqlstates array.
+// @param OPTIONAL. The number of entries in the i_permit_sqlstates array. You should use the %ELEM
+// built-in function to get this number.
 // @param OPTIONAL. A list of SQLSTATEs that should be permitted or ignored.
 // @param OPTIONAL. Information about the user associated with this event.
-//
-// @return *ON if an SQLSTATE besides 00000 or one found in permit_sqlstates, *OFF otherwise.
+// @return *ON (indicating an error was found) if SQLSTATE <> '00000' and not found in
+// i_permit_sqlstates, otherwise *OFF is returned indicating no error was found.
 ///
 // -------------------------------------------------------------------------------------------------
 DCL-PR ERR_IsSQLError IND EXTPROC(*DCLCASE);
-  o_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds) OPTIONS(*EXACT);
-  i_permit_sqlstates_count LIKE(tpl_sdk4i_err_sqlstate_count) OPTIONS(*NOPASS: *OMIT) CONST;
+  o_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds);
+  i_permit_sqlstates_count LIKE(tpl_sdk4i_ibm_elem) OPTIONS(*NOPASS: *OMIT) CONST;
   i_permit_sqlstates LIKE(tpl_sdk4i_err_sqlstate) DIM(C_SDK4I_ERR_PERMIT_SQLSTATE_COUNT)
     OPTIONS(*NOPASS: *OMIT) CONST;
-  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
 END-PR ERR_IsSQLError;

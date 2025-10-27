@@ -171,6 +171,8 @@ DCL-PROC BLDSDK4I;
   BuildComponent('NIL': 'SDK4i - NIL - NULL handling utilities': 'SDK4I'); // Needs LOG
   BuildComponent('ERR': 'SDK4i - ERR - Error handling utilities': 'SDK4I'); // Needs LOG
   BuildComponent('TXT': 'SDK4i - TXT - Text utilities': 'SDK4I'); // Needs LOG
+  BuildComponent('VLD': 'SDK4i - VLD - Validation utilities': 'SDK4I'); // Needs LOG
+  BuildComponent('WEB': 'SDK4i - WEB - Web service utilities': 'SDK4I'); // Needs ERR, LOG, TXT
 
   // Create a CL program to delete all SDK4i objects.
   CreateCLProgram(C_LIBPGM: 'CLNSDK4I': C_SRC_ROOT + 'sdk4i/qcllesrc/clnsdk4i.pgm.clp':
@@ -385,6 +387,10 @@ DCL-PROC BuildTables;
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logextt.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldrult.temporal': C_LIBDTA); // vldmsgt, rgxt
   RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldrulth.history': C_LIBDTA); // vldrult
+
+  // Populate sane default values for logging and purging logs.
+  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logcfgz.sql'); // Populate log configurations.
+  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logpurz.sql'); // Populate log purge configurations.
 
   // Populate validation messages and rules.
   RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngmsgz.sql'); // Add validation messages.
@@ -631,11 +637,11 @@ DCL-PROC CreateServiceProgram;
   IF (allow_unresolved = 'N');
     cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
       C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +') '+
-      'DETAIL(*FULL) OPTION(*EVENTF)';
+      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*EVENTF)';
   ELSE;
     cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
       C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +') '+
-      'DETAIL(*FULL) OPTION(*EVENTF *UNRSLVREF)';
+      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*EVENTF *UNRSLVREF)';
   ENDIF;
 
   /ELSE
@@ -643,11 +649,11 @@ DCL-PROC CreateServiceProgram;
   IF (allow_unresolved = 'N');
     cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
       C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +') '+
-      'DETAIL(*FULL)';
+      'STGMDL(*INHERIT) DETAIL(*FULL)';
   ELSE;
     cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
       C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +') '+
-      'DETAIL(*FULL) OPTION(*UNRSLVREF)';
+      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*UNRSLVREF)';
   ENDIF;
   /ENDIF
 
@@ -811,6 +817,7 @@ DCL-PROC LogMsg;
     msg = 'Success: ' + i_msg;
   ELSE;
     msg = 'FAILURE: ' + i_msg;
+    ll_id = C_SDK4I_LL_ERR;
   ENDIF;
 
   s_stmt = 'INSERT INTO logmsgt(usrprf_cur, logfact_id, loglvlt_id, msg, sys, lib, pgm, prc, ' +
@@ -863,8 +870,8 @@ DCL-PROC PopulateTables;
   // Note that the order in which some of these SQL scripts are executed is important due to
   // foreign key relationships.
 
-  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logcfgz.sql'); // Populate log configurations.
-  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logpurz.sql'); // Populate log purge configurations.
+  // Add something like this:
+  // RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logcfgz.sql');
 
   RETURN;
 

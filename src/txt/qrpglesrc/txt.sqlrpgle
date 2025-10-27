@@ -51,7 +51,7 @@ CTL-OPT TEXT('SDK4i - TXT - Text utilities');
 
 // -------------------------------------------------------------------------------------------------
 ///
-//   Justify a string.
+// TXT_Justify
 //
 //   Justify a string to the left, center, or right. This procedure works with single-byte and
 // multi-byte characters.
@@ -78,7 +78,7 @@ DCL-PROC TXT_Justify EXPORT;
   // --------------------------------------------------
   // Define local variables.
   // --------------------------------------------------
-  DCL-S o_str LIKE(i_str);
+  DCL-S o_str LIKE(i_str) INZ(*BLANKS); // We need to initialize this to blanks.
   DCL-S start LIKE(i_char_count);
   DCL-S str_char_count LIKE(i_char_count);
 

@@ -1,0 +1,452 @@
+**FREE
+// -------------------------------------------------------------------------------------------------
+//   This copybook contains definitions for the WEB procedures which are used to interact with web
+// services.
+//
+// @author James Brian Hill
+// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @license GNU General Public License version 3
+// @link https://www.gnu.org/licenses/gpl-3.0.html
+//
+// Base versions of Apache by OS release:
+// IBM i 7.5 = Apache 2.4.53
+// IBM i 7.4 = Apache 2.4.34
+// IBM i 7.3 = Apache 2.4.20
+// IBM i 7.2 = Apache 2.4.20
+// IBM i 7.1 = Apache 2.2.11
+// @link https://www.ibm.com/support/pages/node/1170952
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+//   This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses/gpl-3.0.html.
+// -------------------------------------------------------------------------------------------------
+
+/IF DEFINED(WEBK)
+/EOF
+/ENDIF
+/DEFINE WEBK
+
+// -------------------------------------------------------------------------------------------------
+// Bring in the copybooks we will use.
+//
+// HTTPSTSK - HTTP statuses.
+// LOGK - LOG constants, data structures, variables, and procedure definitions.
+// -------------------------------------------------------------------------------------------------
+/COPY './httpstsk.rpgleinc'
+/COPY './logk.rpgleinc'
+
+// -------------------------------------------------------------------------------------------------
+// Pull in column definitions.
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures, and template variables.
+// -------------------------------------------------------------------------------------------------
+///
+// IBM i 7.5 has 125 environment variables defined. We double that number to cover future expansion.
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=information-environment-variables
+///
+DCL-C C_SDK4I_WEB_ENV_VAR_ARRAY_COUNT 250;
+
+///
+// By default, Apache limits the number of headers to 100.
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestfields
+///
+DCL-C C_SDK4I_WEB_HEADER_ARRAY_COUNT 100;
+
+///
+//   The longest environment name defined by IBM i 7.5 is 43 characters. We arbitrarily allow names
+// up to 255 characters - you can expand this if you want or need to.
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=information-environment-variables
+///
+DCL-S tpl_sdk4i_web_env_var_name VARCHAR(255) TEMPLATE; // Use native CCSID.
+DCL-S tpl_sdk4i_web_env_var_string_value VARCHAR(C_SDK4I_SIZE_8KI) CCSID(*UTF8) TEMPLATE;
+
+///
+//   The HTTP standard does not impose any limits to the length of header field names or values,
+// however Apache limits each header to a total of 8,190 bytes by default.
+//
+//   Looking at the header field names listed on Wikipedia, we find the longest standard field name
+// is 65 characters. We have arbitrarily chosen a length of 100 characters for header field names -
+// this should allow for all existing standard header field names and will probably work for future
+// header field names. We want to use as small a value as we can here because variables defined LIKE
+// the tpl_sdk4i_web_header_key template will be used in arrays.
+//
+//   We have chosen an arbitrary length limit of 4096 characters for header field values. Similarly
+// to our arbitrary header field name length, we feel 4096 characters is sufficient for today's
+// world and allows us to minimize the amount of memory needed by arrays using variables defined
+// LIKE tpl_sdk4i_web_header_val.
+//
+//   You can certainly adjust these length limits if needed. If you run into memory limit errors,
+// look at IBM documentation for the *TERASPACE storage model:
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=concepts-teraspace-single-level-storage
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=keywords-allocstgmdl-teraspace-snglvl
+//
+// Apache 2.4 limits HTTP Request headers to 8,190 bytes by default.
+// Apache 2.4 limits the number of HTTP Request headers to 100 by default.
+// Apache 2.4.53 and earlier does not limit the size of the HTTP Request body. Later versions set
+//   this limit to 1,073,741,824 bytes (1GiB). It is probably a good idea to set a limit in our
+//   configuration file for IBM i 7.5 and earlier:
+//   LimitRequestBody 1073741824
+//   This limit can be set at the server level, per-directory, per-file, or per-location.
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestfieldsize
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestbody
+// @link https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
+///
+DCL-S tpl_sdk4i_web_header_key VARCHAR(100) TEMPLATE; // Header data should use native CCSID. (75)
+DCL-S tpl_sdk4i_web_header_val VARCHAR(4096) TEMPLATE; // Header data should use native CCSID. (150)
+
+///
+// Define a template for HTTP Status Codes like 200, 404, etc.
+///
+DCL-S tpl_sdk4i_web_http_status_code PACKED(3: 0) TEMPLATE;
+
+///
+//   At the time this code was written, the only valid HTTP Request Methods are: CONNECT, DELETE,
+// GET, HEAD, OPTIONS, PATCH, POST, PUT, and TRACE.
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods
+///
+DCL-S tpl_sdk4i_web_method VARCHAR(7) TEMPLATE;
+
+///
+//   By default, Apache limits the entire HTTP Request Line (HTTP method, URI, and protocol version)
+// to 8,190 bytes.
+// @link https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestline
+///
+DCL-S tpl_sdk4i_web_uri VARCHAR(8190) TEMPLATE;
+
+///
+// We define a data structure to hold information about an environment variable.
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=information-environment-variables
+///
+DCL-DS tpl_sdk4i_web_env_var_ds QUALIFIED TEMPLATE;
+  name LIKE(tpl_sdk4i_web_env_var_name) INZ('');
+  type CHAR(1) INZ('S'); // I (for integer) or S (for string).
+  int_value LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
+  string_value LIKE(tpl_sdk4i_web_env_var_string_value) INZ('');
+END-DS tpl_sdk4i_web_env_var_ds;
+
+///
+// Headers are composed of a "key" and a "value".
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
+///
+DCL-DS tpl_sdk4i_web_http_header_ds QUALIFIED TEMPLATE;
+  key LIKE(tpl_sdk4i_web_header_key) INZ('');
+  val LIKE(tpl_sdk4i_web_header_val) INZ('');
+END-DS tpl_sdk4i_web_http_header_ds;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_CallWebService
+//
+//   This procedure will call a web service using the indicated method (GET, POST, etc.). The
+// i_http_options parameter is probably the string you got back from the BuildHTTPOptions
+// procedure.
+//
+//   By default we use the VERBOSE version of the HTTP functions: HTTP_GET_VERBOSE,
+// HTTP_POST_VERBOSE, etc. We allow you to pass a parameter (i_verbose) with a value of 'N' if you
+// do NOT want to use the VERBOSE version of the HTTP function. When using the non VERBOSE version
+// of the function, we do not receive any information back from the web service regarding success or
+// failure.
+//
+// Security note:
+//   The user calling this procedure must have at least *USE authority to the QSYS/QSQAXISC service
+// program.
+//
+// Parameters:
+// @param REQUIRED. Db2 for i currently supports the DELETE, GET, PATCH, POST, and PUT methods.
+// @param REQUIRED. The URL to be called.
+// @param REQUIRED. The length of data pointed to by i_http_options.
+// @param REQUIRED. A POINTER to an HTTP options JSON string with headers, SSL and proxy options, etc.
+// @param REQUIRED. A variable to hold the HTTP Response Status received from calling the API.
+// @param REQUIRED. The length of data pointed to by o_rsp_headers. When calling this procedure you
+// should send the maximum size io_rsp_headers will allow. When this procedure returns to the caller
+// this parameter will hold the length of data put into o_rsp_headers.
+// @param REQUIRED. A POINTER to a variable to hold response headers (a JSON string).
+// @param REQUIRED. The length of data pointed to by o_rsp_payload. When calling this procedure you
+// should send the maximum size io_rsp_payload will allow. When this procedure returns to the caller
+// this parameter will hold the length of data put into o_rsp_payload.
+// @param REQUIRED. A POINTER to a variable to hold a response payload (a JSON string). This can be
+// empty if the web service does not return a body in the response which is valid behavior for
+// certain methods.
+// @param OPTIONAL. The length of data pointed to by i_req_payload.
+// @param OPTIONAL. A POINTER to a variable containing the payload to be sent with the call to the
+// web service. Some methods do not require a request body which is why this parameter is optional.
+// @param OPTIONAL. A Y indicates we should use the BLOB version of the HTTP function. Defaults to N
+// @param OPTIONAL. A N indicates we should use the non-VERBOSE version of the requested HTTP
+// function. By default, we use the VERBOSE versions.
+// @return *ON if the procedure successfully called the web service, *OFF otherwise. NOTE that just
+// because we successfully called a web service does not mean the service itself was successful -
+// it might have returned an error code. Please check o_rsp_code to see the HTTP Status Code
+// returned by the web service to determine if it was successful or not.
+//
+// References:
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=programming-http-functions-overview
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=dlhviiratus-lob-host-variables-in-ile-rpg-applications-that-use-sql
+// @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_CallWebService IND EXTPROC(*DCLCASE);
+  i_method LIKE(tpl_sdk4i_web_method) CONST;
+  i_url LIKE(tpl_sdk4i_web_uri) CONST;
+  i_http_options_length LIKE(tpl_sdk4i_ibm_len) CONST;
+  i_http_options POINTER VALUE; // UTF-8
+  o_rsp_code LIKE(tpl_sdk4i_web_http_status_code);
+  io_rsp_headers_length LIKE(tpl_sdk4i_ibm_len);
+  o_rsp_headers POINTER VALUE; // UTF-8
+  io_rsp_payload_length LIKE(tpl_sdk4i_ibm_len);
+  o_rsp_payload POINTER VALUE; // UTF-8
+  i_req_payload_length LIKE(tpl_sdk4i_ibm_len) OPTIONS(*NOPASS) CONST;
+  i_req_payload POINTER VALUE OPTIONS(*NOPASS); // UTF-8
+  i_blob CHAR(1) OPTIONS(*NOPASS) CONST;
+  i_verbose CHAR(1) OPTIONS(*NOPASS) CONST;
+END-PR WEB_CallWebService;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_EncodeCredentials
+//
+//   To use some APIs, we need to provide credentials. Usually, the API is expecting a base 64
+// encoded UTF-8 string of the form username:password.
+//
+//   This procedure will generate that string so we can easily use it anywhere else in this
+// program.
+//
+// Note:
+//   Previously, this procedure used the base64encode scalar function in SYSTOOLS. IBM documentation
+// for that function states a maximum input of 2,732 characters. We know that for every 3 bytes of
+// data, we will need 4 base64 characters. Therefore, the maximum length string that could come out
+// of the base64encode function is 3,643 characters.
+//
+//   This procedure now uses the base64_encode scalar function in QSYS2. The documentation for that
+// function does not mention any size limitations, only that the result of the function is a CLOB.
+// Since CLOB variables can be up to 2 147 483 647 bytes in length, a theoretical maximum input
+// would be 1 610 612 735 characters.
+//
+//   We have chosen to continue using the template variables tpl_sdk4i_ibm_base64_input and
+// tpl_sdk4i_ibm_base64_result with their previously defined lengths (2732 and 3643 respectively)
+// since we feel they are more than adequate. If you would like to change those values, do so in the
+// src/qcpysrc/ibmapik.rpgleinc source file.
+//
+// Parameters:
+// @param REQUIRED. The username which will automatically be trimmed.
+// @param REQUIRED. The password which will automatically be trimmed.
+//
+// References:
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=overview-base64encode-scalar-function
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=functions-base64-encode
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=expressions-cast-specification
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_EncodeCredentials LIKE(tpl_sdk4i_ibm_base64_result) EXTPROC(*DCLCASE);
+  i_username LIKE(tpl_sdk4i_ibm_base64_input) OPTIONS(*TRIM) CONST;
+  i_password LIKE(tpl_sdk4i_ibm_base64_input) OPTIONS(*TRIM) CONST;
+END-PR WEB_EncodeCredentials;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_GetEnvVarInt
+//
+// Call the getenv procedure to get an HTTP Server environment variable of type int.
+//
+// @param REQUIRED. The environment variable to be retrieved.
+// @param OPTIONAL. If the environment variable is not set, this is the value the caller would like
+//   returned instead. If not passed, the default is 0.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return the value retrieved if available, else the default if provided, or 0 if no value was
+//   retrieved and no default value was provided.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_GetEnvVarInt LIKE(tpl_sdk4i_ibm_binary4) EXTPROC(*DCLCASE);
+  i_var LIKE(tpl_sdk4i_web_env_var_name) OPTIONS(*TRIM) CONST;
+  i_default LIKE(tpl_sdk4i_ibm_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_GetEnvVarInt;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_GetEnvVarStr
+//
+// Get an environment variable of type string.
+//
+// To get the Authorization header from Apache, the following line needs to be added to the config:
+// SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+//
+// @param REQUIRED. The environment variable to be retrieved.
+// @param OPTIONAL. If the environment variable is not set, this is the value the caller would like
+//   returned instead. If not passed, the default is *BLANKS.
+// @param OPTIONAL. Information about the user associated with this event.
+//
+// @return the value retrieved if available, else the default if provided, or blanks if no value
+//   was retrieved and no default value was provided.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_GetEnvVarStr LIKE(tpl_sdk4i_web_env_var_string_value) EXTPROC(*DCLCASE);
+  i_var LIKE(tpl_sdk4i_web_env_var_name) OPTIONS(*TRIM) CONST;
+  i_default LIKE(tpl_sdk4i_web_env_var_string_value) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR WEB_GetEnvVarStr;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_GetHTTPRequest
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_GetHTTPRequest IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTPResponse
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTPResponse IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP200Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP200Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP201Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP201Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP204Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP204Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP400Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP400Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP401Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP401Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP403Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP403Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP404Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP404Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP405Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP405Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP409Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP409Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP415Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP415Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP500Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP500Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;
+
+// -------------------------------------------------------------------------------------------------
+///
+// WEB_SendHTTP550Response
+//
+// Coming soon.
+///
+// -------------------------------------------------------------------------------------------------
+DCL-PR WEB_SendHTTP550Response IND EXTPROC(*DCLCASE);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+END-PR;

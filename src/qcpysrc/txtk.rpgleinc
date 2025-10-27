@@ -81,6 +81,9 @@ END-PR TXT_Justify;
 // suffix and the opening/closing single quotes.
 // Returns: '<optional prefix><the TRIMmed string given to this procedure><optional suffix>'
 //
+// Note: i_str is not marked as *EXACT because we often pass an empty string or a string with a
+// single space. The CCSID of the source member may not match the CCSID of the job when compiling.
+//
 // @param REQUIRED. This is the source string that needs quotes around it.
 // @param OPTIONAL. This is a prefix that will appear between a single quote and the beginning of
 //   the source string.
@@ -138,7 +141,8 @@ DCL-PR TXT_Tokenize LIKE(tpl_sdk4i_ibm_binary4) EXTPROC(*DCLCASE);
   i_delimiter_array_count LIKE(tpl_sdk4i_ibm_binary4) CONST;
   i_delimiter_array LIKE(tpl_sdk4i_txt_delimiter) DIM(C_SDK4I_TXT_DELIMITER_ARRAY_SIZE)
     OPTIONS(*VARSIZE) CONST;
-  o_token_array LIKE(tpl_sdk4i_txt_token) DIM(C_SDK4I_TXT_TOKEN_ARRAY_SIZE) OPTIONS(*VARSIZE);
+  o_token_array LIKE(tpl_sdk4i_txt_token) DIM(C_SDK4I_TXT_TOKEN_ARRAY_SIZE)
+    OPTIONS(*VARSIZE);
   i_return_delimiters IND OPTIONS(*NOPASS: *OMIT) CONST;
   i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
 END-PR;

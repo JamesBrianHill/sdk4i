@@ -47,14 +47,17 @@ CTL-OPT TEXT('SDK4i - NIL - NULL handling utilities');
 
 // -------------------------------------------------------------------------------------------------
 ///
+// Procedure: NIL_IndToInt
+//
+// Overview:
 // Convert an IND into an INT(5).
 //
-// This procedure can be used to convert an RPG indicator variable to a 2-byte integer usable with
-// embedded SQL.
+//   This procedure can be used to convert an RPG indicator variable to a 2-byte integer, INT(5),
+// usable with embedded SQL.
 //
+// Parameters:
 // @param REQUIRED. This is an IND value that indicates if a field is NULL or not.
 // @param OPTIONAL. Information about the user associated with this event.
-//
 // @return C_SDK4I_NULL (-1) if i_ind = *ON, C_SDK4I_NOT_NULL (0) otherwise.
 ///
 // -------------------------------------------------------------------------------------------------
@@ -93,27 +96,28 @@ END-PROC NIL_IndToInt;
 
 // -------------------------------------------------------------------------------------------------
 ///
-// Convert an array of INT(5) to an array of IND.
+// Procedure: NIL_IntArrayToIndArray
 //
+// Overview:
 //   When using embedded SQL and fetching multiple rows, we use an array of INT(5) values to capture
 // NULL values. This procedure will take an array of INT(5) values and return an array of IND values
 // that can be used easily by RPG.
 //
+// Parameters:
 // @param REQUIRED. The number of values that need to be processed.
 // @param REQUIRED. An array of INT(5) values, probably from a FETCH statement.
 // @param REQUIRED. An array of IND values, probably associated to a data structure like this:
 //   DCL-DS my_ds QUALIFIED NULLIND(my_ind_ds); Note that this procedure will set all of the
 //   indicators in this array to *OFF before doing any processing.
 // @param OPTIONAL. Information about the user associated with this event.
-//
 // @return *ON if the procedure was successful, *OFF otherwise.
 ///
 // -------------------------------------------------------------------------------------------------
 DCL-PROC NIL_IntArrayToIndArray EXPORT;
   DCL-PI NIL_IntArrayToIndArray;
     i_int_array_size LIKE(tpl_sdk4i_nil_array_count) CONST;
-    i_int_array_ds LIKEDS(tpl_sdk4i_nil_int_array_ds) OPTIONS(*EXACT) CONST;
-    o_indicator_array_ds LIKEDS(tpl_sdk4i_nil_indicator_array_ds) OPTIONS(*EXACT);
+    i_int_array_ds LIKEDS(tpl_sdk4i_nil_int_array_ds) CONST;
+    o_indicator_array_ds LIKEDS(tpl_sdk4i_nil_indicator_array_ds);
     i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
   END-PI;
 
@@ -150,14 +154,15 @@ END-PROC NIL_IntArrayToIndArray;
 
 // -------------------------------------------------------------------------------------------------
 ///
-// Convert an INT(5) into an IND.
+// Procedure: NIL_IntToInd
 //
-// This procedure can be used to convert a 2-byte integer used by embedded SQL to indicate NULL to
-// an RPG indicator variable.
+// Overview:
+//   This procedure can be used to convert a 2-byte integer, INT(5), used by embedded SQL to
+// indicate NULL to an RPG indicator variable.
 //
+// Parameters:
 // @param REQUIRED. This is an INT(5) value that indicates if a field is NULL or not.
 // @param OPTIONAL. Information about the user associated with this event.
-//
 // @return *ON if i_int < 0 (indicating NULL), *OFF otherwise.
 ///
 // -------------------------------------------------------------------------------------------------

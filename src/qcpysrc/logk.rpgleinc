@@ -41,11 +41,25 @@ DCL-DS tpl_sdk4i_logmsgt_ds EXTNAME('LOGMSGT') INZ(*EXTDFT) QUALIFIED TEMPLATE C
 DCL-DS tpl_sdk4i_loguset_ds EXTNAME('LOGUSET') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
 DCL-DS tpl_sdk4i_logwblt_ds EXTNAME('LOGWBLT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
 DCL-DS tpl_sdk4i_logwblt_null_ds EXTNAME('LOGWBLT': *NULL) QUALIFIED TEMPLATE END-DS;
-DCL-DS tpl_sdk4i_logwbrt_ds EXTNAME('LOGWBRT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
 
 // -------------------------------------------------------------------------------------------------
 // Define global constants, template data structures and template variables.
 // -------------------------------------------------------------------------------------------------
+//   This data structure must be defined this way instead of using the EXTNAME method above because
+// there are columns defined with the CLOB data type. RPG doesn't understand that so we define the
+// data structure here using VARCHAR data types for those columns.
+DCL-DS tpl_sdk4i_logwbrt_ds QUALIFIED TEMPLATE;
+  id PACKED(15:0) INZ(0);
+  logmsgt_id PACKED(15:0) INZ(0);
+  req_url VARCHAR(2048) INZ('') NULLIND;
+  req_method VARCHAR(7) INZ('') NULLIND;
+  req_opt VARCHAR(2048) INZ('') NULLIND;
+  req_body VARCHAR(2097152) INZ('') NULLIND; // Size must match LOGWBRT.req_body!
+  rsp_code PACKED(3:0) INZ(0) NULLIND;
+  rsp_head VARCHAR(2048) INZ('') NULLIND;
+  rsp_body VARCHAR(4194304) INZ('') NULLIND; // Size must match LOGWBRT.rsp_body!
+END-DS tpl_sdk4i_logwbrt_ds;
+
 //   This data structure holds information about the cause of an event.
 DCL-DS tpl_sdk4i_log_cause_info_ds QUALIFIED TEMPLATE;
   sstate LIKE(tpl_sdk4i_logmsgt_ds.sstate) INZ('') NULLIND;
@@ -67,8 +81,9 @@ END-DS tpl_sdk4i_log_user_info_ds;
 
 // -------------------------------------------------------------------------------------------------
 ///
-//   Log a message from an application.
+// Procedure: LOG_LogMsg
 //
+// Overview:
 //   Events of all kinds can happen in our applications. This procedure provides a way to log
 // messages and related information about those events.
 //
@@ -80,13 +95,17 @@ END-DS tpl_sdk4i_log_user_info_ds;
 // LOGWBLT - local (running on the IBM i) web service.
 // LOGWBRT - remote web service.
 //
+// Note: the i_psds_ds parameter cannot be *EXACT because of the nature of the data structure.
+//
+// Example Usage:
 //   In the examples below, it is assumed the SDK4i version of the PSDS was brought in somewhere by
 // the calling program:
 // /COPY '/path/to/sdk4i/qcpysrc/psdsk.rpgleinc'
 //
 //   It is also assumed the following copybook was brought into the calling procedure - this
-// copybook provides the log_cause_ds, log_event_ds, log_user_ds, log_proc, and other variables:
-// /COPY '/path/to/sdk4i/qcpysrc/logvark.rpgleinc'
+// copybook provides the log_cause_ds, log_event_ds, log_user_ds, log_proc, log_msg and other
+// variables:
+// /COPY '/path/to/sdk4i/qcpysrc/logvar2k.rpgleinc'
 //
 // Common example:
 // LOG_LogMsg(psds_ds: log_proc: 'Something happened.');
@@ -101,6 +120,7 @@ END-DS tpl_sdk4i_log_user_info_ds;
 // LOG_LogMsg(psds_ds: log_proc: 'Apocalypse!': *OMIT: log_event_ds);
 // LOG_LogMsg(psds_ds: log_proc: 'Apocalypse!': log_cause_ds: log_event_ds);
 //
+// Parameters:
 // @param REQUIRED. A populated tpl_sdk4i_psds_ds data structure.
 // @param REQUIRED. The name of the calling procedure.
 // @param REQUIRED. The message to be logged.
@@ -124,8 +144,9 @@ END-PR LOG_LogMsg;
 
 // -------------------------------------------------------------------------------------------------
 ///
-//   Log the use of a program or procedure.
+// Procedure: LOG_LogUse
 //
+// Overview:
 //   We need to know which programs and procedures are being used. It is also helpful to know how
 // often they are being used, if they are failing, how long they take to execute, etc.
 //
@@ -134,6 +155,9 @@ END-PR LOG_LogMsg;
 // LOGMETT - metrics such as beg/end timestamps, success, abnormal end, etc.
 // LOGUSET - a simple count of how many times a program/procedure/etc. is called every time period.
 //
+// Note: the i_psds_ds parameter cannot be *EXACT because of the nature of the data structure.
+//
+// Parameters:
 // @param REQUIRED. A populated tpl_sdk4i_psds_ds data structure.
 // @param REQUIRED. The name of the calling procedure.
 // @param REQUIRED. A timestamp for when this process began.
@@ -145,7 +169,7 @@ END-PR LOG_LogMsg;
 // -------------------------------------------------------------------------------------------------
 DCL-PR LOG_LogUse EXTPROC(*DCLCASE);
   i_psds_ds LIKEDS(tpl_sdk4i_psds_ds) CONST;
-  i_prc LIKE(tpl_sdk4i_logmett_ds.prc) CONST;
+  i_prc LIKE(tpl_sdk4i_logmsgt_ds.prc) CONST;
   i_beg_ts LIKE(tpl_sdk4i_logmett_ds.beg_ts) CONST;
   i_successful LIKE(tpl_sdk4i_is_successful) OPTIONS(*NOPASS: *OMIT) CONST;
   i_abend LIKE(tpl_sdk4i_is_abend) OPTIONS(*NOPASS: *OMIT) CONST;
