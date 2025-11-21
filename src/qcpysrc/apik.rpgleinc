@@ -23,10 +23,10 @@
 // not, see https://www.gnu.org/licenses/gpl-3.0.html
 // -------------------------------------------------------------------------------------------------
 
-/IF DEFINED(IBMAPIK)
+/IF DEFINED(APIK)
 /EOF
 /ENDIF
-/DEFINE IBMAPIK
+/DEFINE APIK
 
 // -------------------------------------------------------------------------------------------------
 // Bring in copybooks.
@@ -47,17 +47,17 @@
 // want it to be up to system limits.
 //
 // Example usage:
-// DCL-DS ckpr0100 LIKEDS(tpl_sdk4i_ibm_ckpr0100_ds) INZ(*LIKEDS);
+// DCL-DS ckpr0100 LIKEDS(tpl_sdk4i_ckpr0100_ds) INZ(*LIKEDS);
 //
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/qsychkpr.html
 ///
 // -----------------------------------------------
-DCL-DS tpl_sdk4i_ibm_ckpr0100_ds QUALIFIED TEMPLATE;
-  offset_to_password LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
-  length_of_password LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
-  ccsid_of_password LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
+DCL-DS tpl_sdk4i_ckpr0100_ds QUALIFIED TEMPLATE;
+  offset_to_password LIKE(tpl_sdk4i_binary4) INZ(0);
+  length_of_password LIKE(tpl_sdk4i_binary4) INZ(0);
+  ccsid_of_password LIKE(tpl_sdk4i_binary4) INZ(0);
   password CHAR(256) INZ(*BLANKS);
-END-DS tpl_sdk4i_ibm_ckpr0100_ds;
+END-DS tpl_sdk4i_ckpr0100_ds;
 
 // -----------------------------------------------
 ///
@@ -70,18 +70,18 @@ END-DS tpl_sdk4i_ibm_ckpr0100_ds;
 // exception_data is returned by the called API.
 //
 // Example usage:
-// DCL-DS error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds) INZ(*LIKEDS);
+// DCL-DS error_ds LIKEDS(tpl_sdk4i_errc0100_ds) INZ(*LIKEDS);
 //
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=parameter-error-code-format
 ///
 // -----------------------------------------------
-DCL-DS tpl_sdk4i_ibm_errc0100_ds QUALIFIED TEMPLATE;
-  bytes_provided LIKE(tpl_sdk4i_ibm_binary4) INZ(%SIZE(tpl_sdk4i_ibm_errc0100_ds));
-  bytes_available LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
+DCL-DS tpl_sdk4i_errc0100_ds QUALIFIED TEMPLATE;
+  bytes_provided LIKE(tpl_sdk4i_binary4) INZ(%SIZE(tpl_sdk4i_errc0100_ds));
+  bytes_available LIKE(tpl_sdk4i_binary4) INZ(0);
   exception_id CHAR(7) INZ(*BLANKS);
   reserved CHAR(1) INZ(*BLANKS);
   exception_data VARCHAR(32767) INZ(''); // 32,767 is the maximum available from the API.
-END-DS tpl_sdk4i_ibm_errc0100_ds;
+END-DS tpl_sdk4i_errc0100_ds;
 
 // -----------------------------------------------
 ///
@@ -91,20 +91,20 @@ END-DS tpl_sdk4i_ibm_errc0100_ds;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/QMHRCVPM.html#HDRRCVM1A
 ///
 // -----------------------------------------------
-DCL-DS tpl_sdk4i_ibm_rcvm0100_ds QUALIFIED TEMPLATE;
-  bytes_returned LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
-  bytes_available LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
-  msg_severity LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
+DCL-DS tpl_sdk4i_rcvm0100_ds QUALIFIED TEMPLATE;
+  bytes_returned LIKE(tpl_sdk4i_binary4) INZ(0);
+  bytes_available LIKE(tpl_sdk4i_binary4) INZ(0);
+  msg_severity LIKE(tpl_sdk4i_binary4) INZ(0);
   msg_id CHAR(7) INZ(*BLANKS);
   msg_type CHAR(2) INZ(*BLANKS);
   msg_key CHAR(4) INZ(*BLANKS);
   reserved CHAR(7) INZ(*BLANKS);
-  ccsid_sts LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
-  ccsid_replacement_data LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
-  len_returned LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
-  len_available LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
+  ccsid_sts LIKE(tpl_sdk4i_binary4) INZ(0);
+  ccsid_replacement_data LIKE(tpl_sdk4i_binary4) INZ(0);
+  len_returned LIKE(tpl_sdk4i_binary4) INZ(0);
+  len_available LIKE(tpl_sdk4i_binary4) INZ(0);
   replacement_data CHAR(256) INZ(*BLANKS);
-END-DS tpl_sdk4i_ibm_rcvm0100_ds;
+END-DS tpl_sdk4i_rcvm0100_ds;
 
 // -----------------------------------------------
 ///
@@ -119,7 +119,7 @@ END-DS tpl_sdk4i_ibm_rcvm0100_ds;
 // uuid will contain the generated UUID.
 //
 // Example usage:
-// DCL-DS uuid_ds LIKEDS(tpl_sdk4i_ibm_uuid_ds) INZ(*LIKEDS);
+// DCL-DS uuid_ds LIKEDS(tpl_sdk4i_uuid_ds) INZ(*LIKEDS);
 //
 // More about UUID versions. Note that _GENUUID supports a version = 0 or 1 (which returns a
 // version 1 DCE). Version = 4 generates an RFC 4122 UUID.
@@ -127,22 +127,22 @@ END-DS tpl_sdk4i_ibm_rcvm0100_ds;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=instructions-generate-universal-unique-identifier-genuuid
 ///
 // -----------------------------------------------
-DCL-DS tpl_sdk4i_ibm_uuid_ds QUALIFIED TEMPLATE;
-  bytes_provided LIKE(tpl_sdk4i_ibm_unsigned_binary4) INZ(%SIZE(tpl_sdk4i_ibm_uuid_ds));
-  bytes_available LIKE(tpl_sdk4i_ibm_unsigned_binary4) INZ(0);
-  version LIKE(tpl_sdk4i_ibm_unsigned_binary1) INZ(4);
+DCL-DS tpl_sdk4i_uuid_ds QUALIFIED TEMPLATE;
+  bytes_provided LIKE(tpl_sdk4i_unsigned_binary4) INZ(%SIZE(tpl_sdk4i_uuid_ds));
+  bytes_available LIKE(tpl_sdk4i_unsigned_binary4) INZ(0);
+  version LIKE(tpl_sdk4i_unsigned_binary1) INZ(4);
   reserved CHAR(7) INZ(*ALLx'00');
   uuid CHAR(16) INZ(*BLANKS);
-END-DS tpl_sdk4i_ibm_uuid_ds;
+END-DS tpl_sdk4i_uuid_ds;
 
 // For use with the SYSTOOLS.BASE64ENCODE scalar function. (Now used with QSYS.BASE64_ENCODE)
-DCL-S tpl_sdk4i_ibm_base64_input VARCHAR(2732) CCSID(*UTF8) TEMPLATE;
-DCL-S tpl_sdk4i_ibm_base64_result VARCHAR(3643) TEMPLATE;
+DCL-S tpl_sdk4i_base64_input VARCHAR(2732) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_base64_result VARCHAR(3643) TEMPLATE;
 
 // For use with the QCMDEXC command.
-DCL-S tpl_sdk4i_ibm_qcmdexc_cmd CHAR(32702) TEMPLATE;
-DCL-S tpl_sdk4i_ibm_qcmdexc_igc CHAR(3) TEMPLATE;
-DCL-S tpl_sdk4i_ibm_qcmdexc_len PACKED(15:5) TEMPLATE;
+DCL-S tpl_sdk4i_qcmdexc_cmd CHAR(32702) TEMPLATE;
+DCL-S tpl_sdk4i_qcmdexc_igc CHAR(3) TEMPLATE;
+DCL-S tpl_sdk4i_qcmdexc_len PACKED(15:5) TEMPLATE;
 
 // -----------------------------------------------
 ///
@@ -157,11 +157,11 @@ DCL-S tpl_sdk4i_ibm_qcmdexc_len PACKED(15:5) TEMPLATE;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=instructions-convert-character-hex-cvtch
 ///
 // -----------------------------------------------
-DCL-PR IBM_CharToHex EXTPROC('cvtch');
+DCL-PR API_CharToHex EXTPROC('cvtch');
   p_hex POINTER VALUE; // Address of hex string (target).
   p_char POINTER VALUE; // Address of character string (source).
-  hex_length LIKE(tpl_sdk4i_ibm_binary4) VALUE; // Length of hex string (length of target).
-END-PR IBM_CharToHex;
+  hex_length LIKE(tpl_sdk4i_binary4) VALUE; // Length of hex string (length of target).
+END-PR API_CharToHex;
 
 // -----------------------------------------------
 ///
@@ -177,12 +177,12 @@ END-PR IBM_CharToHex;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/qsychkpr.html#HDRCKPR100
 ///
 // -----------------------------------------------
-DCL-PR IBM_CheckPassword EXTPGM('QSYCHKPR');
+DCL-PR API_CheckPassword EXTPGM('QSYCHKPR');
   i_usrprf CHAR(10) CONST;
-  i_ckpr0100_ds LIKEDS(tpl_sdk4i_ibm_ckpr0100_ds) CONST;
+  i_ckpr0100_ds LIKEDS(tpl_sdk4i_ckpr0100_ds) CONST;
   i_format CHAR(8) CONST;
-  o_error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds);
-END-PR IBM_CheckPassword;
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR API_CheckPassword;
 
 // -----------------------------------------------
 ///
@@ -198,11 +198,11 @@ END-PR IBM_CheckPassword;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=instructions-copy-bytes-pointers-cpybwp
 ///
 // -----------------------------------------------
-DCL-PR IBM_CopyMemory EXTPROC('memcpy');
+DCL-PR API_CopyMemory EXTPROC('memcpy');
   i_target POINTER VALUE;
   i_source POINTER VALUE;
-  i_length LIKE(tpl_sdk4i_ibm_unsigned_binary4) VALUE;
-END-PR IBM_CopyMemory;
+  i_length LIKE(tpl_sdk4i_unsigned_binary4) VALUE;
+END-PR API_CopyMemory;
 
 // -----------------------------------------------
 ///
@@ -221,15 +221,15 @@ END-PR IBM_CopyMemory;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=keywords-alignfull#dalign
 ///
 // -----------------------------------------------
-DCL-PR IBM_CopyWithPointer EXTPROC('_CPYBWP');
+DCL-PR API_CopyWithPointer EXTPROC('_CPYBWP');
   target POINTER VALUE;
   source POINTER VALUE;
-  length LIKE(tpl_sdk4i_ibm_unsigned_binary4) VALUE;
-END-PR IBM_CopyWithPointer;
+  length LIKE(tpl_sdk4i_unsigned_binary4) VALUE;
+END-PR API_CopyWithPointer;
 
 // -----------------------------------------------
 ///
-// Define the call to the QtmsCreateSendEmail API from IBM.
+// Define the call to the QtmsCreateSendEmail API.
 //
 // The only limit to the size of the message sent with this API is whatever is imposed by mail
 // servers between you and your recipient(s). This API is not limited to 5,000 characters like other
@@ -247,22 +247,22 @@ END-PR IBM_CopyWithPointer;
 // @param OPTIONAL. A pointer to an array of tpl_sdk4i_atch0100_ds data structures.
 // @param OPTIONAL. The number of elements in attachment_array - %ELEM(attachment_array).
 // @param OPTIONAL. The format of the attachment data structures - DCL-S attachment_format CHAR(8) INZ('ATCH0000'); - or ATCH0100 if there are any attachments.
-// @param OPTIONAL. A tpl_sdk4i_ibm_errc0100_ds data structure.
+// @param OPTIONAL. A tpl_sdk4i_errc0100_ds data structure.
 //
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/qtmscreatesendemail.html
 ///
 // -----------------------------------------------
-DCL-PR IBM_CreateAndSendEmail EXTPROC('QtmsCreateSendEmail');
+DCL-PR API_CreateAndSendEmail EXTPROC('QtmsCreateSendEmail');
   recipient_array POINTER VALUE; // char* = an actual pointer.
-  recipient_count LIKE(tpl_sdk4i_ibm_unsigned_binary4) VALUE; // unsigned int = UNS(10).
+  recipient_count LIKE(tpl_sdk4i_unsigned_binary4) VALUE; // unsigned int = UNS(10).
   recipient_format POINTER VALUE; // char* = RPG CHAR(8) variable.
   note POINTER VALUE; // char* = an actual pointer.
   note_format POINTER VALUE; // char* = RPG CHAR(8) variable.
   attachment_array POINTER VALUE OPTIONS(*NOPASS); // char* = an actual pointer.
-  attachment_count LIKE(tpl_sdk4i_ibm_unsigned_binary4) VALUE OPTIONS(*NOPASS); // unsigned int=UNS(10)
+  attachment_count LIKE(tpl_sdk4i_unsigned_binary4) VALUE OPTIONS(*NOPASS); // unsigned int=UNS(10)
   attachment_format POINTER VALUE OPTIONS(*NOPASS); // char* = RPG CHAR(8) variable.
-  error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds) OPTIONS(*NOPASS); // char* = tpl_errc0100_ds.
-END-PR IBM_CreateAndSendEmail;
+  error_ds LIKEDS(tpl_sdk4i_errc0100_ds) OPTIONS(*NOPASS); // char* = tpl_errc0100_ds.
+END-PR API_CreateAndSendEmail;
 
 // -----------------------------------------------
 ///
@@ -274,8 +274,8 @@ END-PR IBM_CreateAndSendEmail;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/quscmdln.htm
 ///
 // -----------------------------------------------
-DCL-PR IBM_DisplayCmdLine EXTPGM('QUSCMDLN');
-END-PR IBM_DisplayCmdLine;
+DCL-PR API_DisplayCmdLine EXTPGM('QUSCMDLN');
+END-PR API_DisplayCmdLine;
 
 // -----------------------------------------------
 ///
@@ -286,7 +286,7 @@ END-PR IBM_DisplayCmdLine;
 // DCL-S cmd_len LIKE(tpl_sdk4i_api_qcmdexc_len);
 // cmd = 'CLRPFM LIB/FILE';
 // MONITOR;
-//   IBM_ExecuteCommand(cmd: %LEN(cmd));
+//   API_ExecuteCommand(cmd: %LEN(cmd));
 // ON-ERROR;
 //   // Log the error and handle it gracefully.
 // ENDMON;
@@ -298,11 +298,11 @@ END-PR IBM_DisplayCmdLine;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/qcmdexc.htm
 ///
 // -----------------------------------------------
-DCL-PR IBM_ExecuteCommand EXTPGM('QCMDEXC');
-  i_command LIKE(tpl_sdk4i_ibm_qcmdexc_cmd) CONST; // 32702 is maximum size allowed.
-  i_length LIKE(tpl_sdk4i_ibm_qcmdexc_len) CONST;
-  i_igc LIKE(tpl_sdk4i_ibm_qcmdexc_igc) OPTIONS(*NOPASS) CONST;
-END-PR IBM_ExecuteCommand;
+DCL-PR API_ExecuteCommand EXTPGM('QCMDEXC');
+  i_command LIKE(tpl_sdk4i_qcmdexc_cmd) CONST; // 32702 is maximum size allowed.
+  i_length LIKE(tpl_sdk4i_qcmdexc_len) CONST;
+  i_igc LIKE(tpl_sdk4i_qcmdexc_igc) OPTIONS(*NOPASS) CONST;
+END-PR API_ExecuteCommand;
 
 // -----------------------------------------------
 ///
@@ -313,9 +313,9 @@ END-PR IBM_ExecuteCommand;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=instructions-generate-universal-unique-identifier-genuuid
 ///
 // -----------------------------------------------
-DCL-PR IBM_GenerateUUID EXTPROC('_GENUUID');
+DCL-PR API_GenerateUUID EXTPROC('_GENUUID');
   p_uuid_ds POINTER VALUE; // Address of uuid_ds
-END-PR IBM_GenerateUUID;
+END-PR API_GenerateUUID;
 
 // -----------------------------------------------
 ///
@@ -332,9 +332,43 @@ END-PR IBM_GenerateUUID;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/evgetenv.html
 ///
 // -----------------------------------------------
-DCL-PR IBM_GetEnv POINTER EXTPROC('getenv');
+DCL-PR API_GetEnv POINTER EXTPROC('getenv');
   env_var_name POINTER VALUE OPTIONS(*STRING: *TRIM);
-END-PR IBM_GetEnv;
+END-PR API_GetEnv;
+
+// -----------------------------------------------
+///
+// Get a profile handle.
+//
+//   This procedure retrieves a profile handle from the OS. It is also useful for simply validating
+// a user profile/password pair.
+//
+//   SDK4i uses this API to validate a user profile and password pair - and that requires three
+// optional parameters to be passed (o_error_ds, i_pwd_len, and i_pwd_ccsid).
+//
+//   There are more parameters that can be passed, SDK4i doesn't need them though so they are not
+// defined. If you need them, you can update this source to fit your needs and do a search of the
+// SDK4i source to see if you need to make any other changes. Currently, this API is only used in
+// the sec/qrpglesrc/sec.sqlrpgle program, in the SEC_AuthenticateUserProfile procedure.
+//
+// @param REQUIRED. The user profile.
+// @param REQUIRED. The password for the user profile.
+// @param REQUIRED. A parameter to hold the profile handle - will be cleared first.
+// @param OPTIONAL. The error data structure returned by the API.
+// @param OPTIONAL. The length of the password. Can be 1 - 512.
+// @param OPTIONAL. The CCSID of the password. See IBM documentation for details.
+//
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/QSYGETPH.html
+///
+// -----------------------------------------------
+DCL-PR API_GetProfileHandle EXTPGM('QSYGETPH');
+  i_user_profile CHAR(10) CONST;
+  i_pwd CHAR(512) CONST;
+  o_handle CHAR(12);
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds) OPTIONS(*NOPASS);
+  i_pwd_len LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS) CONST;
+  i_pwd_ccsid LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS) CONST;
+END-PR API_GetProfileHandle;
 
 // -----------------------------------------------
 ///
@@ -349,11 +383,11 @@ END-PR IBM_GetEnv;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=instructions-convert-hex-character-cvthc
 ///
 // -----------------------------------------------
-DCL-PR IBM_HexToChar EXTPROC('cvthc');
+DCL-PR API_HexToChar EXTPROC('cvthc');
   p_char POINTER VALUE; // Address of character string (target).
   p_hex POINTER VALUE; // Address of hex string (source).
-  char_length LIKE(tpl_sdk4i_ibm_binary4) VALUE; // Length of the character string (length of target).
-END-PR IBM_HexToChar;
+  char_length LIKE(tpl_sdk4i_binary4) VALUE; // Length of the character string (length of target).
+END-PR API_HexToChar;
 
 // -----------------------------------------------
 ///
@@ -372,20 +406,20 @@ END-PR IBM_HexToChar;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/rzaie/rzaieapi_qtmhrdstin.html
 ///
 // -----------------------------------------------
-DCL-PR IBM_ReadFromStdIn EXTPROC('QtmhRdStin');
+DCL-PR API_ReadFromStdIn EXTPROC('QtmhRdStin');
   i_data POINTER VALUE;
-  i_data_length LIKE(tpl_sdk4i_ibm_binary4) CONST;
-  o_available_length LIKE(tpl_sdk4i_ibm_binary4);
-  o_error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds);
-END-PR IBM_ReadFromStdIn;
+  i_data_length LIKE(tpl_sdk4i_binary4) CONST;
+  o_available_length LIKE(tpl_sdk4i_binary4);
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR API_ReadFromStdIn;
 
 // TODO: Use the regular QtmhRdStin above with the POINTER instead of this one with CHAR.
-DCL-PR IBM_ReadFromStdIn2 EXTPROC('QtmhRdStin');
+DCL-PR API_ReadFromStdIn2 EXTPROC('QtmhRdStin');
   i_data CHAR(C_SDK4I_SIZE_2MI) CCSID(*UTF8);
-  i_data_length LIKE(tpl_sdk4i_ibm_binary4) CONST;
-  o_available_length LIKE(tpl_sdk4i_ibm_binary4) CONST;
-  o_error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds);
-END-PR IBM_ReadFromStdIn2;
+  i_data_length LIKE(tpl_sdk4i_binary4) CONST;
+  o_available_length LIKE(tpl_sdk4i_binary4) CONST;
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR API_ReadFromStdIn2;
 
 // -----------------------------------------------
 ///
@@ -397,18 +431,33 @@ END-PR IBM_ReadFromStdIn2;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/QMHRCVPM.html
 ///
 // -----------------------------------------------
-DCL-PR IBM_ReceivePgmMsg EXTPGM('QMHRCVPM');
-  receiver_ds LIKEDS(tpl_sdk4i_ibm_rcvm0100_ds);
-  receiver_ds_length LIKE(tpl_sdk4i_ibm_binary4) CONST;
+DCL-PR API_ReceivePgmMsg EXTPGM('QMHRCVPM');
+  receiver_ds LIKEDS(tpl_sdk4i_rcvm0100_ds);
+  receiver_ds_length LIKE(tpl_sdk4i_binary4) CONST;
   receiver_format_name CHAR(8) CONST;
   call_stack_entry CHAR(10) CONST;
-  call_stack_counter LIKE(tpl_sdk4i_ibm_binary4) CONST;
+  call_stack_counter LIKE(tpl_sdk4i_binary4) CONST;
   msg_type CHAR(10) CONST;
   msg_key CHAR(4) CONST;
-  wait_time LIKE(tpl_sdk4i_ibm_binary4) CONST;
+  wait_time LIKE(tpl_sdk4i_binary4) CONST;
   msg_action CHAR(10) CONST;
-  error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds);
-END-PR IBM_ReceivePgmMsg;
+  error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR API_ReceivePgmMsg;
+
+// -----------------------------------------------
+///
+// Release a profile handle.
+//
+// @param REQUIRED. The profile handle to be released.
+// @param OPTIONAL. The error data structure returned by the API.
+//
+// @link o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds) OPTIONS(*NOPASS);
+///
+// -----------------------------------------------
+DCL-PR API_ReleaseProfileHandle EXTPGM('QSYRLSPH');
+  i_handle CHAR(12) CONST;
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds) OPTIONS(*NOPASS);
+END-PR API_ReleaseProfileHandle;
 
 // -----------------------------------------------
 ///
@@ -419,17 +468,17 @@ END-PR IBM_ReceivePgmMsg;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/QMHRMVPM.html
 ///
 // -----------------------------------------------
-DCL-PR IBM_RemovePgmMsg EXTPGM('QMHRMVPM');
+DCL-PR API_RemovePgmMsg EXTPGM('QMHRMVPM');
   call_stack_entry CHAR(10) CONST;
-  call_stack_counter LIKE(tpl_sdk4i_ibm_binary4) CONST;
+  call_stack_counter LIKE(tpl_sdk4i_binary4) CONST;
   message_key CHAR(4) CONST;
   messages_to_remove CHAR(10) CONST;
-  error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds);
-END-PR IBM_RemovePgmMsg;
+  error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR API_RemovePgmMsg;
 
 // -----------------------------------------------
 ///
-//   Send a break message to an IBM i user.
+//   Send a break message to a user.
 //
 // @param REQUIRED. *INFO (no reply necessary) or *INQ (reply required).
 // @param REQUIRED. *BREAK (break message) or *NORMAL (goes to message queue).
@@ -447,20 +496,20 @@ END-PR IBM_RemovePgmMsg;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/apis/QEZSNDMG.html
 ///
 // -----------------------------------------------
-DCL-PR IBM_SendMessage EXTPGM('QEZSNDMG');
+DCL-PR API_SendMessage EXTPGM('QEZSNDMG');
   i_message_type CHAR(10) CONST;
   i_delivery_mode CHAR(10) CONST;
-  i_message_text VARCHAR(494) CONST;
-  i_message_length LIKE(tpl_sdk4i_ibm_binary4) CONST;
+  i_message_text CHAR(494) CONST;
+  i_message_length LIKE(tpl_sdk4i_binary4) CONST;
   i_usrprf_array CHAR(10) DIM(299) CONST;
-  i_usrprf_count LIKE(tpl_sdk4i_ibm_binary4) CONST;
-  o_message_sent LIKE(tpl_sdk4i_ibm_binary4);
-  o_function_requested LIKE(tpl_sdk4i_ibm_binary4);
-  o_error_ds LIKE(tpl_sdk4i_ibm_errc0100_ds);
+  i_usrprf_count LIKE(tpl_sdk4i_binary4) CONST;
+  o_message_sent LIKE(tpl_sdk4i_binary4);
+  o_function_requested LIKE(tpl_sdk4i_binary4);
+  o_error_ds LIKE(tpl_sdk4i_errc0100_ds);
   i_show_display CHAR(1) CONST;
   i_msgq CHAR(20) CONST;
   i_name_type CHAR(4) CONST;
-END-PR IBM_SendMessage;
+END-PR API_SendMessage;
 
 // -----------------------------------------------
 ///
@@ -469,8 +518,8 @@ END-PR IBM_SendMessage;
 // This procedure is in the QHTTPSVR/QZHBCGI service program provided by IBM.
 //
 // Example:
-// DCL-DS error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds) INZ(*LIKEDS);
-// DCL-S data LIKE(tpl_sdk4i_db2_varchar);
+// DCL-DS error_ds LIKEDS(tpl_sdk4i_errc0100_ds) INZ(*LIKEDS);
+// DCL-S data LIKE(tpl_sdk4i_db_varchar);
 // data = 'This is my test string';
 // WriteStdout(%ADDR(data: *DATA): %LEN(data): error_ds);
 // IF (error_ds.bytes_available > 0);
@@ -486,8 +535,8 @@ END-PR IBM_SendMessage;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=ssw_ibm_i_76/rzaie/rzaieapi_qtmhwrstout.html
 ///
 // -----------------------------------------------
-DCL-PR IBM_WriteStdOut EXTPROC('QtmhWrStout');
+DCL-PR API_WriteStdOut EXTPROC('QtmhWrStout');
   i_data POINTER VALUE;
-  i_data_length LIKE(tpl_sdk4i_ibm_binary4) CONST;
-  o_error_ds LIKEDS(tpl_sdk4i_ibm_errc0100_ds);
-END-PR IBM_WriteStdOut;
+  i_data_length LIKE(tpl_sdk4i_binary4) CONST;
+  o_error_ds LIKEDS(tpl_sdk4i_errc0100_ds);
+END-PR API_WriteStdOut;

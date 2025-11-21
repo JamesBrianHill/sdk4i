@@ -28,6 +28,7 @@ INSERT INTO vldmsgt (id, msg) VALUES
 ('LOGCFGT_PGM', 'A valid program name. Up to 10 characters long, the first character must be an uppercase letter. The remaining characters can be uppercase letters, numbers and underscores.'),
 ('LOGCFGT_MOD', 'A valid module name. Up to 10 characters long, the first character must be an uppercase letter. The remaining characters can be uppercase letters, numbers, and underscores.'),
 ('LOGCFGT_PRC', 'A valid procedure name. Up to 128 characters long. the first character must be a letter. The remaining characters can be letters, numbers, and underscores.'),
+('LOGCFGT_USR', 'A valid user profile.'),
 ('LOGCFGT_LOGCSIT', 'A flag indicating if we should collect call stack information. Must be Y or N. Defaults to N.'),
 ('LOGCFGT_LOGEXTT', 'A flag indicating if we should collect extended debugging information. Must be Y or N. Defaults to N.'),
 ('LOGCFGT_LOGMETT', 'A flag indicating if we should collect metrics. Must be Y or N. Defaults to N'),
@@ -40,9 +41,14 @@ INSERT INTO vldmsgt (id, msg) VALUES
 ('LOGCFGT_CRTCMD', 'A command that should be executed when an CRITICAL level (2) event is logged. This can be up to 1024 characters long.'),
 ('LOGCFGT_ERRCMD', 'A command that should be executed when an ERROR level (3) event is logged. This can be up to 1024 characters long.'),
 ('LOGCFGT_WRNCMD', 'A command that should be executed when an WARNING level (4) event is logged. This can be up to 1024 characters long.'),
-('LOGCFGT_NOTCMD', 'A command that should be executed when an NOTIFICATION level (5) event is logged. This can be up to 1024 characters long.'),
+('LOGCFGT_NTFCMD', 'A command that should be executed when an NOTIFICATION level (5) event is logged. This can be up to 1024 characters long.'),
 ('LOGCFGT_INFCMD', 'A command that should be executed when an INFORMATIONAL level (6) event is logged. This can be up to 1024 characters long.'),
-('LOGCFGT_DBGCMD', 'A command that should be executed when an DEBUG level (7) event is logged. This can be up to 1024 characters long.');
+('LOGCFGT_DBGCMD', 'A command that should be executed when an DEBUG level (7) event is logged. This can be up to 1024 characters long.'),
+('LOGCFGT_SYS_WRN', 'The system (LPAR) name you entered does not match the current system name. This is not an error, only a warning in case you misspelled the name.'),
+('LOGCFGT_LIB_WRN', 'The library name you entered does not exist on the current system. This is not an error, only a warning in case you misspelled the name.'),
+('LOGCFGT_USR_WRN', 'The user profile you entered does not exist on the current system. This is not an error, only a warning in case you misspelled the name.'),
+('LOGCFGT_SYS_LIB_PGM_MOD_PRC_USR', 'A valid LPAR name, library name, program name, module name, procedure name, or user profile must be provided.'),
+('LOGCFGT_MET_USE', 'In order to collect metric information, we must collect usage information. Please select a valid setting for collecting usage data.');
 
 INSERT INTO vldmsgt (id, msg) VALUES
 ('LOGPURT_ID', 'The ID is the name of the LPAR.'),

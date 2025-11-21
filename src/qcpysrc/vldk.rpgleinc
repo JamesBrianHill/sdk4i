@@ -41,11 +41,26 @@ DCL-DS tpl_sdk4i_vldmsgt_ds EXTNAME('VLDMSGT') INZ(*EXTDFT) QUALIFIED TEMPLATE C
 DCL-DS tpl_sdk4i_vldrult_ds EXTNAME('VLDRULT') INZ(*EXTDFT) QUALIFIED TEMPLATE CCSID(*EXACT) END-DS;
 
 // -------------------------------------------------------------------------------------------------
+// Define global constants, template data structures and template variables.
+// -------------------------------------------------------------------------------------------------
+// This data structure is used by Data Mappers to return error messages to calling programs.
+DCL-DS tpl_sdk4i_vld_error_ds QUALIFIED TEMPLATE;
+  lib LIKE(tpl_sdk4i_vldrult_ds.lib) INZ('');
+  tbl LIKE(tpl_sdk4i_vldrult_ds.tbl) INZ('');
+  col LIKE(tpl_sdk4i_vldrult_ds.col) INZ('');
+  lvl_id LIKE(tpl_sdk4i_logmsgt_ds.loglvlt_id) INZ(C_SDK4I_LL_ERR);
+  msg LIKE(tpl_sdk4i_vldmsgt_ds.msg) INZ('');
+END-DS tpl_sdk4i_vld_error_ds;
+
+// -------------------------------------------------------------------------------------------------
 ///
 //   Get a message description.
 //
 //   Given a message ID and optional language code, return the message text. If no language code is
 // given, we default to "en" (English).
+//
+//   If we attempt to retrieve a message in a language other than 'en' (English) and fail, we fall
+// back to retrieving the message using 'en' (English) using a recursive call.
 //
 // @param REQUIRED. A message id.
 // @param OPTIONAL. A language code. If not provided, we default to "en" (English).

@@ -25,6 +25,38 @@
 -- not, see https://www.gnu.org/licenses/gpl-3.0.html
 -- *************************************************************************************************
 
+-- ***********************************************
+-- Rules for LOGCFGT.
+-- ***********************************************
+INSERT INTO vldrult (tbl, col, rgx, vldmsgt_id) VALUES
+('LOGCFGT', 'ALTCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_ALTCMD'),
+('LOGCFGT', 'CRTCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_CRTCMD'),
+('LOGCFGT', 'DBGCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_DBGCMD'),
+('LOGCFGT', 'EMGCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_EMGCMD'),
+('LOGCFGT', 'ERRCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_ERRCMD'),
+('LOGCFGT', 'INFCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_INFCMD'),
+('LOGCFGT', 'LIB', '^([A-Z@#$][A-Z@#$0-9_\.]{0,9})?$', 'LOGCFGT_LIB'),
+('LOGCFGT', 'LOGCSIT', '^[NY]{1}$', 'LOGCFGT_LOGCSIT'),
+('LOGCFGT', 'LOGEXTT', '^[NY]{1}$', 'LOGCFGT_LOGEXTT'),
+('LOGCFGT', 'LOGMETT', '^[NY]{1}$', 'LOGCFGT_LOGMETT'),
+('LOGCFGT', 'LOGUSET', '^[DHIMNWY]{1}$', 'LOGCFGT_LOGUSET'),
+('LOGCFGT', 'LOGWBLT', '^[NY]{1}$', 'LOGCFGT_LOGWBLT'),
+('LOGCFGT', 'LOGWBRT', '^[NY]{1}$', 'LOGCFGT_LOGWBRT'),
+('LOGCFGT', 'MOD', '^([A-Z@#$][A-Z@#$0-9_\.]{0,9})?$', 'LOGCFGT_MOD'),
+('LOGCFGT', 'NTFCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_NTFCMD'),
+('LOGCFGT', 'PGM', '^([A-Z@#$][A-Z@#$0-9_\.]{0,9})?$', 'LOGCFGT_PGM'),
+('LOGCFGT', 'PRC', '^[A-Za-z0-9_]{0,128}$', 'LOGCFGT_PRC'),
+('LOGCFGT', 'SYS', '^([A-Z][A-Z0-9]{0,7})?$', 'LOGCFGT_SYS'),
+('LOGCFGT', 'USR', '^([A-Z@#$][A-Z@#$0-9_\.]{0,9})?$', 'LOGCFGT_USR'),
+('LOGCFGT', 'WRNCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_WRNCMD');
+
+INSERT INTO vldrult (tbl, col, ftbl, fcol, vldmsgt_id) VALUES
+('LOGCFGT', 'LOGMSGT_ID', 'LOGLVLT', 'ID', 'LOGCFGT_LOGMSGT_ID');
+
+
+-- ***********************************************
+-- Rules for LOGPURT.
+-- ***********************************************
 INSERT INTO vldrult (tbl, col, rgx, vldmsgt_id) VALUES
 ('LOGPURT', 'ID', '^[A-Z0-9]{1,8}$', 'LOGPURT_ID');
 
@@ -38,26 +70,3 @@ INSERT INTO vldrult (tbl, col, min_num, max_num, vldmsgt_id) VALUES
 ('LOGPURT', 'DB_PURGE_6', 1, 999, 'LOGPURT_DB_PURGE_6'),
 ('LOGPURT', 'DB_PURGE_7', 1, 999, 'LOGPURT_DB_PURGE_7'),
 ('LOGPURT', 'DB_PURGE_U', 1, 999, 'LOGPURT_DB_PURGE_U');
-
-INSERT INTO vldrult (tbl, col, rgx, vldmsgt_id) VALUES
-('LOGCFGT', 'ALTCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_ALTCMD'),
-('LOGCFGT', 'CRTCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_CRTCMD'),
-('LOGCFGT', 'DBGCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_DBGCMD'),
-('LOGCFGT', 'EMGCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_EMGCMD'),
-('LOGCFGT', 'ERRCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_ERRCMD'),
-('LOGCFGT', 'INFCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_INFCMD'),
-('LOGCFGT', 'LIB', '^[A-Z0-9_]{1,10}$', 'LOGCFGT_LIB'),
-('LOGCFGT', 'LOGCSIT', '^[NY]{1}$', 'LOGCFGT_LOGCSIT'),
-('LOGCFGT', 'LOGEXTT', '^[NY]{1}$', 'LOGCFGT_LOGEXTT'),
-('LOGCFGT', 'LOGMETT', '^[NY]{1}$', 'LOGCFGT_LOGMETT'),
-('LOGCFGT', 'LOGUSET', '^[DHIMNWY]{1}$', 'LOGCFGT_LOGUSET'),
-('LOGCFGT', 'LOGWBLT', '^[NY]{1}$', 'LOGCFGT_LOGWBLT'),
-('LOGCFGT', 'MOD', '^[A-Z0-9_]{1,10}$', 'LOGCFGT_MOD'),
-('LOGCFGT', 'NOTCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_NOTCMD'),
-('LOGCFGT', 'PGM', '^[A-Z0-9_]{1,10}$', 'LOGCFGT_PGM'),
-('LOGCFGT', 'PRC', '^[A-Za-z0-9_]{1,128}$', 'LOGCFGT_PRC'),
-('LOGCFGT', 'SYS', '^[A-Z][A-Z0-9]{0,7}$', 'LOGCFGT_SYS'),
-('LOGCFGT', 'WRNCMD', '^[A-Za-z0-9&*()_ ]{0,1024}$', 'LOGCFGT_WRNCMD');
-
-INSERT INTO vldrult (tbl, col, min_num, max_num, vldmsgt_id) VALUES
-('LOGCFGT', 'LOGMSGT_ID', 0, 7, 'LOGCFGT_LOGMSGT_ID');

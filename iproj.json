@@ -2,15 +2,13 @@
   "buildCommand": "makei build",
   "description": "SDK4i",
   "license": "GPLv3",
-  "objlib": "SDK4IPGM",
+  "objlib": "&SDK4I_PGM_LIB",
   "preUsrlibl": [
-    "SDK4IDTA",
-    "SDK4IPGM",
-    "SDK4IWEB"
+    "&SDK4I_DATA_LIB",
+    "&SDK4I_PGM_LIB",
+    "&SDK4I_WEB_LIB"
   ],
-  "setIBMiEnvCmd": [
-    "CHGJOB CCSID(37)"
-  ],
+  "repository": "https://github.com/JamesBrianHill/sdk4i",
   "version": "1.0.0",
   "curlib": "&CURLIB"
 }

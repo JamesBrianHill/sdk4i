@@ -43,7 +43,7 @@
 // -------------------------------------------------------------------------------------------------
 DCL-C C_SDK4I_ERR_PERMIT_SQLSTATE_COUNT 50; // 50 is arbitrary but seems more than adequate.
 
-DCL-DS tpl_sdk4i_err_sql_diagnostics_ds QUALIFIED TEMPLATE;
+DCL-DS tpl_sdk4i_err_sql_diagnostics_ds ALIGN(*FULL) QUALIFIED TEMPLATE;
   // Statement information items.
   db2_last_row INT(10);
   db2_number_rows PACKED(31: 0);
@@ -111,7 +111,7 @@ DCL-S tpl_sdk4i_err_sqlstate_count PACKED(2:0) TEMPLATE;
 // -------------------------------------------------------------------------------------------------
 DCL-PR ERR_IsSQLError IND EXTPROC(*DCLCASE);
   o_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds);
-  i_permit_sqlstates_count LIKE(tpl_sdk4i_ibm_elem) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_permit_sqlstates_count LIKE(tpl_sdk4i_elem) OPTIONS(*NOPASS: *OMIT) CONST;
   i_permit_sqlstates LIKE(tpl_sdk4i_err_sqlstate) DIM(C_SDK4I_ERR_PERMIT_SQLSTATE_COUNT)
     OPTIONS(*NOPASS: *OMIT) CONST;
   i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;

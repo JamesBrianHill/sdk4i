@@ -29,16 +29,19 @@
 // Define global constants, template data structures and template variables.
 // -------------------------------------------------------------------------------------------------
 
-// Data mappers use this value when parsing JSON strings. The value of 100 is arbitrary but should
-// be large enough to represent the table with the highest number of columns that will be processed.
+// These constants are generally used in Data Mappers and the values are arbitrary.
 DCL-C C_SDK4I_COLUMN_COUNT 100;
+DCL-C C_SDK4I_GENERIC_FAILURE 'GENERIC_FAILURE'; // Must match a value in table VLDMSGT.
+DCL-C C_SDK4I_GENERIC_NOT_FOUND 'GENERIC_NOT_FOUND'; // Must match a value in table VLDMSGT.
+DCL-C C_SDK4I_GENERIC_UNAUTHORIZED 'GENERIC_UNAUTHORIZED'; // Must match a value in table VLDMSGT.
+DCL-C C_SDK4I_MAX_ERROR_COUNT 100;
 
 // Db2 for i maximums.
-// DCL-C C_SDK4I_DB2_COLUMN_MAX_COUNT 8000;
-DCL-C C_SDK4I_DB2_COLUMN_NAME_MAX_LEN 128;
-DCL-C C_SDK4I_DB2_SCHEMA_NAME_MAX_LEN 128;
-DCL-C C_SDK4I_DB2_TABLE_NAME_MAX_LEN 128;
-DCL-C C_SDK4I_DB2_VARCHAR_MAX_LEN 32739;
+// DCL-C C_SDK4I_DB_COLUMN_MAX_COUNT 8000;
+DCL-C C_SDK4I_DB_COLUMN_NAME_MAX_LEN 128;
+DCL-C C_SDK4I_DB_SCHEMA_NAME_MAX_LEN 128;
+DCL-C C_SDK4I_DB_TABLE_NAME_MAX_LEN 128;
+DCL-C C_SDK4I_DB_VARCHAR_MAX_LEN 32739;
 
 // Log levels as defined in RFC5424.
 DCL-C C_SDK4I_LL_EMG 0; // Emergency: system is unusable.
@@ -46,7 +49,7 @@ DCL-C C_SDK4I_LL_ALT 1; // Alert: action must be taken immediately.
 DCL-C C_SDK4I_LL_CRT 2; // Critical: critical conditions.
 DCL-C C_SDK4I_LL_ERR 3; // Error: error conditions.
 DCL-C C_SDK4I_LL_WRN 4; // Warning: warning conditions.
-DCL-C C_SDK4I_LL_NOT 5; // Notice: normal but significant condition.
+DCL-C C_SDK4I_LL_NTF 5; // Notification: normal but significant condition.
 DCL-C C_SDK4I_LL_INF 6; // Informational: informational messages.
 DCL-C C_SDK4I_LL_DBG 7; // Debug: debug-level messages.
 

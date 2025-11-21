@@ -26,7 +26,7 @@
 // Control Specificiations.
 // -------------------------------------------------------------------------------------------------
 /COPY '../../qcpysrc/ctloptspk.rpgleinc'
-CTL-OPT TEXT('SDK4i - ERR - Error handling procedures');
+CTL-OPT TEXT('SDK4i - ERR - Error handling utilities');
 
 // -------------------------------------------------------------------------------------------------
 // Bring in the copybooks we will use.
@@ -77,7 +77,7 @@ CTL-OPT TEXT('SDK4i - ERR - Error handling procedures');
 DCL-PROC ERR_IsSQLError EXPORT;
   DCL-PI ERR_IsSQLError IND;
     o_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds);
-    i_permit_sqlstates_count LIKE(tpl_sdk4i_ibm_elem) OPTIONS(*NOPASS: *OMIT) CONST;
+    i_permit_sqlstates_count LIKE(tpl_sdk4i_elem) OPTIONS(*NOPASS: *OMIT) CONST;
     i_permit_sqlstates LIKE(tpl_sdk4i_err_sqlstate) DIM(C_SDK4I_ERR_PERMIT_SQLSTATE_COUNT)
     OPTIONS(*NOPASS: *OMIT) CONST;
     i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
@@ -148,7 +148,6 @@ DCL-PROC ERR_IsSQLError EXPORT;
 
   // We have encountered an SQLSTATE we were not expecting.
   is_error = *ON;
-  log_is_successful = *OFF;
   IF (o_diagnostics_ds.db2_message_id <> *BLANKS);
     o_diagnostics_ds.err_msg = o_diagnostics_ds.db2_message_id + ': ' +
       o_diagnostics_ds.message_text;

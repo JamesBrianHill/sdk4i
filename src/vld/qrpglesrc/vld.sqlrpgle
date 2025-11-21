@@ -26,7 +26,7 @@
 // Control Specifications.
 // -------------------------------------------------------------------------------------------------
 /COPY '../../qcpysrc/ctloptspk.rpgleinc'
-CTL-OPT TEXT('SDK4i - VLD - Validation procedures');
+CTL-OPT TEXT('SDK4i - VLD - Validation utilities');
 
 // -------------------------------------------------------------------------------------------------
 // Bring in the copybooks we will use.
@@ -60,6 +60,9 @@ CTL-OPT TEXT('SDK4i - VLD - Validation procedures');
 //
 //   Given a message ID and optional language code, return the message text. If no language code is
 // given, we default to "en" (English).
+//
+//   If we attempt to retrieve a message in a language other than 'en' (English) and fail, we fall
+// back to retrieving the message using 'en' (English) using a recursive call.
 //
 // @param REQUIRED. A message id.
 // @param OPTIONAL. A language code. If not provided, we default to "en" (English).
@@ -102,7 +105,7 @@ DCL-PROC VLD_GetMsg EXPORT;
     log_is_successful = *OFF;
     log_cause_info_ds.sstate = s_diagnostics_ds.returned_sqlstate;
     log_cause_info_ds.sstmt = s_stmt;
-    log_msg = 'PREPARE failed. ' + s_diagnostics_ds.err_msg;
+    log_msg = 'PREPARE failed. (id='+ i_id +' and lng_id='+ lng_id +') '+ s_diagnostics_ds.err_msg;
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     RETURN msg;
   ENDIF;
@@ -112,7 +115,7 @@ DCL-PROC VLD_GetMsg EXPORT;
     log_is_successful = *OFF;
     log_cause_info_ds.sstate = s_diagnostics_ds.returned_sqlstate;
     log_cause_info_ds.sstmt = s_stmt;
-    log_msg = 'DECLARE failed. ' + s_diagnostics_ds.err_msg;
+    log_msg = 'DECLARE failed. (id='+ i_id +' and lng_id='+ lng_id +') '+ s_diagnostics_ds.err_msg;
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     RETURN msg;
   ENDIF;
@@ -122,17 +125,25 @@ DCL-PROC VLD_GetMsg EXPORT;
     log_is_successful = *OFF;
     log_cause_info_ds.sstate = s_diagnostics_ds.returned_sqlstate;
     log_cause_info_ds.sstmt = s_stmt;
-    log_msg = 'OPEN failed. ' + s_diagnostics_ds.err_msg;
+    log_msg = 'OPEN failed. (id='+ i_id +' and lng_id='+ lng_id +') '+ s_diagnostics_ds.err_msg;
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     RETURN msg;
   ENDIF;
 
   EXEC SQL FETCH c_GetMsg INTO :msg;
   IF (ERR_IsSQLError(s_diagnostics_ds: *OMIT: *OMIT: log_user_info_ds));
+    IF (s_diagnostics_ds.returned_sqlstate = C_SDK4I_SQLSTATE_NOT_FOUND AND lng_id <> 'en');
+      log_event_info_ds.ll_id = C_SDK4I_LL_NTF; // Notification level message.
+      log_msg = 'No message exists for id='+ i_id +' and lng_id='+ lng_id +
+        '. Attempting to retrieve the message in English.';
+      LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
+      RESET log_event_info_ds;
+      RETURN VLD_GetMsg(i_id: 'en': log_user_info_ds);
+    ENDIF;
     log_is_successful = *OFF;
     log_cause_info_ds.sstate = s_diagnostics_ds.returned_sqlstate;
     log_cause_info_ds.sstmt = s_stmt;
-    log_msg = 'FETCH failed. ' + s_diagnostics_ds.err_msg;
+    log_msg = 'FETCH failed. (id='+ i_id +' and lng_id='+ lng_id +') '+ s_diagnostics_ds.err_msg;
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     RETURN msg;
   ENDIF;
@@ -322,6 +333,8 @@ DCL-PROC VLD_IsValid EXPORT;
     o_vldmsgt_id = vldmsgt_id;
   ENDIF;
 
+  // PERFORMANCE NOTE: This query is approximately 3x faster if temp_lib is not blank.
+  //
   //   We need to know if the column being validated is nullable - so we will query the information
   // available to us in the QSYS2/SYSCOLUMNS view. If we were not given a specific library/schema,
   // we will only consider the libraries in the job's library list - which we can obtain from the
@@ -378,7 +391,7 @@ DCL-PROC VLD_IsValid EXPORT;
   // If we are validating a date and no maximum was provided, log a message and default to *HIVAL.
   IF (%PARMS >= %PARMNUM(i_date) AND max_date_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NTF;
     log_msg = 'Max date is NULL, defaulting to *HIVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     max_date = *HIVAL;
@@ -387,7 +400,7 @@ DCL-PROC VLD_IsValid EXPORT;
   // If we are validating a date and no minimum was provided, log a message and default to *LOVAL.
   IF (%PARMS >= %PARMNUM(i_date) AND min_date_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NTF;
     log_msg = 'Min date is NULL, defaulting to *LOVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     min_date = *LOVAL;
@@ -396,7 +409,7 @@ DCL-PROC VLD_IsValid EXPORT;
   // If we are validating a number and no maximum was provided, log a message and default to *HIVAL.
   IF (%PARMS >= %PARMNUM(i_num) AND max_num_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NTF;
     log_msg = 'Max num is NULL, defaulting to *HIVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     max_num = *HIVAL;
@@ -405,7 +418,7 @@ DCL-PROC VLD_IsValid EXPORT;
   // If we are validating a number and no maximum was provided, log a message and default to *LOVAL.
   IF (%PARMS >= %PARMNUM(i_num) AND min_num_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NTF;
     log_msg = 'Min num is NULL, defaulting to *LOVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     min_num = *LOVAL;
@@ -414,7 +427,7 @@ DCL-PROC VLD_IsValid EXPORT;
   // If we are validating a time and no maximum was provided, log a message and default to *HIVAL.
   IF (%PARMS >= %PARMNUM(i_time) AND max_time_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NTF;
     log_msg = 'Max time is NULL, defaulting to *HIVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     max_time = *HIVAL;
@@ -423,7 +436,7 @@ DCL-PROC VLD_IsValid EXPORT;
   // If we are validating a time and no maximum was provided, log a message and default to *LOVAL.
   IF (%PARMS >= %PARMNUM(i_time) AND min_time_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NTF;
     log_msg = 'Min time is NULL, defaulting to *LOVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     min_time = *LOVAL;
@@ -433,7 +446,7 @@ DCL-PROC VLD_IsValid EXPORT;
   // *HIVAL.
   IF (%PARMS >= %PARMNUM(i_ts) AND max_ts_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NTF;
     log_msg = 'Max timestamp is NULL, defaulting to *HIVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     max_ts = *HIVAL;
@@ -443,7 +456,7 @@ DCL-PROC VLD_IsValid EXPORT;
   // *LOVAL.
   IF (%PARMS >= %PARMNUM(i_ts) AND min_ts_null = C_SDK4I_NULL);
     RESET log_event_info_ds;
-    log_event_info_ds.ll_id = C_SDK4I_LL_NOT;
+    log_event_info_ds.ll_id = C_SDK4I_LL_NTF;
     log_msg = 'Min timestamp is NULL, defaulting to *LOVAL.';
     LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log_user_info_ds);
     min_ts = *LOVAL;
@@ -662,7 +675,7 @@ DCL-PROC VLD_IsValidFK EXPORT;
   // --------------------------------------------------
   DCL-DS s_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds) INZ(*LIKEDS);
 
-  DCL-S cnt LIKE(tpl_sdk4i_ibm_binary4);
+  DCL-S cnt LIKE(tpl_sdk4i_binary4);
   DCL-S s_stmt LIKE(tpl_sdk4i_sql_statement);
 
   // Bring in variables associated with logging.
@@ -869,9 +882,11 @@ DCL-PROC VLD_IsValidString EXPORT;
   ENDIF;
 
   // Perform validation.
+  //   We are unable to specify OPTIONS(*TRIM) above for i_str since the compiler does not allow us
+  // to mix *TRIM and *NULLIND. So we use the TRIM() function in our SQL statement below.
   EXEC SQL
     WITH cte1(src) AS (
-      VALUES(:i_str)
+      VALUES(TRIM(:i_str))
     )
     SELECT COUNT(*)
     INTO :cnt

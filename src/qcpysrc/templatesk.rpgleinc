@@ -36,15 +36,17 @@
 // Define global constants, template data structures and template variables.
 // -------------------------------------------------------------------------------------------------
 
+DCL-S tpl_sdk4i_ccsid PACKED(5:0) TEMPLATE;
+
 //   When defining arrays that will hold data from tables, it is helpful to have a template. There
 // can only be 8,000 columns in a table so a PACKED(4:0) is used.
 DCL-S tpl_sdk4i_column_count PACKED(4: 0) TEMPLATE;
 
 //   Db2 for i column, schema, and table names have maximum lengths. We define some templates so our
 // software can use consistently sized and typed variables.
-DCL-S tpl_sdk4i_db2_column_name VARCHAR(C_SDK4I_DB2_COLUMN_NAME_MAX_LEN) TEMPLATE;
-DCL-S tpl_sdk4i_db2_schema_name VARCHAR(C_SDK4I_DB2_SCHEMA_NAME_MAX_LEN) TEMPLATE;
-DCL-S tpl_sdk4i_db2_table_name VARCHAR(C_SDK4I_DB2_TABLE_NAME_MAX_LEN) TEMPLATE;
+DCL-S tpl_sdk4i_db_column_name VARCHAR(C_SDK4I_DB_COLUMN_NAME_MAX_LEN) TEMPLATE;
+DCL-S tpl_sdk4i_db_schema_name VARCHAR(C_SDK4I_DB_SCHEMA_NAME_MAX_LEN) TEMPLATE;
+DCL-S tpl_sdk4i_db_table_name VARCHAR(C_SDK4I_DB_TABLE_NAME_MAX_LEN) TEMPLATE;
 
 DCL-S tpl_sdk4i_http_status_code PACKED(3: 0) TEMPLATE;
 
@@ -64,7 +66,7 @@ DCL-S tpl_sdk4i_json_1M VARCHAR(C_SDK4I_SIZE_1MI) CCSID(*UTF8) TEMPLATE;
 //   We define a template that can be used to define variables that will hold dynamically built SQL
 // statements. Because this software is used by people all over the world, we define the SQL
 // template to use UTF-8 encoding by specifying CCSID(*UTF8).
-DCL-S tpl_sdk4i_sql_statement VARCHAR(C_SDK4I_DB2_VARCHAR_MAX_LEN) CCSID(*UTF8) TEMPLATE;
+DCL-S tpl_sdk4i_sql_statement VARCHAR(C_SDK4I_DB_VARCHAR_MAX_LEN) CCSID(*UTF8) TEMPLATE;
 
 //   We define some templates that describe system items.
 // IFS path names can be up to 16MiB in size.
@@ -88,20 +90,20 @@ DCL-S tpl_sdk4i_uuid VARCHAR(36) TEMPLATE;
 // respectively. In an effort to simplify things a little, we define some template variables as INT
 // and UNS values but use the "binary" names we commonly see in documentation.
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=type-integer-format
-DCL-S tpl_sdk4i_ibm_binary1 INT(3) TEMPLATE; // 1-byte integer.
-DCL-S tpl_sdk4i_ibm_binary2 INT(5) TEMPLATE; // 2-byte integer.
-DCL-S tpl_sdk4i_ibm_binary4 INT(10) TEMPLATE; // 4-byte integer.
-DCL-S tpl_sdk4i_ibm_binary8 INT(20) TEMPLATE; // 8-byte integer.
+DCL-S tpl_sdk4i_binary1 INT(3) TEMPLATE; // 1-byte integer. tpl_sdk4i_
+DCL-S tpl_sdk4i_binary2 INT(5) TEMPLATE; // 2-byte integer.
+DCL-S tpl_sdk4i_binary4 INT(10) TEMPLATE; // 4-byte integer.
+DCL-S tpl_sdk4i_binary8 INT(20) TEMPLATE; // 8-byte integer.
 
-DCL-S tpl_sdk4i_ibm_elem UNS(20) TEMPLATE; // %ELEM returns an UNS(20).
-DCL-S tpl_sdk4i_ibm_len INT(20) TEMPLATE; // %LEN returns an INT(20).
-DCL-S tpl_sdk4i_ibm_size UNS(20) TEMPLATE; // %SIZE returns an UNS(20).
+DCL-S tpl_sdk4i_elem UNS(20) TEMPLATE; // %ELEM returns an UNS(20).
+DCL-S tpl_sdk4i_len INT(20) TEMPLATE; // %LEN returns an INT(20).
+DCL-S tpl_sdk4i_size UNS(20) TEMPLATE; // %SIZE returns an UNS(20).
 
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=type-unsigned-format
-DCL-S tpl_sdk4i_ibm_unsigned_binary1 UNS(3) TEMPLATE; // 1-byte unsigned int.
-DCL-S tpl_sdk4i_ibm_unsigned_binary2 UNS(5) TEMPLATE; // 2-byte unsigned int.
-DCL-S tpl_sdk4i_ibm_unsigned_binary4 UNS(10) TEMPLATE; // 4-byte unsigned int.
-DCL-S tpl_sdk4i_ibm_unsigned_binary8 UNS(20) TEMPLATE; // 8-byte unsigned int.
+DCL-S tpl_sdk4i_unsigned_binary1 UNS(3) TEMPLATE; // 1-byte unsigned int.
+DCL-S tpl_sdk4i_unsigned_binary2 UNS(5) TEMPLATE; // 2-byte unsigned int.
+DCL-S tpl_sdk4i_unsigned_binary4 UNS(10) TEMPLATE; // 4-byte unsigned int.
+DCL-S tpl_sdk4i_unsigned_binary8 UNS(20) TEMPLATE; // 8-byte unsigned int.
 
 //   We define some template strings of various sizes, using both the local CCSID as well as *UTF8.
 // This allows us to the LIKE keyword when we define variables in our applications which keeps

@@ -4,6 +4,10 @@
 //
 // DATFMT, DECMPT, and TIMFMT are set to ISO standards.
 //
+// ALWBLK and ALWCPYDTA are, by default, set respectively to *ALLREAD and *OPTIMIZE in the CRTSQL*
+// commands. If you have change those defaults, you might consider adding those options to the
+// SET OPTIONS statement below.
+//
 // DLYPRP and SQLCA are set to optimize performance.
 //
 // EXTIND is set to provide extended indicator support for the programmer.

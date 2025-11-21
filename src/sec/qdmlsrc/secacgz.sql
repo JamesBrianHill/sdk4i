@@ -1,7 +1,7 @@
 -- *************************************************************************************************
---   This table records a history of changes made to the LOGPRGT (SDK4i - Log - Purge Configuration)
--- table.
+--   This source member will associate security actions with security groups in SECACGT.
 --
+-- @author James Brian Hill
 -- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
 -- @license GNU General Public License version 3
 -- @link https://www.gnu.org/licenses/gpl-3.0.html
@@ -19,13 +19,6 @@
 --   You should have received a copy of the GNU General Public License along with this program. If
 -- not, see https://www.gnu.org/licenses/gpl-3.0.html
 -- *************************************************************************************************
-
--- *************************************************************************************************
--- Create a history table to track all changes.
--- *************************************************************************************************
-CREATE OR REPLACE TABLE sdk4i_log_purge_history FOR SYSTEM NAME logpurth LIKE logpurt;
-
--- *************************************************************************************************
--- Label the table.
--- *************************************************************************************************
-LABEL ON TABLE logpurth IS 'SDK4i - LOG - Purge Configuration - History';
+INSERT INTO secacgt (act_id, grp_id)
+SELECT id, 1
+FROM secactt;

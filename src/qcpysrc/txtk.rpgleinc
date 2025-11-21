@@ -136,9 +136,9 @@ END-PR TXT_Q;
 // @return The number of tokens (including delimiters if the caller wants them) in o_token_array.
 ///
 // -------------------------------------------------------------------------------------------------
-DCL-PR TXT_Tokenize LIKE(tpl_sdk4i_ibm_binary4) EXTPROC(*DCLCASE);
+DCL-PR TXT_Tokenize LIKE(tpl_sdk4i_binary4) EXTPROC(*DCLCASE);
   i_str LIKE(tpl_sdk4i_varchar_2M_utf8) OPTIONS(*TRIM) CONST;
-  i_delimiter_array_count LIKE(tpl_sdk4i_ibm_binary4) CONST;
+  i_delimiter_array_count LIKE(tpl_sdk4i_binary4) CONST;
   i_delimiter_array LIKE(tpl_sdk4i_txt_delimiter) DIM(C_SDK4I_TXT_DELIMITER_ARRAY_SIZE)
     OPTIONS(*VARSIZE) CONST;
   o_token_array LIKE(tpl_sdk4i_txt_token) DIM(C_SDK4I_TXT_TOKEN_ARRAY_SIZE)

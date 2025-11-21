@@ -6,7 +6,7 @@
 -- 2 = Critical: critical conditions
 -- 3 = Error: error conditions
 -- 4 = Warning: warning conditions
--- 5 = Notice: normal but significant condition
+-- 5 = Notification: normal but significant condition
 -- 6 = Informational: informational messages
 -- 7 = Debug: debug-level messages
 --
@@ -34,6 +34,6 @@ INSERT INTO loglvlt (id, code, dsc) VALUES
 (2, 'LL_CRT', 'Critical'),
 (3, 'LL_ERR', 'Error'),
 (4, 'LL_WRN', 'Warning'),
-(5, 'LL_NOT', 'Notice'),
+(5, 'LL_NTF', 'Notification'),
 (6, 'LL_INF', 'Informational'),
 (7, 'LL_DBG', 'Debug');

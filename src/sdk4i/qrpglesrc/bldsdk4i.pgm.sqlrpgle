@@ -15,7 +15,7 @@
 //    web services. It defaults to SDK4IPGM.
 // *) C_LIBWEB - this is the library you created to hold all the SDK4i program objects that are web
 //    services. It defaults to SDK4IWEB.
-// *) C_SRC_ROOT - this is the "root" directory for the SDK4i source code. It defaults to
+// *) C_SRC_ROOT - this is the directory for the SDK4i source code. It defaults to
 //    /opt/sdk4i/src.
 //
 //   If you are unfamiliar with Linear Main modules, you can read more about them at the link below.
@@ -62,20 +62,23 @@ CTL-OPT TIMFMT(*ISO);
 // -------------------------------------------------------------------------------------------------
 // Bring in the copybooks we will use.
 //
-// IBMAPIK - IBM API constants, data structures, variables, and procedure definitions.
+// APIK - API constants, data structures, variables, and procedure definitions.
 // PSDSK - Definition of the Program Status Data Structure (PSDS).
 // -------------------------------------------------------------------------------------------------
-/COPY '../../qcpysrc/ibmapik.rpgleinc'
+/COPY '../../qcpysrc/apik.rpgleinc'
 /COPY '../../qcpysrc/psdsk.rpgleinc'
 
 // -------------------------------------------------------------------------------------------------
 // Define global constants, template data structures, and template variables.
 // -------------------------------------------------------------------------------------------------
 DCL-C C_ADD_RESTRICT_ON_DROP 'Y';
+
 DCL-C C_LIBDTA 'SDK4IDTA';
 DCL-C C_LIBPGM 'SDK4IPGM';
 DCL-C C_LIBWEB 'SDK4IWEB';
 DCL-C C_SRC_ROOT '/opt/sdk4i/src/';
+
+/DEFINE Do_COM_SendEmail
 
 // -------------------------------------------------------------------------------------------------
 // Set SQL options before any executable code.
@@ -105,7 +108,7 @@ DCL-PROC AddBindingDirectoryEntry;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
@@ -115,7 +118,7 @@ DCL-PROC AddBindingDirectoryEntry;
   cmd = 'ADDBNDDIRE BNDDIR('+ i_lib +'/'+ i_binding_directory +') OBJ(('+ i_obj_lib +'/'+
     i_obj +'))';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
     is_successful = *OFF;
   ENDMON;
@@ -171,15 +174,14 @@ DCL-PROC BLDSDK4I;
   BuildComponent('NIL': 'SDK4i - NIL - NULL handling utilities': 'SDK4I'); // Needs LOG
   BuildComponent('ERR': 'SDK4i - ERR - Error handling utilities': 'SDK4I'); // Needs LOG
   BuildComponent('TXT': 'SDK4i - TXT - Text utilities': 'SDK4I'); // Needs LOG
+  BuildComponent('COM': 'SDK4i - COM - Communication utilities': 'SDK4I'); // Needs ERR, LOG, TXT
   BuildComponent('VLD': 'SDK4i - VLD - Validation utilities': 'SDK4I'); // Needs LOG
+  BuildComponent('SEC': 'SDK4i - SEC - Security utilities': 'SDK4I'); // Needs ERR, LOG, NIL, VLD
   BuildComponent('WEB': 'SDK4i - WEB - Web service utilities': 'SDK4I'); // Needs ERR, LOG, TXT
 
   // Create a CL program to delete all SDK4i objects.
   CreateCLProgram(C_LIBPGM: 'CLNSDK4I': C_SRC_ROOT + 'sdk4i/qcllesrc/clnsdk4i.pgm.clp':
     'SDK4i - Delete all SDK4i objects');
-
-  // Compile a program to purge log information.
-  CreateSQLRPGLEProgram(C_LIBPGM: 'LOGPURP': C_SRC_ROOT + 'log/qrpglesrc/logpurp.pgm.sqlrpgle');
 
   // -----------------------------------------------
   // Clean up.
@@ -358,10 +360,10 @@ DCL-PROC BuildTables;
   // -----------------------------------------------
   // Create the tables we need to start logging messages.
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logfact.table': C_LIBDTA: *OFF);
-  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logfacz.sql': *OMIT: *OFF);
+  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logfacz.sql': *OMIT: *OFF); // Populate facilities.
 
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/loglvlt.table': C_LIBDTA: *OFF);
-  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/loglvlz.sql': *OMIT: *OFF);
+  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/loglvlz.sql': *OMIT: *OFF); // Populate levels.
 
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logmsgt.table': C_LIBDTA: *OFF); // logfact, loglvlt
 
@@ -370,27 +372,56 @@ DCL-PROC BuildTables;
   RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngz.sql'); // Populate languages.
 
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logmett.table': C_LIBDTA);
-  RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logpurt.temporal': C_LIBDTA);
-  RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logpurth.history': C_LIBDTA); // logpurt
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/loguset.table': C_LIBDTA);
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logwblt.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logwbrt.table': C_LIBDTA); // logmsgt
+
+  RunSQLStatement(C_SRC_ROOT + 'psn/qddlsrc/psnhont.table': C_LIBDTA);
+  RunSQLStatement(C_SRC_ROOT + 'psn/qdmlsrc/psnhonz.sql'); // Populate honorifics.
+  RunSQLStatement(C_SRC_ROOT + 'psn/qddlsrc/psnsfxt.table': C_LIBDTA);
+  RunSQLStatement(C_SRC_ROOT + 'psn/qdmlsrc/psnsfxz.sql'); // Populate suffixes.
+
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secactt.temporal': C_LIBDTA);
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secactth.history': C_LIBDTA); // secactt
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secgrpt.temporal': C_LIBDTA);
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secgrpth.history': C_LIBDTA); // secgrpt
+
+  RunSQLStatement(C_SRC_ROOT + 'tme/qddlsrc/tmetznt.table': C_LIBDTA);
+  RunSQLStatement(C_SRC_ROOT + 'tme/qdmlsrc/tmetznz.sql'); // Populate timezones.
 
   RunSQLStatement(C_SRC_ROOT + 'rgx/qddlsrc/rgxt.table': C_LIBDTA);
   RunSQLStatement(C_SRC_ROOT + 'rgx/qdmlsrc/rgxz.sql'); // Populate regular expressions.
 
   // Create tables/views that have dependencies.
-  RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldmsgt.table': C_LIBDTA); // lngt
-  RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logcfgt.temporal': C_LIBDTA); // altgrpt
+  RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logcfgt.temporal': C_LIBDTA); // loglvlt
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logcfgth.history': C_LIBDTA); // logcfgt
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logcsit.table': C_LIBDTA); // logmsgt
   RunSQLStatement(C_SRC_ROOT + 'log/qddlsrc/logextt.table': C_LIBDTA); // logmsgt
+
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secacgt.temporal': C_LIBDTA); // secactt, secgrpt
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secacgth.history': C_LIBDTA); // secacgt
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secusrt.temporal': C_LIBDTA); // lngt, psnhont, psnsfxt, tmetznt
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secusrth.history': C_LIBDTA); // secusrt
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secsest.table': C_LIBDTA); // lngt, secusrt
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secusat.temporal': C_LIBDTA); // secactt, secusrt
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secusath.history': C_LIBDTA); // secusat
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secusgt.temporal': C_LIBDTA); // secusgt, secusrt
+  RunSQLStatement(C_SRC_ROOT + 'sec/qddlsrc/secusgth.history': C_LIBDTA); // secusgt
+
+  RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldmsgt.table': C_LIBDTA); // lngt
+  RunSQLStatement(C_SRC_ROOT + 'vld/qdmlsrc/vldmsgz.sql'); // Add validation messages.
   RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldrult.temporal': C_LIBDTA); // vldmsgt, rgxt
   RunSQLStatement(C_SRC_ROOT + 'vld/qddlsrc/vldrulth.history': C_LIBDTA); // vldrult
 
   // Populate sane default values for logging and purging logs.
   RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logcfgz.sql'); // Populate log configurations.
-  RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logpurz.sql'); // Populate log purge configurations.
+
+  RunSQLStatement(C_SRC_ROOT + 'sec/qdmlsrc/secactz.sql'); // Populate security actions.
+  RunSQLStatement(C_SRC_ROOT + 'sec/qdmlsrc/secgrpz.sql'); // Populate security groups.
+  RunSQLStatement(C_SRC_ROOT + 'sec/qdmlsrc/secacgz.sql'); // Associate actions/groups.
+  RunSQLStatement(C_SRC_ROOT + 'sec/qdmlsrc/secusrz.sql'); // Populate security users.
+  RunSQLStatement(C_SRC_ROOT + 'sec/qdmlsrc/secusaz.sql'); // Associate users/actions.
+  RunSQLStatement(C_SRC_ROOT + 'sec/qdmlsrc/secusgz.sql'); // Associate users/groups.
 
   // Populate validation messages and rules.
   RunSQLStatement(C_SRC_ROOT + 'lng/qdmlsrc/lngmsgz.sql'); // Add validation messages.
@@ -399,7 +430,15 @@ DCL-PROC BuildTables;
   RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logmsgz.sql'); // Add validation messages.
   RunSQLStatement(C_SRC_ROOT + 'log/qdmlsrc/logrulz.sql'); // Add validation rules.
 
-  RunSQLStatement(C_SRC_ROOT + 'vld/qdmlsrc/vldmsgz.sql'); // Add validation messages.
+  RunSQLStatement(C_SRC_ROOT + 'psn/qdmlsrc/psnmsgz.sql'); // Add validation messages.
+  RunSQLStatement(C_SRC_ROOT + 'psn/qdmlsrc/psnrulz.sql'); // Add validation rules.
+
+  RunSQLStatement(C_SRC_ROOT + 'sec/qdmlsrc/secmsgz.sql'); // Add validation messages.
+  RunSQLStatement(C_SRC_ROOT + 'sec/qdmlsrc/secrulz.sql'); // Add validation rules.
+
+  RunSQLStatement(C_SRC_ROOT + 'tme/qdmlsrc/tmemsgz.sql'); // Add validation messages.
+  RunSQLStatement(C_SRC_ROOT + 'tme/qdmlsrc/tmerulz.sql'); // Add validation rules.
+
   RunSQLStatement(C_SRC_ROOT + 'vld/qdmlsrc/vldrulz.sql'); // Add validation rules.
 
   // After all tables have been created, add versioning to temporal tables.
@@ -445,7 +484,7 @@ DCL-PROC CreateBindingDirectory;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
@@ -455,7 +494,7 @@ DCL-PROC CreateBindingDirectory;
   cmd = 'CRTBNDDIR BNDDIR('+ i_lib +'/'+ i_binding_directory +') AUT(*EXCLUDE) TEXT('+
     C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +')';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-EXCP 'CPF2112'; // The binding directory already exists.
   ON-ERROR;
     is_successful = *OFF;
@@ -500,7 +539,7 @@ DCL-PROC CreateCLProgram;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S do_log_msg LIKE(i_log_msg) INZ(*ON);
   DCL-S dsc LIKE(i_dsc) INZ('');
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
@@ -520,7 +559,7 @@ DCL-PROC CreateCLProgram;
   cmd = 'CRTBNDCL PGM('+ i_lib +'/'+ i_pgm + ') SRCSTMF('+ C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +
     ') TEXT('+ C_SDK4I_QUOTE + dsc + C_SDK4I_QUOTE +') ALWRTVSRC(*NO)';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
     is_successful = *OFF;
   ENDMON;
@@ -563,7 +602,7 @@ DCL-PROC CreateModule;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
@@ -576,7 +615,7 @@ DCL-PROC CreateModule;
         'DATFMT(*ISO) DBGVIEW(*SOURCE) OBJTYPE(*MODULE) OPTION(*EVENTF) OUTPUT(*PRINT) '+
         'RPGPPOPT(*LVL2) TGTRLS(*CURRENT) TIMFMT(*ISO)';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
     is_successful = *OFF;
   ENDMON;
@@ -622,7 +661,7 @@ DCL-PROC CreateServiceProgram;
   // Define local variables.
   // -----------------------------------------------
   DCL-S allow_unresolved LIKE(i_allow_unresolved) INZ('N');
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
@@ -658,7 +697,7 @@ DCL-PROC CreateServiceProgram;
   /ENDIF
 
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
     is_successful = *OFF;
   ENDMON;
@@ -699,7 +738,7 @@ DCL-PROC CreateSQLRPGLEProgram;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
@@ -712,7 +751,7 @@ DCL-PROC CreateSQLRPGLEProgram;
         'DATFMT(*ISO) DBGVIEW(*SOURCE) OPTION(*EVENTF) OUTPUT(*PRINT) '+
         'RPGPPOPT(*LVL2) TGTRLS(*CURRENT) TIMFMT(*ISO)';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
     is_successful = *OFF;
   ENDMON;
@@ -753,7 +792,7 @@ DCL-PROC DeleteObject;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
@@ -762,7 +801,7 @@ DCL-PROC DeleteObject;
   // -----------------------------------------------
   cmd = 'DLTOBJ OBJ('+ i_lib +'/'+ i_object +') OBJTYPE('+ i_type +')';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
     is_successful = *OFF;
   ENDMON;
@@ -907,7 +946,7 @@ DCL-PROC RemoveBindingDirectoryEntry;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
@@ -917,7 +956,7 @@ DCL-PROC RemoveBindingDirectoryEntry;
   cmd = 'RMVBNDDIRE BNDDIR('+ i_lib +'/'+ i_binding_directory +') OBJ(('+ i_obj_lib +'/'+
     i_obj +'))';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
     is_successful = *OFF;
   ENDMON;
@@ -960,7 +999,7 @@ DCL-PROC RunSQLStatement;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S do_log_msg IND INZ(*ON);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
@@ -980,7 +1019,7 @@ DCL-PROC RunSQLStatement;
       ') DATFMT(*ISO) DECMPT(*PERIOD) MARGINS(240) TIMFMT(*ISO) COMMIT(*NONE)';
   ENDIF;
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
     is_successful = *OFF;
   ENDMON;
@@ -1018,7 +1057,7 @@ DCL-PROC SetupLibraryList;
   // -----------------------------------------------
   // Define local variables.
   // -----------------------------------------------
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S is_abend IND INZ(*OFF); // Assume we will end normally.
   DCL-S is_successful IND INZ(*ON); // Assume we will be successful.
 
@@ -1027,7 +1066,7 @@ DCL-PROC SetupLibraryList;
   // -----------------------------------------------
   cmd = 'ADDLIBLE '+ C_LIBPGM + ' *FIRST';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-EXCP 'CPF2103'; // The library already exists in the library list.
   ON-ERROR;
     is_successful = *OFF;
@@ -1035,7 +1074,7 @@ DCL-PROC SetupLibraryList;
 
   cmd = 'ADDLIBLE '+ C_LIBWEB + ' *FIRST';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-EXCP 'CPF2103'; // The library already exists in the library list.
   ON-ERROR;
     is_successful = *OFF;
@@ -1043,7 +1082,7 @@ DCL-PROC SetupLibraryList;
 
   cmd = 'ADDLIBLE '+ C_LIBDTA + ' *FIRST';
   MONITOR;
-    IBM_ExecuteCommand(cmd: %LEN(cmd));
+    API_ExecuteCommand(cmd: %LEN(cmd));
   ON-EXCP 'CPF2103'; // The library already exists in the library list.
   ON-ERROR;
     is_successful = *OFF;

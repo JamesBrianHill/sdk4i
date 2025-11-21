@@ -304,9 +304,9 @@ END-PROC TXT_Q;
 ///
 // -------------------------------------------------------------------------------------------------
 DCL-PROC TXT_Tokenize EXPORT;
-  DCL-PI TXT_Tokenize LIKE(tpl_sdk4i_ibm_binary4);
+  DCL-PI TXT_Tokenize LIKE(tpl_sdk4i_binary4);
     i_str LIKE(tpl_sdk4i_varchar_2M_utf8) OPTIONS(*TRIM) CONST;
-    i_delimiter_array_count LIKE(tpl_sdk4i_ibm_binary4) CONST;
+    i_delimiter_array_count LIKE(tpl_sdk4i_binary4) CONST;
     i_delimiter_array LIKE(tpl_sdk4i_txt_delimiter) DIM(C_SDK4I_TXT_DELIMITER_ARRAY_SIZE) OPTIONS(*VARSIZE) CONST;
     o_token_array LIKE(tpl_sdk4i_txt_token) DIM(C_SDK4I_TXT_TOKEN_ARRAY_SIZE) OPTIONS(*VARSIZE);
     i_return_delimiters IND OPTIONS(*NOPASS: *OMIT) CONST;
@@ -316,16 +316,16 @@ DCL-PROC TXT_Tokenize EXPORT;
   // --------------------------------------------------
   // Define local variables.
   // --------------------------------------------------
-  DCL-S cur_pos LIKE(tpl_sdk4i_ibm_binary4) INZ(1);
+  DCL-S cur_pos LIKE(tpl_sdk4i_binary4) INZ(1);
   DCL-S delimiter_length PACKED(3: 0);
-  DCL-S nxt_pos LIKE(tpl_sdk4i_ibm_binary4);
-  DCL-S prv_pos LIKE(tpl_sdk4i_ibm_binary4) INZ(1);
-  DCL-S tmp_pos LIKE(tpl_sdk4i_ibm_binary4);
+  DCL-S nxt_pos LIKE(tpl_sdk4i_binary4);
+  DCL-S prv_pos LIKE(tpl_sdk4i_binary4) INZ(1);
+  DCL-S tmp_pos LIKE(tpl_sdk4i_binary4);
 
   DCL-S return_delimiters IND;
   DCL-S token LIKE(tpl_sdk4i_txt_token);
-  DCL-S token_count LIKE(tpl_sdk4i_ibm_binary4);
-  DCL-S x LIKE(tpl_sdk4i_ibm_binary4);
+  DCL-S token_count LIKE(tpl_sdk4i_binary4);
+  DCL-S x LIKE(tpl_sdk4i_binary4);
 
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvark.rpgleinc'

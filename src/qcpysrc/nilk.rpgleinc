@@ -44,7 +44,7 @@ DCL-DS tpl_sdk4i_nil_indicator_array_ds QUALIFIED TEMPLATE;
   indicator_array IND DIM(C_SDK4I_SIZE_1KI) OVERLAY(indicator_string);
 END-DS tpl_sdk4i_nil_indicator_array_ds;
 
-DCL-DS tpl_sdk4i_nil_int_array_ds QUALIFIED TEMPLATE;
+DCL-DS tpl_sdk4i_nil_int_array_ds ALIGN(*FULL) QUALIFIED TEMPLATE;
   int_array LIKE(tpl_sdk4i_nil_null_int) DIM(C_SDK4I_SIZE_1KI);
 END-DS tpl_sdk4i_nil_int_array_ds;
 

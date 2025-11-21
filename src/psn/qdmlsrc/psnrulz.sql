@@ -1,6 +1,12 @@
 -- *************************************************************************************************
---   This SQL statement will insert default purge durations into LOGPURT.
+--   This source member will insert rules into VLDRULT related to the PSN component.
 --
+-- NOTE: while IBM i object names can have $, #, and @ in them, we intentionally disallow them in
+--       our validation rules. All three of these characters are "variant", meaning they can change
+--       based on CCSID. For instance, the octothorpe (#) is x7B in CCSID 37 but x7B in CCSID 297
+--       (France), it is the symbol for British Pounds.
+--
+-- @author James Brian Hill
 -- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
 -- @license GNU General Public License version 3
 -- @link https://www.gnu.org/licenses/gpl-3.0.html
@@ -18,5 +24,6 @@
 --   You should have received a copy of the GNU General Public License along with this program. If
 -- not, see https://www.gnu.org/licenses/gpl-3.0.html
 -- *************************************************************************************************
-INSERT INTO logpurt (id) VALUES
-(SELECT host_name FROM qsys2.system_status_info);
+INSERT INTO vldrult (tbl, col, rgx, rgx_id, min_len, max_len, vldmsgt_id) VALUES
+('PSNHONT', 'ID', '\.', 'UTF8_LETTERS_ONLY', 1, 10, 'PSNHONT_ID'),
+('PSNSFXT', 'ID', '\.', 'UTF8_LETTERS_ONLY', 1, 10, 'PSNSFXT_ID');

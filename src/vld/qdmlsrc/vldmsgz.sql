@@ -25,6 +25,7 @@
 -- *************************************************************************************************
 INSERT INTO vldmsgt (id, msg) VALUES
 ('GENERIC_FAILURE', 'An unexpected error has occurred.'),
+('GENERIC_NOT_FOUND', 'The resource was not found.'),
 ('GENERIC_UNAUTHORIZED', 'You are not authorized to perform the requested function.');
 
 -- *************************************************************************************************
@@ -33,5 +34,4 @@ INSERT INTO vldmsgt (id, msg) VALUES
 INSERT INTO vldmsgt (id, msg) VALUES
 ('VLDMSGT_ID', 'A unique identifier for a message. Must be between 1 and 50 alphanumeric characters.'),
 ('VLDMSGT_LNG_ID', 'A valid two-character language ID like en, fr, etc.'),
-('VLDMSGT_MSG', 'The message we want to show to a user. Must be between 1 and 1,024 characters.'),
-('VLDMSGT_LVL_ID', 'A valid error level between 0 (most severe) and 7 (least severe).');
+('VLDMSGT_MSG', 'The message we want to show to a user. Must be between 1 and 1,024 characters.');

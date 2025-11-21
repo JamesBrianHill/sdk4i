@@ -130,8 +130,8 @@ DCL-S tpl_sdk4i_web_uri VARCHAR(8190) TEMPLATE;
 ///
 DCL-DS tpl_sdk4i_web_env_var_ds QUALIFIED TEMPLATE;
   name LIKE(tpl_sdk4i_web_env_var_name) INZ('');
-  type CHAR(1) INZ('S'); // I (for integer) or S (for string).
-  int_value LIKE(tpl_sdk4i_ibm_binary4) INZ(0);
+  type CHAR(1) INZ('S'); // I (for integer) or S (for string). tpl_sdk4i_
+  int_value LIKE(tpl_sdk4i_binary4) INZ(0);
   string_value LIKE(tpl_sdk4i_web_env_var_string_value) INZ('');
 END-DS tpl_sdk4i_web_env_var_ds;
 
@@ -198,14 +198,14 @@ END-DS tpl_sdk4i_web_http_header_ds;
 DCL-PR WEB_CallWebService IND EXTPROC(*DCLCASE);
   i_method LIKE(tpl_sdk4i_web_method) CONST;
   i_url LIKE(tpl_sdk4i_web_uri) CONST;
-  i_http_options_length LIKE(tpl_sdk4i_ibm_len) CONST;
+  i_http_options_length LIKE(tpl_sdk4i_len) CONST;
   i_http_options POINTER VALUE; // UTF-8
   o_rsp_code LIKE(tpl_sdk4i_web_http_status_code);
-  io_rsp_headers_length LIKE(tpl_sdk4i_ibm_len);
+  io_rsp_headers_length LIKE(tpl_sdk4i_len);
   o_rsp_headers POINTER VALUE; // UTF-8
-  io_rsp_payload_length LIKE(tpl_sdk4i_ibm_len);
+  io_rsp_payload_length LIKE(tpl_sdk4i_len);
   o_rsp_payload POINTER VALUE; // UTF-8
-  i_req_payload_length LIKE(tpl_sdk4i_ibm_len) OPTIONS(*NOPASS) CONST;
+  i_req_payload_length LIKE(tpl_sdk4i_len) OPTIONS(*NOPASS) CONST;
   i_req_payload POINTER VALUE OPTIONS(*NOPASS); // UTF-8
   i_blob CHAR(1) OPTIONS(*NOPASS) CONST;
   i_verbose CHAR(1) OPTIONS(*NOPASS) CONST;
@@ -232,10 +232,10 @@ END-PR WEB_CallWebService;
 // Since CLOB variables can be up to 2 147 483 647 bytes in length, a theoretical maximum input
 // would be 1 610 612 735 characters.
 //
-//   We have chosen to continue using the template variables tpl_sdk4i_ibm_base64_input and
-// tpl_sdk4i_ibm_base64_result with their previously defined lengths (2732 and 3643 respectively)
+//   We have chosen to continue using the template variables tpl_sdk4i_base64_input and
+// tpl_sdk4i_base64_result with their previously defined lengths (2732 and 3643 respectively)
 // since we feel they are more than adequate. If you would like to change those values, do so in the
-// src/qcpysrc/ibmapik.rpgleinc source file.
+// src/qcpysrc/apik.rpgleinc source file.
 //
 // Parameters:
 // @param REQUIRED. The username which will automatically be trimmed.
@@ -247,9 +247,9 @@ END-PR WEB_CallWebService;
 // @link https://www.ibm.com/docs/en/i/7.6.0?topic=expressions-cast-specification
 ///
 // -------------------------------------------------------------------------------------------------
-DCL-PR WEB_EncodeCredentials LIKE(tpl_sdk4i_ibm_base64_result) EXTPROC(*DCLCASE);
-  i_username LIKE(tpl_sdk4i_ibm_base64_input) OPTIONS(*TRIM) CONST;
-  i_password LIKE(tpl_sdk4i_ibm_base64_input) OPTIONS(*TRIM) CONST;
+DCL-PR WEB_EncodeCredentials LIKE(tpl_sdk4i_base64_result) EXTPROC(*DCLCASE);
+  i_username LIKE(tpl_sdk4i_base64_input) OPTIONS(*TRIM) CONST;
+  i_password LIKE(tpl_sdk4i_base64_input) OPTIONS(*TRIM) CONST;
 END-PR WEB_EncodeCredentials;
 
 // -------------------------------------------------------------------------------------------------
@@ -267,9 +267,9 @@ END-PR WEB_EncodeCredentials;
 //   retrieved and no default value was provided.
 ///
 // -------------------------------------------------------------------------------------------------
-DCL-PR WEB_GetEnvVarInt LIKE(tpl_sdk4i_ibm_binary4) EXTPROC(*DCLCASE);
+DCL-PR WEB_GetEnvVarInt LIKE(tpl_sdk4i_binary4) EXTPROC(*DCLCASE);
   i_var LIKE(tpl_sdk4i_web_env_var_name) OPTIONS(*TRIM) CONST;
-  i_default LIKE(tpl_sdk4i_ibm_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+  i_default LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
   i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
 END-PR WEB_GetEnvVarInt;
 

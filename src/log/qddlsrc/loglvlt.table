@@ -8,7 +8,7 @@
 -- 2 = Critical: critical conditions (C_SDK4I_LL_CRT)
 -- 3 = Error: error conditions (C_SDK4I_LL_ERR)
 -- 4 = Warning: warning conditions (C_SDK4I_LL_WRN)
--- 5 = Notice: normal but significant condition (C_SDK4I_LL_NOT)
+-- 5 = Notification: normal but significant condition (C_SDK4I_LL_NTF)
 -- 6 = Informational: informational messages (C_SDK4I_LL_INF)
 -- 7 = Debug: debug-level messages (C_SDK4I_LL_DBG)
 --
@@ -40,7 +40,7 @@ CREATE OR REPLACE TABLE sdk4i_log_level FOR SYSTEM NAME loglvlt (
     DECIMAL(1,0) NOT NULL,
 
   -- Data columns.
-  code -- LL_EMG, LL_ALT, LL_CRT, LL_ERR, LL_WRN, LL_NOT, LL_INF, and LL_DBG.
+  code -- LL_EMG, LL_ALT, LL_CRT, LL_ERR, LL_WRN, LL_NTF, LL_INF, and LL_DBG.
     CHAR(6) NOT NULL,
 
   description FOR dsc

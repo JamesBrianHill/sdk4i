@@ -1,0 +1,6 @@
+{
+  "build": {
+    "objlib": "&SDK4I_DATA_LIB"
+  },
+  "version": "1.0.0"
+}

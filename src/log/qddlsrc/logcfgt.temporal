@@ -116,7 +116,7 @@ CREATE OR REPLACE TABLE sdk4i_log_config FOR SYSTEM NAME logcfgt (
   wrncmd -- Command to execute when a WARNING level event (4) is logged.
     VARCHAR(1024) DEFAULT NULL,
 
-  notcmd -- Command to execute when a NOTICE level event (5) is logged.
+  ntfcmd -- Command to execute when a NOTICE level event (5) is logged.
     VARCHAR(1024) DEFAULT NULL,
 
   infcmd -- Command to execute when an INFORMATION level event (6) is logged.
@@ -174,7 +174,7 @@ LABEL ON COLUMN logcfgt (
   crtcmd     IS 'Critical (2)        Level Event Handler',
   errcmd     IS 'Error (3)           Level Event Handler',
   wrncmd     IS 'Warning (4)         Level Event Handler',
-  notcmd     IS 'Notify (5)          Level Event Handler',
+  ntfcmd     IS 'Notification (5)    Level Event Handler',
   infcmd     IS 'Informational (6)   Level Event Handler',
   dbgcmd     IS 'Debug (7)           Level Event Handler'
 );

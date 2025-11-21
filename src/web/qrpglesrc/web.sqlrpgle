@@ -55,15 +55,15 @@ CTL-OPT TEXT('SDK4i - WEB - Web service utilities');
 // -------------------------------------------------------------------------------------------------
 // Bring in the copybooks we will use.
 //
+// APIK - API constants, data structures, variables, and procedure definitions.
 // ERRK - ERR constants, data structures, variables, and procedure definitions.
-// IBMAPIK - constants, data structures, variables, and procedure definitions for IBM APIs.
 // LOGK - LOG constants, data structures, variables, and procedure definitions.
 // NILK - NIL constants, data structures, variables, and procedure definitions.
 // PSDSK - Definition of the Program Status Data Structure (PSDS).
 // TXTK - TXT constants, data structures, variables, and procedure definitions.
 // -------------------------------------------------------------------------------------------------
+/COPY '../../qcpysrc/apik.rpgleinc'
 /COPY '../../qcpysrc/errk.rpgleinc'
-/COPY '../../qcpysrc/ibmapik.rpgleinc'
 /COPY '../../qcpysrc/logk.rpgleinc'
 /COPY '../../qcpysrc/nilk.rpgleinc'
 /COPY '../../qcpysrc/psdsk.rpgleinc'
@@ -138,14 +138,14 @@ DCL-PROC WEB_CallWebService EXPORT;
   DCL-PI WEB_CallWebService IND;
     i_method LIKE(tpl_sdk4i_web_method) CONST;
     i_url LIKE(tpl_sdk4i_web_uri) CONST;
-    i_http_options_length LIKE(tpl_sdk4i_ibm_len) CONST;
+    i_http_options_length LIKE(tpl_sdk4i_len) CONST;
     i_http_options POINTER VALUE; // UTF-8
     o_rsp_code LIKE(tpl_sdk4i_web_http_status_code);
-    io_rsp_headers_length LIKE(tpl_sdk4i_ibm_len);
+    io_rsp_headers_length LIKE(tpl_sdk4i_len);
     o_rsp_headers POINTER VALUE; // UTF-8
-    io_rsp_payload_length LIKE(tpl_sdk4i_ibm_len);
+    io_rsp_payload_length LIKE(tpl_sdk4i_len);
     o_rsp_payload POINTER VALUE; // UTF-8
-    i_req_payload_length LIKE(tpl_sdk4i_ibm_len) OPTIONS(*NOPASS) CONST;
+    i_req_payload_length LIKE(tpl_sdk4i_len) OPTIONS(*NOPASS) CONST;
     i_req_payload POINTER VALUE OPTIONS(*NOPASS); // UTF-8
     i_blob CHAR(1) OPTIONS(*NOPASS) CONST;
     i_verbose CHAR(1) OPTIONS(*NOPASS) CONST;
@@ -200,7 +200,7 @@ DCL-PROC WEB_CallWebService EXPORT;
   CLEAR local_rsp_clob_data;
   CLEAR local_rsp_headers_data;
 
-  IBM_CopyMemory(%ADDR(local_http_options_data): i_http_options: i_http_options_length);
+  API_CopyMemory(%ADDR(local_http_options_data): i_http_options: i_http_options_length);
   local_http_options_len = i_http_options_length;
 
   IF ((i_method = 'PATCH' OR i_method = 'POST' OR i_method = 'PUT') AND
@@ -226,10 +226,10 @@ DCL-PROC WEB_CallWebService EXPORT;
   //   If the caller is providing a Request Payload, copy it to our local variable.
   IF (%PARMS >= %PARMNUM(i_req_payload) AND i_req_payload <> *NULL AND i_req_payload_length > 0);
     IF (blob = 'N');
-      IBM_CopyMemory(%ADDR(local_req_clob_payload_data): i_req_payload: i_req_payload_length);
+      API_CopyMemory(%ADDR(local_req_clob_payload_data): i_req_payload: i_req_payload_length);
       local_req_clob_payload_len = i_req_payload_length;
     ELSE;
-      IBM_CopyMemory(%ADDR(local_req_blob_payload_data): i_req_payload: i_req_payload_length);
+      API_CopyMemory(%ADDR(local_req_blob_payload_data): i_req_payload: i_req_payload_length);
       local_req_blob_payload_len = i_req_payload_length;
     ENDIF;
   ENDIF;
@@ -507,7 +507,7 @@ DCL-PROC WEB_CallWebService EXPORT;
     // Copy response header data back to the caller.
     local_rsp_headers_len = %LEN(%TRIM(local_rsp_headers_data));
     io_rsp_headers_length = %MIN(io_rsp_headers_length: local_rsp_headers_len);
-    IBM_CopyMemory(o_rsp_headers: %ADDR(local_rsp_headers_data): io_rsp_headers_length);
+    API_CopyMemory(o_rsp_headers: %ADDR(local_rsp_headers_data): io_rsp_headers_length);
   ELSE;
     io_rsp_headers_length = 0;
   ENDIF;
@@ -517,13 +517,13 @@ DCL-PROC WEB_CallWebService EXPORT;
     IF (local_rsp_clob_null = C_SDK4I_NOT_NULL AND local_rsp_clob_len > 0);
       local_rsp_clob_len = %LEN(%TRIM(local_rsp_clob_data));
       io_rsp_payload_length = %MIN(io_rsp_payload_length: local_rsp_clob_len);
-      IBM_CopyMemory(o_rsp_payload: %ADDR(local_rsp_clob_data): io_rsp_payload_length);
+      API_CopyMemory(o_rsp_payload: %ADDR(local_rsp_clob_data): io_rsp_payload_length);
     ENDIF;
   ELSE;
     IF (local_rsp_blob_null = C_SDK4I_NOT_NULL AND local_rsp_blob_len > 0);
       local_rsp_blob_len = %LEN(%TRIM(local_rsp_blob_data));
       io_rsp_payload_length = %MIN(io_rsp_payload_length: local_rsp_blob_len);
-      IBM_CopyMemory(o_rsp_payload: %ADDR(local_rsp_blob_data): io_rsp_payload_length);
+      API_CopyMemory(o_rsp_payload: %ADDR(local_rsp_blob_data): io_rsp_payload_length);
     ENDIF;
   ENDIF;
 
@@ -582,10 +582,10 @@ END-PROC WEB_CallWebService;
 // Since CLOB variables can be up to 2 147 483 647 bytes in length, a theoretical maximum input
 // would be 1 610 612 735 characters.
 //
-//   We have chosen to continue using the template variables tpl_sdk4i_ibm_base64_input and
-// tpl_sdk4i_ibm_base64_result with their previously defined lengths (2732 and 3643 respectively)
+//   We have chosen to continue using the template variables tpl_sdk4i_base64_input and
+// tpl_sdk4i_base64_result with their previously defined lengths (2732 and 3643 respectively)
 // since we feel they are more than adequate. If you would like to change those values, do so in the
-// src/qcpysrc/ibmapik.rpgleinc source file.
+// src/qcpysrc/apik.rpgleinc source file.
 //
 // Parameters:
 // @param REQUIRED. The username which will automatically be trimmed.
@@ -598,9 +598,9 @@ END-PROC WEB_CallWebService;
 ///
 // -------------------------------------------------------------------------------------------------
 DCL-PROC WEB_EncodeCredentials EXPORT;
-  DCL-PI WEB_EncodeCredentials LIKE(tpl_sdk4i_ibm_base64_result);
-    i_username LIKE(tpl_sdk4i_ibm_base64_input) OPTIONS(*TRIM) CONST;
-    i_password LIKE(tpl_sdk4i_ibm_base64_input) OPTIONS(*TRIM) CONST;
+  DCL-PI WEB_EncodeCredentials LIKE(tpl_sdk4i_base64_result);
+    i_username LIKE(tpl_sdk4i_base64_input) OPTIONS(*TRIM) CONST;
+    i_password LIKE(tpl_sdk4i_base64_input) OPTIONS(*TRIM) CONST;
   END-PI;
 
   // -----------------------------------------------
@@ -608,8 +608,8 @@ DCL-PROC WEB_EncodeCredentials EXPORT;
   // -----------------------------------------------
   DCL-DS s_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds) INZ(*LIKEDS);
 
-  DCL-S o_base64_encoded_string LIKE(tpl_sdk4i_ibm_base64_result);
-  DCL-S temp_str LIKE(tpl_sdk4i_ibm_base64_input); // Will hold username:password in UTF-8 encoding.
+  DCL-S o_base64_encoded_string LIKE(tpl_sdk4i_base64_result);
+  DCL-S temp_str LIKE(tpl_sdk4i_base64_input); // Will hold username:password in UTF-8 encoding.
 
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvar2k.rpgleinc'
@@ -664,9 +664,9 @@ END-PROC WEB_EncodeCredentials;
 ///
 // -------------------------------------------------------------------------------------------------
 DCL-PROC WEB_GetEnvVarInt EXPORT;
-  DCL-PI WEB_GetEnvVarInt LIKE(tpl_sdk4i_ibm_binary4);
+  DCL-PI WEB_GetEnvVarInt LIKE(tpl_sdk4i_binary4);
     i_var LIKE(tpl_sdk4i_web_env_var_name) OPTIONS(*TRIM) CONST;
-    i_default LIKE(tpl_sdk4i_ibm_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
+    i_default LIKE(tpl_sdk4i_binary4) OPTIONS(*NOPASS: *OMIT) CONST;
     i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
   END-PI;
 
@@ -682,7 +682,7 @@ DCL-PROC WEB_GetEnvVarInt EXPORT;
   // Main logic.
   // -----------------------------------------------
   MONITOR;
-    o_value = %INT(%STR(IBM_GetEnv(i_var)));
+    o_value = %INT(%STR(API_GetEnv(i_var)));
   ON-ERROR;
     IF (%PARMS >= %PARMNUM(i_default) AND %ADDR(i_default) <> *NULL);
       o_value = i_default;
@@ -748,7 +748,7 @@ DCL-PROC WEB_GetEnvVarStr EXPORT;
   // Main logic.
   // -----------------------------------------------
   MONITOR;
-    o_value = %STR(IBM_GetEnv(i_var));
+    o_value = %STR(API_GetEnv(i_var));
   ON-ERROR;
     IF (%PARMS >= %PARMNUM(i_default) AND %ADDR(i_default) <> *NULL);
       o_value = i_default;

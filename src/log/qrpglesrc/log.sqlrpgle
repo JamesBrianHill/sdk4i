@@ -35,12 +35,12 @@ CTL-OPT TEXT('SDK4i - LOG - Logging utilities');
 // -------------------------------------------------------------------------------------------------
 // Bring in the copybooks we will use.
 //
-// IBMAPIK - IBM API constants, data structures, variables, and procedure definitions.
+// APIK - IBM API constants, data structures, variables, and procedure definitions.
 // LOGK - LOG constants, data structures, variables, and procedure definitions.
 // NILK - NIL constants, data structures, variables, and procedure definitions.
 // PSDSK - Definition of the Program Status Data Structure (PSDS).
 // -------------------------------------------------------------------------------------------------
-/COPY '../../qcpysrc/ibmapik.rpgleinc'
+/COPY '../../qcpysrc/apik.rpgleinc'
 /COPY '../../qcpysrc/logk.rpgleinc'
 /COPY '../../qcpysrc/nilk.rpgleinc'
 /COPY '../../qcpysrc/psdsk.rpgleinc'
@@ -101,11 +101,11 @@ DCL-PROC LOG_LogMsg EXPORT;
   DCL-S crtcmd LIKE(tpl_sdk4i_logcfgt_ds.crtcmd);
   DCL-S errcmd LIKE(tpl_sdk4i_logcfgt_ds.errcmd);
   DCL-S wrncmd LIKE(tpl_sdk4i_logcfgt_ds.wrncmd);
-  DCL-S notcmd LIKE(tpl_sdk4i_logcfgt_ds.notcmd);
+  DCL-S ntfcmd LIKE(tpl_sdk4i_logcfgt_ds.ntfcmd);
   DCL-S infcmd LIKE(tpl_sdk4i_logcfgt_ds.infcmd);
   DCL-S dbgcmd LIKE(tpl_sdk4i_logcfgt_ds.dbgcmd);
   DCL-S cfg_lvl LIKE(tpl_sdk4i_logcfgt_ds.logmsgt_id);
-  DCL-S cmd LIKE(tpl_sdk4i_ibm_qcmdexc_cmd);
+  DCL-S cmd LIKE(tpl_sdk4i_qcmdexc_cmd);
   DCL-S do_logcsit LIKE(tpl_sdk4i_logcfgt_ds.logcsit) INZ('N');
   DCL-S do_logextt LIKE(tpl_sdk4i_logcfgt_ds.logextt) INZ('N');
   DCL-S do_logwblt LIKE(tpl_sdk4i_logcfgt_ds.logwblt) INZ('N');
@@ -180,48 +180,48 @@ DCL-PROC LOG_LogMsg EXPORT;
   // particular procedure will override all other settings - exept those for a particular user, etc.
   // We want the settings associated with the most important priority.
   EXEC SQL
-    WITH pty1 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd) AS (
-      SELECT 1, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd
+    WITH pty1 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd) AS (
+      SELECT 1, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd
       FROM logcfgt
       WHERE usr IN (:usrprf_cur, :usrprf_ses)
     ),
-    pty2 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd) AS (
-      SELECT 2, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd
+    pty2 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd) AS (
+      SELECT 2, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd
       FROM logcfgt
       WHERE prc = :i_proc
     ),
-    pty3 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd) AS (
-      SELECT 3, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd
+    pty3 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd) AS (
+      SELECT 3, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd
       FROM logcfgt
       WHERE mod = :mod
     ),
-    pty4 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd) AS (
-      SELECT 4, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd
+    pty4 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd) AS (
+      SELECT 4, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd
       FROM logcfgt
       WHERE pgm = :pgm
     ),
-    pty5 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd) AS (
-      SELECT 5, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd
+    pty5 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd) AS (
+      SELECT 5, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd
       FROM logcfgt
       WHERE lib = :lib
     ),
-    pty6 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd) AS (
-      SELECT 6, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd
+    pty6 (priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd) AS (
+      SELECT 6, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd
       FROM logcfgt
       WHERE sys = :sys
     ),
     composite AS (
-      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd FROM pty1
+      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd FROM pty1
       UNION
-      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd FROM pty2
+      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd FROM pty2
       UNION
-      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd FROM pty3
+      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd FROM pty3
       UNION
-      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd FROM pty4
+      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd FROM pty4
       UNION
-      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd FROM pty5
+      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd FROM pty5
       UNION
-      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, notcmd, infcmd, dbgcmd FROM pty6
+      SELECT priority, logcsit, logextt, logmsgt_id, logwblt, logwbrt, emgcmd, altcmd, crtcmd, errcmd, wrncmd, ntfcmd, infcmd, dbgcmd FROM pty6
     )
     SELECT
       COALESCE(logcsit, 'N'),
@@ -234,10 +234,10 @@ DCL-PROC LOG_LogMsg EXPORT;
       COALESCE(crtcmd, ''),
       COALESCE(errcmd, ''),
       COALESCE(wrncmd, ''),
-      COALESCE(notcmd, ''),
+      COALESCE(ntfcmd, ''),
       COALESCE(infcmd, ''),
       COALESCE(dbgcmd, '')
-    INTO :do_logcsit, :do_logextt, :cfg_lvl, :do_logwblt, :do_logwbrt, :emgcmd, :altcmd, :crtcmd, :errcmd, :wrncmd, :notcmd, :infcmd, :dbgcmd
+    INTO :do_logcsit, :do_logextt, :cfg_lvl, :do_logwblt, :do_logwbrt, :emgcmd, :altcmd, :crtcmd, :errcmd, :wrncmd, :ntfcmd, :infcmd, :dbgcmd
     FROM composite
     ORDER BY priority
     FETCH FIRST 1 ROWS ONLY
@@ -364,7 +364,7 @@ DCL-PROC LOG_LogMsg EXPORT;
     // To avoid a RNF0662 error, we have to put new_id into a temporary variable.
     temp_new_id = %EDITC(new_id: 'X');
     cmd = %SCANRPL(%CHAR('&SDK4I_ID': *UTF8): temp_new_id: %CHAR(cmd: *UTF8));
-    IBM_ExecuteCommand(cmd: %LEN(%TRIM(cmd)));
+    API_ExecuteCommand(cmd: %LEN(%TRIM(cmd)));
   ENDIF;
 
   ON-EXIT log_is_abend;
@@ -548,12 +548,15 @@ DCL-PROC LOG_LogUse EXPORT;
 
   // Log usage if configured to do so.
   IF (do_loguset <> 'N');
-    SaveUseInfo(i_psds_ds: i_proc: do_loguset: do_logmett);
+    SaveUseInfo(i_psds_ds: i_proc: do_loguset);
   ENDIF;
 
   ON-EXIT local_is_abend;
     IF (local_is_abend);
       local_is_successful = *OFF;
+    ENDIF;
+    IF (do_loguset <> 'N');
+      SaveUseInfo(psds_ds: log_proc: do_loguset);
     ENDIF;
     IF (do_logmett = 'Y');
       log_end_ts = %TIMESTAMP(*SYS);
@@ -933,6 +936,7 @@ DCL-PROC SaveMetrics;
           :username :username_null,
           :usrprf_cur)
     WITH NC;
+  ON-EXIT;
 END-PROC SaveMetrics;
 
 // -------------------------------------------------------------------------------------------------
@@ -1047,16 +1051,14 @@ END-PROC SaveRemoteWebServiceInfo;
 // @param REQUIRED. A populated tpl_sdk4i_psds_ds data structure.
 // @param REQUIRED. The name of the calling procedure.
 // @param REQUIRED. Flag indicating usage granularity.
-// @param REQUIRED. A Y/N flag indicating if metric information is being collected.
 // @param OPTIONAL. A tpl_sdk4i_log_user_info_ds data structure.
 ///
 // -------------------------------------------------------------------------------------------------
 DCL-PROC SaveUseInfo;
   DCL-PI SaveUseInfo;
-    i_psds_ds LIKEDS(tpl_sdk4i_psds_ds) OPTIONS(*EXACT) CONST;
+    i_psds_ds LIKEDS(tpl_sdk4i_psds_ds) CONST;
     i_proc LIKE(tpl_sdk4i_logmsgt_ds.prc) OPTIONS(*EXACT) CONST;
     i_loguset LIKE(tpl_sdk4i_logcfgt_ds.loguset) OPTIONS(*EXACT) CONST;
-    i_logmett LIKE(tpl_sdk4i_logcfgt_ds.logmett) OPTIONS(*EXACT) CONST;
     i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
   END-PI;
 
@@ -1071,9 +1073,6 @@ DCL-PROC SaveUseInfo;
   DCL-S cur_week LIKE(tpl_sdk4i_loguset_ds.wk) INZ(C_SDK4I_NULL);
   DCL-S cur_year LIKE(tpl_sdk4i_loguset_ds.yr);
   DCL-S lib LIKE(i_psds_ds.lib);
-  DCL-S local_is_abend LIKE(tpl_sdk4i_is_abend) NULLIND INZ(*OFF);
-  DCL-S local_is_successful LIKE(tpl_sdk4i_is_successful) NULLIND INZ(*ON);
-  DCL-S log_end_ts LIKE(tpl_sdk4i_logmett_ds.end_ts) NULLIND;
   DCL-S mod LIKE(i_psds_ds.mod_prc);
   DCL-S pgm LIKE(i_psds_ds.pgm_prc);
   DCL-S sys LIKE(i_psds_ds.sys);
@@ -1151,12 +1150,4 @@ DCL-PROC SaveUseInfo;
       VALUES (src.sys, src.lib, src.pgm, src.mod, src.prc, src.yr, src.mnth, src.wk, src.d, src.hr, src.mn, 1)
     ELSE IGNORE
     WITH NC;
-  ON-EXIT local_is_abend;
-    IF (local_is_abend);
-      local_is_successful = *OFF;
-    ENDIF;
-    IF (i_logmett = 'Y');
-      log_end_ts = %TIMESTAMP(*SYS);
-      SaveMetrics(psds_ds: log_proc: log_beg_ts: local_is_successful: local_is_abend: log_user_info_ds: log_end_ts);
-    ENDIF;
 END-PROC SaveUseInfo;
