@@ -1,12 +1,15 @@
 # **Procedure: SaveMetrics**
 
-### **Purpose:**
+## **Purpose:**
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 Records performance and execution metrics for a specific program, module, or procedure invocation on IBM i.
 This information is stored in the `LOGMETT` table and is used for analyzing execution success, runtime duration, user context, and abnormal termination indicators (abend flags).
 
 ---
 
-### Parameters
+## Parameters
 
 | Parameter        | Type                                 | Description                                                                                                                                         |
 | ---------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -20,7 +23,7 @@ This information is stored in the `LOGMETT` table and is used for analyzing exec
 
 ---
 
-### Description
+## Description
 
 `SaveMetrics` is responsible for persisting runtime measurement and outcome data for an individual procedure or process execution.
 It is a core component of SDK4i’s metrics subsystem, which supports performance tracking, success/failure auditing, and operational observability across IBM i business applications.
@@ -32,7 +35,7 @@ Optional parameters allow flexible usage—callers may choose to include success
 
 ---
 
-### Captured Information
+## Captured Information
 
 The following fields are inserted into the `LOGMETT` table:
 
@@ -58,7 +61,7 @@ Each field may be nullable to allow flexibility when optional information is not
 
 ---
 
-### Processing Logic
+## Processing Logic
 
 1. **Extract PSDS Data:**
    Copies job name, job number, library, module, program, and user context from `i_psds_ds`.
@@ -81,13 +84,13 @@ Each field may be nullable to allow flexibility when optional information is not
 
 ---
 
-### Example Usage
+## Example Usage
 
 This procedure is not exported from the LOG service program therefore is not accessible to external callers. The only way to trigger the SaveMetrics procedure is by configuring it in the LOGCFGT table: `logmett` = 'Y'.
 
 ---
 
-### Database Dependencies
+## Database Dependencies
 
 | Table           | Description                                                                      |
 | --------------- | -------------------------------------------------------------------------------- |
@@ -96,7 +99,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### Notes
+## Notes
 
 * Designed for SDK4i internal use within performance and operational monitoring components.
 * Fields and data structures are fully compatible with the SDK4i metrics schema.
@@ -106,7 +109,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### **Related Procedures**
+## **Related Procedures**
 
 | Procedure                      | Description                                                                         |
 | ------------------------------ | ----------------------------------------------------------------------------------- |

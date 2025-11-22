@@ -1,6 +1,8 @@
 # Procedure: **LOG_LogMsg**
 
-### Overview
+## Overview
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
 
 The `LOG_LogMsg` procedure records diagnostic and operational messages to the logging subsystem.
 It writes entries to the `LOGMSGT` database table and, based on configuration, may also log call stack, extended runtime, and web service context information.
@@ -10,7 +12,7 @@ It is designed to provide a **centralized, configurable, and extensible** loggin
 
 ---
 
-### Prototype
+## Prototype
 
 ```rpg
 DCL-PROC LOG_LogMsg EXPORT;
@@ -34,7 +36,7 @@ END-PROC;
 
 ---
 
-### Parameters
+## Parameters
 
 | Parameter                      | Type                          | Attributes               | Description                                                                           |
 | ------------------------------ | ----------------------------- | ------------------------ | ------------------------------------------------------------------------------------- |
@@ -49,7 +51,7 @@ END-PROC;
 
 ---
 
-### Functionality Summary
+## Functionality Summary
 
 `LOG_LogMsg` performs the following major functions:
 
@@ -99,7 +101,7 @@ END-PROC;
 
 ---
 
-### Log Level Reference
+## Log Level Reference
 
 | Constant         | Level | Meaning       |
 | ---------------- | ----- | ------------- |
@@ -113,7 +115,7 @@ END-PROC;
 
 ---
 
-### Example Usage
+## Example Usage
 
 #### Example 1: Log a simple error
 
@@ -171,7 +173,7 @@ LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log
 
 ---
 
-### Error Handling and Logging Behavior
+## Error Handling and Logging Behavior
 
 * If an **abnormal termination** occurs (`log_is_abend = *ON`), the procedure logs
   `"Procedure ended abnormally."` via `LOG_LogMsg` and still records usage metrics.
@@ -180,7 +182,7 @@ LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log
 
 ---
 
-### Notes
+## Notes
 
 * The `LOGCFGT` configuration controls the logging behavior for users, programs, modules, and systems.
 * The procedure is idempotent for identical calls but will create distinct log entries for each invocation.
@@ -189,7 +191,7 @@ LOG_LogMsg(psds_ds: log_proc: log_msg: log_cause_info_ds: log_event_info_ds: log
 
 ---
 
-### **Related Procedures**
+## **Related Procedures**
 
 | Procedure                      | Description                                                                         |
 | ------------------------------ | ----------------------------------------------------------------------------------- |

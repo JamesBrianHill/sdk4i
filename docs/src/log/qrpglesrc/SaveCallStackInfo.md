@@ -1,12 +1,15 @@
 # **Procedure: SaveCallStackInfo**
 
-### **Purpose:**
+## **Purpose:**
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 Captures the current job’s call stack information and stores it in the `LOGCSIT` table, associating the captured data with a specific log message record.
 This provides detailed runtime context for debugging, tracing, and post-event analysis of application behavior at the time a log entry was created.
 
 ---
 
-### Parameters
+## Parameters
 
 | Parameter | Type                            | Description                                                                                                                 |
 | --------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -14,7 +17,7 @@ This provides detailed runtime context for debugging, tracing, and post-event an
 
 ---
 
-### Description
+## Description
 
 `SaveCallStackInfo` retrieves the complete call stack for the current job — including all active threads — using the IBM i service `QSYS2.STACK_INFO('*', 'ALL')`.
 It then inserts each stack entry into the `LOGCSIT` table, tagging all rows with the supplied log message ID (`i_id`).
@@ -32,7 +35,7 @@ The captured data provides developers and support teams with a detailed snapshot
 
 ---
 
-### Processing Logic
+## Processing Logic
 
 1. Calls `QSYS2.STACK_INFO('*', 'ALL')` to retrieve active call stack entries.
 2. Performs an `INSERT INTO LOGCSIT ... SELECT` to populate stack data linked to the given `LOGMSGT_ID`.
@@ -43,13 +46,13 @@ Any SQL errors are propagated to the caller.
 
 ---
 
-### Example Usage
+## Example Usage
 
 This procedure is not exported from the LOG service program therefore is not accessible to external callers. The only way to trigger the SaveCallStackInfo procedure is by configuring it in the LOGCFGT table: `logcsit` = 'Y'.
 
 ---
 
-### Database Dependencies
+## Database Dependencies
 
 | Table     | Description                                                                     |
 | --------- | ------------------------------------------------------------------------------- |
@@ -58,7 +61,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### Notes
+## Notes
 
 * Intended for internal use by SDK4i logging procedures.
 * Stack data is retrieved directly from IBM i system services and may include sensitive module or path details.
@@ -66,7 +69,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### **Related Procedures**
+## **Related Procedures**
 
 | Procedure                      | Description                                                                         |
 | ------------------------------ | ----------------------------------------------------------------------------------- |

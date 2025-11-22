@@ -1,12 +1,15 @@
 # **Procedure: SaveRemoteWebServiceInfo**
 
-### **Purpose:**
+## **Purpose:**
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 Records metadata and payload details for outbound (remote) web service requests and responses executed by the current job or process.
 This procedure captures HTTP/S request and response information and writes it to the `LOGWBRT` table for diagnostics, auditing, and performance analysis.
 
 ---
 
-### Parameters
+## Parameters
 
 | Parameter      | Type                            | Description                                                                                                                                                                               |
 | -------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -15,7 +18,7 @@ This procedure captures HTTP/S request and response information and writes it to
 
 ---
 
-### Description
+## Description
 
 `SaveRemoteWebServiceInfo` logs contextual and technical information about outbound web service interactions initiated by SDK4i-enabled applications.
 It captures both network and application-layer attributes — such as destination server, API endpoint, HTTP method, request/response payloads, and status codes — to assist with transaction tracing, debugging, and operational analytics.
@@ -27,7 +30,7 @@ All data is inserted using proper null handling to maintain integrity even when 
 
 ---
 
-### Captured Information
+## Captured Information
 
 The following fields are inserted into the `LOGWBRT` table:
 
@@ -51,7 +54,7 @@ Each field supports null indication for flexibility when data is not available o
 
 ---
 
-### Processing Logic
+## Processing Logic
 
 1. **Extract Field Data**
    Reads each attribute from the input structure `i_logwbrt_ds` and stores it in local variables for SQL compatibility.
@@ -67,13 +70,13 @@ Each field supports null indication for flexibility when data is not available o
 
 ---
 
-### Example Usage
+## Example Usage
 
 This procedure is not exported from the LOG service program therefore is not accessible to external callers. The only way to trigger the SaveRemoteWebServiceInfo procedure is by configuring it in the LOGCFGT table: `logwbrt` = 'Y'.
 
 ---
 
-### Database Dependencies
+## Database Dependencies
 
 | Table     | Description                                                                    |
 | --------- | ------------------------------------------------------------------------------ |
@@ -82,7 +85,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### Notes
+## Notes
 
 * Intended for use by SDK4i service wrappers, middleware, and integration layers performing HTTP or RESTful requests from IBM i.
 * All parameters are optional except the parent log message identifier (`i_id`).
@@ -92,7 +95,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### **Related Procedures**
+## **Related Procedures**
 
 | Procedure                      | Description                                                                         |
 | ------------------------------ | ----------------------------------------------------------------------------------- |

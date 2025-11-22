@@ -1,12 +1,15 @@
 # **Procedure: SaveUseInfo**
 
-### **Purpose:**
+## **Purpose:**
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 Tracks and records execution frequency of individual procedures, programs, or modules on IBM i systems.
 This procedure maintains cumulative usage statistics by configurable time intervals (year, month, week, day, hour, or minute) and writes or updates records in the `LOGUSET` table.
 
 ---
 
-### Parameters
+## Parameters
 
 | Parameter   | Type                                 | Description                                                                                                         |
 | ----------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
@@ -16,7 +19,7 @@ This procedure maintains cumulative usage statistics by configurable time interv
 
 ---
 
-### Description
+## Description
 
 `SaveUseInfo` is part of the SDK4i operational analytics subsystem.
 It captures **usage metrics** for monitored procedures and components, incrementing a counter that represents how often a specific procedure, program, or module is executed.
@@ -43,7 +46,7 @@ All timestamp values are derived from the IBM i system clock at runtime, ensurin
 
 ---
 
-### Processing Logic
+## Processing Logic
 
 1. **Extract Context**
    Retrieves system, library, program, and module identifiers from the provided `i_psds_ds` structure.
@@ -67,12 +70,12 @@ All timestamp values are derived from the IBM i system clock at runtime, ensurin
 
 ---
 
-### Example Usage
+## Example Usage
 
 This procedure is not exported from the LOG service program therefore is not accessible to external callers. The only way to trigger the SaveUseInfo procedure is by configuring it in the LOGCFGT table: `loguset` = 'Y', 'M', 'W', 'D', 'H', or 'I'.
 ---
 
-### Database Dependencies
+## Database Dependencies
 
 | Table     | Description                                                                                               |
 | --------- | --------------------------------------------------------------------------------------------------------- |
@@ -86,7 +89,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### Notes
+## Notes
 
 * `SaveUseInfo` supports both operational and analytical logging without performance impact; UPSERT operations are efficient even under high call volumes.
 * The granularity (`i_loguset`) should be configured via SDK4i settings (`LOGCFGT.LOGUSET`) for consistency across the environment.
@@ -96,7 +99,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### **Related Procedures**
+## **Related Procedures**
 
 | Procedure                      | Description                                                                         |
 | ------------------------------ | ----------------------------------------------------------------------------------- |

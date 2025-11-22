@@ -1,6 +1,9 @@
 # Procedure: **VLD_GetMsg**
 
 ## Overview
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 The `VLD_GetMsg` procedure retrieves a localized validation message from the `VLDMSGT` table based on the provided message ID and optional language code.  
 If no language code is provided, the procedure defaults to `'en'` (English).  
 If any error occurs during SQL processing, the procedure logs the error details using the logging framework and returns a fallback error message.
@@ -58,6 +61,6 @@ message = VLD_GetMsg(messageId : *OMIT : *OMIT);
 
 | Procedure        | Description                                                         |
 | ---------------- | ------------------------------------------------------------------- |
+| `ERR_IsSQLError` | Checks for SQL error conditions and returns diagnostic information. |
 | `LOG_LogMsg`     | Logs structured error or informational messages.                    |
 | `LOG_LogUse`     | Logs usage metrics including success/abend state.                   |
-| `ERR_IsSQLError` | Checks for SQL error conditions and returns diagnostic information. |

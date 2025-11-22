@@ -2,6 +2,8 @@
 
 ## **Overview**
 
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 `VLD_IsValid` is a general-purpose validation procedure that validates data values based on metadata-driven validation rules stored in a rules table (`VLDRULT`). This procedure supports validation of **strings**, **numbers**, **dates**, **times**, and **timestamps**, as well as **foreign key relationships**.
 
 The procedure dynamically determines applicable validation rules for a specific table column, including regular expressions, length constraints, min/max ranges, and foreign key references. It also supports column nullability, retrieving the `IS_NULLABLE` attribute from system catalogs.

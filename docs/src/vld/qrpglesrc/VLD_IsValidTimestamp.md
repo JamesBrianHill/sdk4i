@@ -2,6 +2,8 @@
 
 ## **Overview**
 
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 The `VLD_IsValidTimestamp` procedure validates whether a given timestamp value falls within a defined minimum and maximum range. If the timestamp is null or falls outside the valid range, the procedure returns *OFF (false). If the timestamp is valid, it returns *ON (true).
 
 This procedure also integrates with the logging framework to record abnormal terminations and usage information. This ensures that timestamp validations can be audited and monitored effectively.

@@ -1,12 +1,15 @@
 # **Procedure: SaveExtendedInfo**
 
-### **Purpose:**
+## **Purpose:**
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 Captures extended job and environment information for the current IBM i job and stores it in the `LOGEXTT` table.
 This information is linked to a specific log message record (`LOGMSGT_ID`) to provide detailed runtime and system context at the time of logging.
 
 ---
 
-### Parameters
+## Parameters
 
 | Parameter | Type                            | Description                                                                                                                       |
 | --------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -14,7 +17,7 @@ This information is linked to a specific log message record (`LOGMSGT_ID`) to pr
 
 ---
 
-### Description
+## Description
 
 `SaveExtendedInfo` collects an extensive set of attributes from the current IBM i job using the **QSYS2.JOB_INFO** service and several environment-level special registers (via `SYSIBM.SYSDUMMY1`).
 It then inserts this information into the `LOGEXTT` table, associating it with the provided `LOGMSGT_ID`.
@@ -25,7 +28,7 @@ This procedure is part of the **SDK4i logging framework** and is typically calle
 
 ---
 
-### Captured Information
+## Captured Information
 
 `SaveExtendedInfo` inserts a rich collection of system attributes into the `LOGEXTT` table, including:
 
@@ -50,7 +53,7 @@ All data is retrieved dynamically at runtime, ensuring the logged context reflec
 
 ---
 
-### Processing Logic
+## Processing Logic
 
 1. Performs a `SELECT` from `QSYS2.JOB_INFO` filtered for the current active job (`WHERE JOB_NAME = QSYS2.JOB_NAME`).
 2. Enriches the data with current SQL environment values obtained from `SYSIBM.SYSDUMMY1`.
@@ -61,13 +64,13 @@ This design minimizes database I/O while ensuring atomic insertion of environmen
 
 ---
 
-### Example Usage
+## Example Usage
 
 This procedure is not exported from the LOG service program therefore is not accessible to external callers. The only way to trigger the SaveExtendedInfo procedure is by configuring it in the LOGCFGT table: `logextt` = 'Y'.
 
 ---
 
-### Database Dependencies
+## Database Dependencies
 
 | Table     | Description                                                                                 |
 | --------- | ------------------------------------------------------------------------------------------- |
@@ -76,7 +79,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### Notes
+## Notes
 
 * This procedure is intended for internal use by the SDK4i logging subsystem.
 * All data is collected from IBM i system views (`QSYS2.JOB_INFO`, `SYSIBM.SYSDUMMY1`) and special registers (`QSYS2.PROCESS_ID`, `QSYS2.THREAD_ID`).
@@ -85,7 +88,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### **Related Procedures**
+## **Related Procedures**
 
 | Procedure                      | Description                                                                         |
 | ------------------------------ | ----------------------------------------------------------------------------------- |

@@ -2,6 +2,8 @@
 
 ## **Overview**
 
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 The `VLD_IsValidNumber` procedure validates whether a given numeric value is within an allowed minimum and maximum range.
 
 The procedure first checks whether the provided numeric value is `NULL`. If so, the validation fails. If the value is not `NULL`, it is compared against the defined minimum and maximum bounds. If it falls outside the valid range, the procedure returns `*OFF` to indicate failure.

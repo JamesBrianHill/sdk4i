@@ -1,6 +1,8 @@
 # **Procedure: LOG_LogUse**
 
-### **Purpose**
+## **Purpose**
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
 
 The `LOG_LogUse` procedure records metrics and usage information for a program or procedure execution within the IBM i SDK logging framework.
 It determines — based on configuration settings in the **LOGCFGT** table — whether execution metrics and/or usage events should be logged.
@@ -8,7 +10,7 @@ If logging is enabled, it writes records to the appropriate log tables by invoki
 
 ---
 
-### **Prototype Definition**
+## **Prototype Definition**
 
 ```rpg
 DCL-PROC LOG_LogUse EXPORT;
@@ -26,7 +28,7 @@ END-PROC LOG_LogUse;
 
 ---
 
-### **Parameters**
+## **Parameters**
 
 | Parameter            | Type / Definition                    | Required | Description                                                                                                                                                                                               |
 | -------------------- | ------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -40,7 +42,7 @@ END-PROC LOG_LogUse;
 
 ---
 
-### **Description**
+## **Description**
 
 The `LOG_LogUse` procedure performs configurable logging of both **metrics** (execution times, success/failure state) and **usage** (when and by whom a procedure is called).
 
@@ -59,7 +61,7 @@ If neither metrics nor usage logging is enabled, the procedure exits immediately
 
 ---
 
-### **Processing Steps**
+## **Processing Steps**
 
 1. **Extract runtime context**
 
@@ -92,7 +94,7 @@ If neither metrics nor usage logging is enabled, the procedure exits immediately
 
 ---
 
-### **Error Handling**
+## **Error Handling**
 
 * The procedure does not raise exceptions directly.
 * SQL operations use `WITH NC` to avoid commitment control issues.
@@ -100,7 +102,7 @@ If neither metrics nor usage logging is enabled, the procedure exits immediately
 
 ---
 
-### **Example Usage**
+## **Example Usage**
 
 ```rpg
 DCL-PROC my_procedure;
@@ -133,7 +135,7 @@ DCL-PROC my_procedure;
 
 ---
 
-### **Notes**
+## **Notes**
 
 * The **LOGCFGT** table must be properly configured for this procedure to perform any logging.
 * When both metrics and usage logging are disabled, this procedure executes with negligible performance impact.
@@ -141,7 +143,7 @@ DCL-PROC my_procedure;
 
 ---
 
-### **Related Procedures**
+## **Related Procedures**
 
 | Procedure                      | Description                                                                         |
 | ------------------------------ | ----------------------------------------------------------------------------------- |

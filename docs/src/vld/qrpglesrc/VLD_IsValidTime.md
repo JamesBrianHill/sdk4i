@@ -2,6 +2,8 @@
 
 ## **Overview**
 
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 The `VLD_IsValidTime` procedure validates whether a given time value falls within a specified minimum and maximum time range. If the time is null or outside the valid range, the procedure returns *OFF (false). If the time is valid, it returns *ON (true).
 
 This procedure also integrates with the system logging framework to record abnormal terminations and usage information, ensuring traceability and ease of troubleshooting.

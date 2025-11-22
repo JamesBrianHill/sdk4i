@@ -47,7 +47,7 @@ SDK4i uses modern RPG with embedded SQL and functionality provided by the curren
 - Creation of some new libraries to keep SDK4i self-contained is recommended but not required.
 - Creation of a proper IFS directory (such as `/opt/sdk4i`) is recommended for permanent installation but you can upload the source to your personal directory if you just want to give it a test drive.
 
-Step-by-step installation instructions are available in a separate document.
+Step-by-step installation instructions are available in a [separate document](INSTALL.md).
 
 ## Disclaimers
 This software is provided "as-is" without warranty of any kind. The authors are not affiliated with IBM Corporation. IBM, IBM i, Db2, and RPG are trademarks or registered trademarks of International Business Machines Corportation.

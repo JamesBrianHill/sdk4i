@@ -2,6 +2,8 @@
 
 ## **Overview**
 
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 The `VLD_IsValidDate` procedure validates whether a given date value falls within a specified minimum and maximum date range.
 
 If the input date value is null, the procedure immediately returns `*OFF`. If the date is outside the defined range, it also returns `*OFF`. When the value is valid and within the range, the procedure returns `*ON`.

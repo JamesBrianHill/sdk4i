@@ -1,6 +1,9 @@
 # Procedure **VLD_IsValidString**
 
 ## Overview
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 The `VLD_IsValidString` procedure validates a string value against a regular expression pattern using the SQL function `REGEXP_LIKE`.  
 If the string matches the provided regular expression, the procedure returns `*ON` (true). If it does not match or an error occurs, the procedure returns `*OFF` (false).
 

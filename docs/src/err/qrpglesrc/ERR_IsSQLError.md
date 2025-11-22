@@ -1,6 +1,8 @@
 # Procedure: **ERR_IsSQLError**
 
-### Overview
+## Overview
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
 
 The `ERR_IsSQLError` procedure analyzes the SQL diagnostics from the most recent SQL operation to determine whether an SQL error occurred. It retrieves detailed information from the SQL diagnostics area using `GET DIAGNOSTICS` and populates the provided diagnostics data structure with message, SQLSTATE, and context details.
 
@@ -13,7 +15,7 @@ Optional parameters allow specifying a list of SQLSTATE codes that are permitted
 
 ---
 
-### Prototype
+## Prototype
 
 ```rpg
 DCL-PROC ERR_IsSQLError EXPORT;
@@ -32,7 +34,7 @@ END-PROC;
 
 ---
 
-### Parameters
+## Parameters
 
 | Name                                 | Type                               | Attributes        | Description                                                                      |
 | ------------------------------------ | ---------------------------------- | ----------------- | -------------------------------------------------------------------------------- |
@@ -43,7 +45,7 @@ END-PROC;
 
 ---
 
-### Return Value
+## Return Value
 
 * **Type:** `IND` (Indicator variable)
 * **Meaning:**
@@ -53,7 +55,7 @@ END-PROC;
 
 ---
 
-### Processing Logic
+## Processing Logic
 
 1. **Retrieve SQL Diagnostics**
 
@@ -84,7 +86,7 @@ END-PROC;
 
 ---
 
-### Example Usage
+## Example Usage
 
 #### Example 1: Simple SQL Error Check
 
@@ -117,7 +119,7 @@ ENDIF;
 
 ---
 
-### Notes
+## Notes
 
 * Use this procedure after **any embedded SQL operation** to safely check for errors and capture diagnostic info.
 * The `o_diagnostics_ds` structure is fully populated for logging or display.
@@ -126,7 +128,9 @@ ENDIF;
 
 ---
 
-### Related Procedures
+## Related Procedures
 
-* [`LOG_LogMsg`](../../log/qrpglesrc/LOG_LogMsg.md) — Write messages to the application log.
-* [`LOG_LogUse`](../../log/qrpglesrc/LOG_LogUse.md) — Record procedure usage and capture metrics.
+| Procedure         | Description                                                                                                                 |
+| ----------------- | 
+| [**`LOG_LogMsg`**](../../log/qrpglesrc/LOG_LogMsg.md)      | Writes a log message including cause data, event data, and context derived from the caller and runtime environment.         |
+| [**`LOG_LogUse`**](../../log/qrpglesrc/LOG_LogUse.md)      | Logs usage metrics for the procedure, including start time, end time, success indicators, and abend status.                 |

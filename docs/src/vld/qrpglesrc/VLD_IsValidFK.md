@@ -2,6 +2,8 @@
 
 ## **Overview**
 
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 The `VLD_IsValidFK` procedure validates whether a provided value exists in a target table and column, effectively performing a foreign key existence check.
 
 The procedure dynamically builds and prepares a SQL statement using the provided foreign table, column, and optional host/library values. It then executes a `SELECT COUNT(*)` against the specified table and determines if at least one matching record exists.

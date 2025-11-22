@@ -1,12 +1,15 @@
 # **Procedure: SaveLocalWebServiceInfo**
 
-### **Purpose:**
+## **Purpose:**
+
+NOTE: Documentation created by AI but not yet vetted by a human. Be skeptical.
+
 Captures detailed information about a local web service request and response associated with a specific log message.
 This data is stored in the `LOGWBLT` table, allowing each log message to be correlated with the originating web service call, its request details, and its response metadata.
 
 ---
 
-### Parameters
+## Parameters
 
 | Parameter      | Type                            | Description                                                                                                                                                                                                      |
 | -------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -15,7 +18,7 @@ This data is stored in the `LOGWBLT` table, allowing each log message to be corr
 
 ---
 
-### Description
+## Description
 
 `SaveLocalWebServiceInfo` records contextual details about the current web service transaction that triggered a logged event.
 It is designed for use within SDK4i logging and diagnostic routines that execute in the context of an HTTP or REST-based service running locally on IBM i.
@@ -27,7 +30,7 @@ This stored information helps correlate system-level logging events with their c
 
 ---
 
-### Captured Information
+## Captured Information
 
 The following attributes are persisted to the `LOGWBLT` table:
 
@@ -49,7 +52,7 @@ Each field supports nullability to accommodate partial or optional web service d
 
 ---
 
-### Processing Logic
+## Processing Logic
 
 1. Initialize all local variables and null indicators.
 2. Extract field values from the input data structure `i_logwblt_ds`.
@@ -61,13 +64,13 @@ The operation is performed with `WITH NC` (no commit), allowing the caller to co
 
 ---
 
-### Example Usage
+## Example Usage
 
 This procedure is not exported from the LOG service program therefore is not accessible to external callers. The only way to trigger the SaveLocalWebServiceInfo procedure is by configuring it in the LOGCFGT table: `logwblt` = 'Y'.
 
 ---
 
-### Database Dependencies
+## Database Dependencies
 
 | Table     | Description                                                                    |
 | --------- | ------------------------------------------------------------------------------ |
@@ -76,7 +79,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### Notes
+## Notes
 
 * This procedure is designed for internal SDK4i use within web service or API contexts.
 * Supports null indicators for optional fields to ensure compatibility with incomplete data structures.
@@ -85,7 +88,7 @@ This procedure is not exported from the LOG service program therefore is not acc
 
 ---
 
-### **Related Procedures**
+## **Related Procedures**
 
 | Procedure                      | Description                                                                         |
 | ------------------------------ | ----------------------------------------------------------------------------------- |
