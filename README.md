@@ -13,21 +13,21 @@ More details about the LOG component are available in it's [README](./docs/src/l
 ## Validation (VLD)
 The VLD component allows a programmer to define validation rules for every column in every table (or every field in every file if you prefer). These rules can be anything from basic min/max values or foreign key relationships (without any constraints being defined in the database) to powerful regular expressions.
 
-More details about the VLD component are available in it's README.
+More details about the VLD component are available in it's [README](./docs/src/vld/README.md).
 
 ## Security (SEC)
 Security is critical and the SEC component gives a programmer the ability to define users (based on local IBM i user profiles AND/OR externally defined users) and the actions they are authorized to perform. Groups can be defined to make management of users and actions simpler.
 
 The SEC component does not use the outdated role-based security model. Instead, it utilizes a model called "Sliding Window Authorization" based on the Principle of Least Privilege and time-bounded authorizations where user activity can (sometimes) automatically renew the time-bound authorizations.
 
-You can read more about Sliding Window Authorization and other functionality provided by the SEC component on it's README.
+You can read more about Sliding Window Authorization and other functionality provided by the SEC component on it's [README](./docs/src/sec/README.md).
 
 ## Summary
 There are other components available in SDK4i, all available for you to use as much or as little as you need. The three highlighted above, LOG, VLD, and SEC, are the foundation we all need for our projects. Here are some of the other components available:
-- ERR component: error handling utilities
+- ERR component: error handling utilities ([README](./docs/src/err/README.md))
 - NIL component: NULL handling utilities
-- TXT component: text-related utilities (check out TXT_Q to help build dynamic embedded SQL statements)
-- WEB component: utilities for calling remote web services AND for hosting local web services on IBM i
+- TXT component: text-related utilities (check out TXT_Q to help build dynamic embedded SQL statements) ([README](./docs/src/txt/README.md))
+- WEB component: utilities for calling remote web services AND for hosting local web services on IBM i ([README](./docs/src/web/README.md))
 
 SDK4i uses modern RPG with embedded SQL and functionality provided by the current versions of IBM i - 7.5 and 7.6. Inside, you will find the use of:
 - [System-Period Temporal Tables](https://www.ibm.com/docs/en/i/7.6.0?topic=administration-working-system-period-temporal-tables)

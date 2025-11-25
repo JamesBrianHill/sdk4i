@@ -601,6 +601,8 @@ DCL-PROC VLD_IsValidDate EXPORT;
   // --------------------------------------------------
   // Define local variables.
   // --------------------------------------------------
+  DCL-S temp_date DATE;
+
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvark.rpgleinc'
 
@@ -611,6 +613,18 @@ DCL-PROC VLD_IsValidDate EXPORT;
     log_is_successful = *OFF;
     RETURN log_is_successful;
   ENDIF;
+
+  // Make sure the value of i_date is valid. If a DATE variable is declared inside a data structure
+  // it is possible for that variable to be equal to *BLANKS if the programmer didn't initialize it.
+  // If the value is invalid, it should result in a RNX0112 error (Date, Time or Timestamp value is
+  // not valid). We don't care what the specific error is so rather than do an ON-EXCP for RNX0112,
+  // we just use ON-ERROR.
+  MONITOR;
+    temp_date = i_date;
+  ON-ERROR;
+    log_is_successful = *OFF;
+    RETURN log_is_successful;
+  ENDMON;
 
   // Perform the validation.
   IF (i_date < i_min_date OR i_date > i_max_date);
@@ -801,6 +815,8 @@ DCL-PROC VLD_IsValidNumber EXPORT;
   // --------------------------------------------------
   // Define local variables.
   // --------------------------------------------------
+  DCL-S temp_num LIKE(i_num);
+
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvark.rpgleinc'
 
@@ -811,6 +827,14 @@ DCL-PROC VLD_IsValidNumber EXPORT;
     log_is_successful = *OFF;
     RETURN log_is_successful;
   ENDIF;
+
+  // Ensure that i_num is a valid number.
+  MONITOR;
+    temp_num = i_num;
+  ON-ERROR;
+    log_is_successful = *OFF;
+    RETURN log_is_successful;
+  ENDMON;
 
   // Perform the validation.
   IF (i_num < i_min_num OR i_num > i_max_num);
@@ -949,6 +973,8 @@ DCL-PROC VLD_IsValidTime EXPORT;
   // --------------------------------------------------
   // Define local variables.
   // --------------------------------------------------
+  DCL-S temp_time TIME;
+
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvark.rpgleinc'
 
@@ -959,6 +985,18 @@ DCL-PROC VLD_IsValidTime EXPORT;
     log_is_successful = *OFF;
     RETURN log_is_successful;
   ENDIF;
+
+  // Make sure the value of i_time is valid. If a TIME variable is declared inside a data structure
+  // it is possible for that variable to be equal to *BLANKS if the programmer didn't initialize it.
+  // If the value is invalid, it should result in a RNX0112 error (Date, Time or Timestamp value is
+  // not valid). We don't care what the specific error is so rather than do an ON-EXCP for RNX0112,
+  // we just use ON-ERROR.
+  MONITOR;
+    temp_time = i_time;
+  ON-ERROR;
+    log_is_successful = *OFF;
+    RETURN log_is_successful;
+  ENDMON;
 
   // Perform the validation.
   IF (i_time < i_min_time OR i_time > i_max_time);
@@ -1006,6 +1044,8 @@ DCL-PROC VLD_IsValidTimestamp EXPORT;
   // --------------------------------------------------
   // Define local variables.
   // --------------------------------------------------
+  DCL-S temp_ts TIMESTAMP;
+
   // Bring in variables associated with logging.
   /COPY '../../qcpysrc/logvark.rpgleinc'
 
@@ -1016,6 +1056,18 @@ DCL-PROC VLD_IsValidTimestamp EXPORT;
     log_is_successful = *OFF;
     RETURN log_is_successful;
   ENDIF;
+
+  // Make sure the value of i_ts is valid. If a TIMESTAMP variable is declared inside a data structure
+  // it is possible for that variable to be equal to *BLANKS if the programmer didn't initialize it.
+  // If the value is invalid, it should result in a RNX0112 error (Date, Time or Timestamp value is
+  // not valid). We don't care what the specific error is so rather than do an ON-EXCP for RNX0112,
+  // we just use ON-ERROR.
+  MONITOR;
+    temp_ts = i_ts;
+  ON-ERROR;
+    log_is_successful = *OFF;
+    RETURN log_is_successful;
+  ENDMON;
 
   // Perform the validation.
   IF (i_ts < i_min_ts OR i_ts > i_max_ts);
