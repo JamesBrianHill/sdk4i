@@ -77,36 +77,11 @@ CRTSQLRPGI OBJ(SDK4IPGM/BLDSDK4I) SRCSTMF('/opt/sdk4i/src/qrpglesrc/bldsdk4i.pgm
 
 You should now have a program (BLDSDK4I) that will build all of the components in SDK4i.
 
-You can call that program in one of two ways:
+You can call that program in the usual way:
 
 ```clp
 CALL SDK4IPGM/BLDSDK4I
 ```
-
-or the recommended way:
-
-```clp
-CALL SDK4IPGM/BLDSDK4I PARM('Y')
-```
-
-By passing a parameter of `Y`, we tell the build program to also populate some configuration tables with default values:
-- LOGCFGT will have one row in it indicating for the current LPAR:
-  - we want to log error messages at the ERROR level or higher in LOGMSGT.
-  - we want to log metrics in LOGMETT.
-  - we want to log usage counts by day in LOGUSET.
-  - we want to log local web service information in LOGWBLT when a message is logged in LOGMSGT.
-  - we want to log remote web service information in LOGWBRT when a message is logged in LOGMSGT.
-- LOGPURT will have one row in it indicating how long to keep messages in LOGMSGT:
-  - we will keep EMERGENCY level messages for 731 days.
-  - we will keep ALERT level messages for 365 days.
-  - we will keep CRITICAL level messages for 180 days.
-  - we will keep ERROR level messages for 180 days.
-  - we will keep WARNING level messages for 90 days.
-  - we will keep NOTIFICATION level messages for 60 days.
-  - we will keep INFORMATIONAL level messages for 30 days.
-  - we will keep DEBUG level messages for 10 days.
-  - we will keep 731 days worth of metric data in LOGMETT.
-  - we will keep 731 days worth of usages data in LOGUSET.
 
 After you call the BLDSDK4I program, you can query LOGMSGT to see the results:
 

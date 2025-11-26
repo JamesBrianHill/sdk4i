@@ -29,10 +29,10 @@ There are other components available in SDK4i, all available for you to use as m
 - TXT component: text-related utilities (check out TXT_Q to help build dynamic embedded SQL statements) ([README](./docs/src/txt/README.md))
 - WEB component: utilities for calling remote web services AND for hosting local web services on IBM i ([README](./docs/src/web/README.md))
 
-SDK4i uses modern RPG with embedded SQL and functionality provided by the current versions of IBM i - 7.5 and 7.6. Inside, you will find the use of:
+SDK4i uses modern RPG with embedded SQL and functionality provided by the current versions of IBM i. Inside, you will find the use of:
 - [System-Period Temporal Tables](https://www.ibm.com/docs/en/i/7.6.0?topic=administration-working-system-period-temporal-tables)
 - The [RESTRICT ON DROP](https://www.ibm.com/docs/en/i/7.6.0?topic=object-restrict-drop) attribute (optional)
-- SQL for all input and output - no record-level-access :hot_pepper:
+- :hot_pepper: SQL for all input and output - no record-level-access
 - [ON-EXIT](https://www.ibm.com/docs/en/i/7.6.0?topic=codes-exit-exit) is used in every procedure
 - [*UTF8](https://www.ibm.com/docs/en/i/7.6.0?topic=keywords-ccsid-definition-keyword) variables in RPG and [CCSID(1208)](https://www.ibm.com/docs/en/i/7.6.0?topic=keywords-ccsid-definition-keyword) columns in Db2 for i
 - [NULL](https://www.ibm.com/docs/en/i/7.6.0?topic=types-nulls)-capable columns and variables
@@ -41,11 +41,19 @@ SDK4i uses modern RPG with embedded SQL and functionality provided by the curren
 - Completely free-format RPG with lines up to 240 characters long (this is a self-imposed limit)
 
 ## Requirements and Installation
-- Requires IBM i 7.5 or higher.
+- IBM i version 7.4 or higher (see additional notes below)
 - The ability to upload source code to the IFS.
 - All SDK4i tables must be journaled.
 - Creation of some new libraries to keep SDK4i self-contained is recommended but not required.
-- Creation of a proper IFS directory (such as `/opt/sdk4i`) is recommended for permanent installation but you can upload the source to your personal directory if you just want to give it a test drive.
+- Creation of a proper IFS directory (such as `/opt/sdk4i`) is recommended for permanent installation but you can upload the source to your personal directory if you just want to give it a try.
+
+Note that because SDK4i uses source line lengths longer than 100 for SQLRPGLE source, your compiiler must be able to handle that. You can read more about the issue and the fix that was released on March 14, 2024 for IBM i versions 7.3, 7.4, and 7.5 [here](https://www.ibm.com/mysupport/s/defect/aCI3p0000008yvEGAQ/dt323498?language=en_US).
+
+While SDK4i is meant to be used on IBM i 7.4 or higher, most functionality is also available for IBM i 7.3. There are two procedures, both in the `TXT` component, that will do nothing when compiled for IBM i 7.3:
+- `TXT_Justify`
+- `TXT_Tokenize`
+
+The build program (`bldsdk4i`) will allow you to specify the target release for all SDK4i programs. By default it uses `*CURRENT` but you can change this in the source code along with target libraries and IFS path before you compile `bldsdk4i`.
 
 Step-by-step installation instructions are available in a [separate document](INSTALL.md).
 

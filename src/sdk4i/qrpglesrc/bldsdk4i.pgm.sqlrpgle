@@ -76,8 +76,13 @@ DCL-C C_ADD_RESTRICT_ON_DROP 'Y';
 DCL-C C_LIBDTA 'SDK4IDTA';
 DCL-C C_LIBPGM 'SDK4IPGM';
 DCL-C C_LIBWEB 'SDK4IWEB';
+DCL-C C_OS_VERSION '*CURRENT'; // V7R3M0, V7R4M0, V7R5M0, etc. or *CURRENT
 DCL-C C_SRC_ROOT '/opt/sdk4i/src/';
 
+// The COM_SendEmail procedure requires access to the QtmsCreateSendEmail API provided by the
+// QTCP/QTMSCRTSNM service program. If that service program is not available to you, for instance if
+// you are using PUB400, comment out the following /DEFINE so the COM component can compile
+// successfully.
 /DEFINE Do_COM_SendEmail
 
 // -------------------------------------------------------------------------------------------------
@@ -557,7 +562,7 @@ DCL-PROC CreateCLProgram;
   ENDIF;
 
   cmd = 'CRTBNDCL PGM('+ i_lib +'/'+ i_pgm + ') SRCSTMF('+ C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +
-    ') TEXT('+ C_SDK4I_QUOTE + dsc + C_SDK4I_QUOTE +') ALWRTVSRC(*NO)';
+    ') TEXT('+ C_SDK4I_QUOTE + dsc + C_SDK4I_QUOTE +') ALWRTVSRC(*NO) TGTRLS('+ C_OS_VERSION +')';
   MONITOR;
     API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
@@ -613,7 +618,7 @@ DCL-PROC CreateModule;
         ') CLOSQLCSR(*ENDACTGRP) '+
         'COMPILEOPT('+ C_SDK4I_QUOTE +'PPMINOUTLN(240) TGTCCSID(*JOB)' + C_SDK4I_QUOTE +') ' +
         'DATFMT(*ISO) DBGVIEW(*SOURCE) OBJTYPE(*MODULE) OPTION(*EVENTF) OUTPUT(*PRINT) '+
-        'RPGPPOPT(*LVL2) TGTRLS(*CURRENT) TIMFMT(*ISO)';
+        'RPGPPOPT(*LVL2) TGTRLS('+ C_OS_VERSION +') TIMFMT(*ISO)';
   MONITOR;
     API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;
@@ -676,11 +681,11 @@ DCL-PROC CreateServiceProgram;
   IF (allow_unresolved = 'N');
     cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
       C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +') '+
-      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*EVENTF)';
+      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*EVENTF) TGTRLS('+ C_OS_VERSION +')';
   ELSE;
     cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
       C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +') '+
-      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*EVENTF *UNRSLVREF)';
+      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*EVENTF *UNRSLVREF) TGTRLS('+ C_OS_VERSION +')';
   ENDIF;
 
   /ELSE
@@ -688,11 +693,11 @@ DCL-PROC CreateServiceProgram;
   IF (allow_unresolved = 'N');
     cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
       C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +') '+
-      'STGMDL(*INHERIT) DETAIL(*FULL)';
+      'STGMDL(*INHERIT) DETAIL(*FULL) TGTRLS('+ C_OS_VERSION +')';
   ELSE;
     cmd = 'CRTSRVPGM SRVPGM('+ i_lib +'/'+ i_srvpgm +') SRCSTMF('+
       C_SDK4I_QUOTE + i_src + C_SDK4I_QUOTE +') TEXT('+ C_SDK4I_QUOTE + i_text + C_SDK4I_QUOTE +') '+
-      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*UNRSLVREF)';
+      'STGMDL(*INHERIT) DETAIL(*FULL) OPTION(*UNRSLVREF) TGTRLS('+ C_OS_VERSION +')';
   ENDIF;
   /ENDIF
 
@@ -749,7 +754,7 @@ DCL-PROC CreateSQLRPGLEProgram;
         ') CLOSQLCSR(*ENDACTGRP) '+
         'COMPILEOPT('+ C_SDK4I_QUOTE +'PPMINOUTLN(240) TGTCCSID(*JOB)' + C_SDK4I_QUOTE +') ' +
         'DATFMT(*ISO) DBGVIEW(*SOURCE) OPTION(*EVENTF) OUTPUT(*PRINT) '+
-        'RPGPPOPT(*LVL2) TGTRLS(*CURRENT) TIMFMT(*ISO)';
+        'RPGPPOPT(*LVL2) TGTRLS('+ C_OS_VERSION +') TIMFMT(*ISO)';
   MONITOR;
     API_ExecuteCommand(cmd: %LEN(cmd));
   ON-ERROR;

@@ -53,6 +53,9 @@ CTL-OPT TEXT('SDK4i - TXT - Text utilities');
 ///
 // TXT_Justify
 //
+// THIS PROCEDURE ONLY WORKS ON 7.4 AND HIGHER. This will compile on an earlier release but will
+// always return a blank string.
+//
 //   Justify a string to the left, center, or right. This procedure works with single-byte and
 // multi-byte characters.
 //
@@ -118,6 +121,10 @@ DCL-PROC TXT_Justify EXPORT;
     RETURN o_str;
   ENDIF;
 
+  // The %CHARCOUNT built-in function and *NATURAL parameter for the %SUBST built-in function did
+  // not become available until 7.4.
+  /IF DEFINED(*V7R4M0)
+
   // Center a string within another string.
   IF (i_position = 'C');
     str_char_count = %CHARCOUNT(i_str);
@@ -174,6 +181,8 @@ DCL-PROC TXT_Justify EXPORT;
     ENDMON;
     RETURN o_str;
   ENDIF;
+
+  /ENDIF
 
   RETURN o_str;
 
@@ -241,8 +250,7 @@ DCL-PROC TXT_Q EXPORT;
   o_str += %SCANRPL(
     %CHAR(C_SDK4I_QUOTE: *UTF8):
     %CHAR(C_SDK4I_QUOTE + C_SDK4I_QUOTE: *UTF8):
-    i_str:
-    *NATURAL
+    i_str
   );
 
   // Add the optional suffix if one was specified.
@@ -270,6 +278,9 @@ END-PROC TXT_Q;
 // -------------------------------------------------------------------------------------------------
 ///
 // Tokenize a string using 0 or more delimiters.
+//
+// THIS PROCEDURE ONLY WORKS ON 7.4 AND HIGHER. This will compile on an earlier release but will
+// always return 0 tokens.
 //
 // Note that the delimiter_array and token_array are both variable size arrays in the calling
 // program defined something like this:
@@ -341,6 +352,9 @@ DCL-PROC TXT_Tokenize EXPORT;
     RETURN token_count;
   ENDIF;
 
+  // The *NATURAL parameter did not become available until 7.4
+  /IF DEFINED(*V7R4M0)
+
   // See if the caller wants us to return the delimiters as tokens or not.
   IF (%PARMS >= %PARMNUM(i_return_delimiters) AND %ADDR(i_return_delimiters) <> *NULL);
     return_delimiters = i_return_delimiters;
@@ -376,6 +390,7 @@ DCL-PROC TXT_Tokenize EXPORT;
     // Move our previous pos forward so we start right after the delimiter we just processed.
     prv_pos = cur_pos + delimiter_length;
   ENDDO;
+  /ENDIF
 
   RETURN token_count;
 
