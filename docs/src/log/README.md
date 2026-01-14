@@ -83,6 +83,6 @@ INSERT INTO logcfgt (pgm, logcsit, logextt) VALUES('SNDBAL', 'Y', 'Y');
 ```
 
 ## Capture web service information
-Everything is a web service nowadays and you've probably been calling remote web services for a while. Maybe you're exploring the idea of serving web services directly from IBM i. If you want to capture information related to the remote web services you're calling, enable the capture of that data in your `LOGCFGT` table by setting `logwbrt` = 'Y' and adding `LOG_LogMsg` calls to your programs call those remote web services and passing the `i_logwbrt` parameter.
+Everything is a web service nowadays and you've probably been calling remote web services for a while. Maybe you're exploring the idea of serving web services directly from IBM i. If you want to capture information related to the remote web services you're calling, enable the capture of that data in your `LOGCFGT` table by setting `logwbrt` = 'Y' and adding `LOG_LogMsg` calls to your programs calling those remote web services and passing the `i_logwbrt` parameter.
 
 Similarly, if you want to capture information about local web services, enable that in your `LOGCFGT` table by setting `logwblt` = 'Y' and adding calls to `LOG_LogMsg` to your web service programs and passing the `i_logwblt` parameter.
