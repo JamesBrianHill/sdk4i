@@ -1,0 +1,12 @@
+# Enforce LF for all text files.
+text=auto eol=lf
+
+# Except binary files.
+*.gif binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.pdf binary
+*.png binary
+*.ttf binary
+*.zip binary
