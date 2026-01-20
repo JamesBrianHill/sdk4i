@@ -1,5 +1,8 @@
-# Enforce LF for all text files.
-text=auto eol=lf
+# Set default behavior for text files
+  # Set line endings to LF
+  # Set encoding to UTF-8
+* text eol=lf
+* text encoding=utf-8
 
 # Except binary files.
 *.gif binary
@@ -10,3 +13,7 @@ text=auto eol=lf
 *.png binary
 *.ttf binary
 *.zip binary
+
+# Force Windows scripts to always use CRLF
+*.[cC][mM][dD] text eol=CRLF
+*.[bB][aA][tT] text eol=CRLF

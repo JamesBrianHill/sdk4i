@@ -3,7 +3,7 @@
 /* defined below.                                                             */
 /*                                                                            */
 /* @author James Brian Hill                                                   */
-/* @copyright Copyright (c) 2015 - 2025 by James Brian Hill                   */
+/* @copyright Copyright (c) 2015 - 2026 by James Brian Hill                   */
 /* @license GNU General Public License version 3                              */
 /* @link https://www.gnu.org/licenses/gpl-3.0.html                            */
 /* -------------------------------------------------------------------------- */
@@ -24,6 +24,8 @@
 /*----------------------------------------------------------------------------*/
 PGM
 
+/*   If you put SDK4i objects into different libraries than the default, you  */
+/* will need to update the values here.                                       */
 DCL VAR(&LIBDTA) TYPE(*CHAR) LEN(10) VALUE('SDK4IDTA')
 DCL VAR(&LIBPGM) TYPE(*CHAR) LEN(10) VALUE('SDK4IPGM')
 DCL VAR(&LIBWEB) TYPE(*CHAR) LEN(10) VALUE('SDK4IWEB')
@@ -41,7 +43,7 @@ DLTOBJ &LIBPGM/EVFEVENT *FILE
 DLTOBJ &LIBWEB/EVFEVENT *FILE
 
 /* Web service programs */
-/* DLTOBJ &LIBWEB/*ALL *PGM */
+/* DLTOBJ &LIBWEB/xxx *PGM */
 
 /* Service programs and programs. Modules were cleaned up by the build pgm.   */
 DLTOBJ &LIBPGM/COM *SRVPGM

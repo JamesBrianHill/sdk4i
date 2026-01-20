@@ -22,7 +22,7 @@
 // Program execution will begin in procedure BLDSDK4I.
 // https://www.ibm.com/docs/en/i/7.6.0?topic=pplc-program-flow-in-rpg-modules-cycle-versus-linear
 //
-// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @copyright Copyright (c) 2015 - 2026 by James Brian Hill
 // @license GNU General Public License version 3
 // @link https://www.gnu.org/licenses/gpl-3.0.html
 // -------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@
 CTL-OPT ACTGRP(*NEW);
 CTL-OPT ALWNULL(*USRCTL);
 CTL-OPT CCSIDCVT(*LIST); // list all the source statements that have a CCSID conversion.
-CTL-OPT COPYRIGHT('Copyright (c) 2015 - 2025 by James Brian Hill');
+CTL-OPT COPYRIGHT('Copyright (c) 2015 - 2026 by James Brian Hill');
 CTL-OPT DATFMT(*ISO);
 // CTL-OPT DATEYY(*NOALLOW); // Became available with 7.5TR5 on 2024-11-22.
 CTL-OPT DEBUG(*CONSTANTS: *DUMP: *INPUT: *RETVAL: *XMLSAX);
@@ -71,8 +71,19 @@ CTL-OPT TIMFMT(*ISO);
 // -------------------------------------------------------------------------------------------------
 // Define global constants, template data structures, and template variables.
 // -------------------------------------------------------------------------------------------------
+//   If you do not want the SDK4i tables created using the RESTRICT ON DROP clause, change this
+// constant to 'N'.
 DCL-C C_ADD_RESTRICT_ON_DROP 'Y';
 
+//   These are the recommended settings. These libraries (SDK4IDTA, SDK4IPGM, and SDK4IWEB) must
+// already exist and the SDK4i source code must be in the /opt/sdk4i/src directory in the IFS.
+// Change these settings to meet your needs.
+//   If you are using PUB400 to evaluate SDK4i, I recommend setting C_LIBDTA to your second library,
+// C_LIBPGM and C_LIBWEB to your first library. You will need to change C_SRC_ROOT to be where you
+// put the source in your personal directory in the IFS - something like: /home/MYUSRPRF/sdk4i/src
+//
+//   HUGE thank you to Holger Scherer, the owner of RZKH GmbH/POWERbunker, for making PUB400
+// available to the world!
 DCL-C C_LIBDTA 'SDK4IDTA';
 DCL-C C_LIBPGM 'SDK4IPGM';
 DCL-C C_LIBWEB 'SDK4IWEB';

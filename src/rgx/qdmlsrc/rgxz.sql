@@ -3,7 +3,7 @@
 -- expressions that can be easily reused in the Validation table (VLDRULT).
 --
 -- @author James Brian Hill
--- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @copyright Copyright (c) 2015 - 2026 by James Brian Hill
 -- @license GNU General Public License version 3
 -- @link https://www.gnu.org/licenses/gpl-3.0.html
 -- @link https://stackoverflow.com/a/22075070

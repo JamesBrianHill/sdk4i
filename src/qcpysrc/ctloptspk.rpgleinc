@@ -9,7 +9,7 @@
 // my_array.
 //
 // @author James Brian Hill
-// @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+// @copyright Copyright (c) 2015 - 2026 by James Brian Hill
 // @license GNU General Public License version 3
 // @link https://www.gnu.org/licenses/gpl-3.0.html
 // -------------------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ CTL-OPT ALWNULL(*USRCTL);
 CTL-OPT BNDDIR('SDK4I');
 CTL-OPT CCSID(*EXACT);
 CTL-OPT CCSIDCVT(*EXCP: *LIST); // list all the source statements that have a CCSID conversion.
-CTL-OPT COPYRIGHT('Copyright (c) 2015 - 2025 by James Brian Hill');
+CTL-OPT COPYRIGHT('Copyright (c) 2015 - 2026 by James Brian Hill');
 CTL-OPT DATFMT(*ISO);
 // CTL-OPT DATEYY(*NOALLOW); // Became available with 7.5TR5 on 2024-11-22.
 CTL-OPT DEBUG(*CONSTANTS: *DUMP: *INPUT: *RETVAL: *XMLSAX);

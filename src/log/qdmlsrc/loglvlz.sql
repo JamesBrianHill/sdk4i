@@ -10,7 +10,7 @@
 -- 6 = Informational: informational messages
 -- 7 = Debug: debug-level messages
 --
--- @copyright Copyright (c) 2015 - 2025 by James Brian Hill
+-- @copyright Copyright (c) 2015 - 2026 by James Brian Hill
 -- @license GNU General Public License version 3
 -- @link https://www.gnu.org/licenses/gpl-3.0.html
 -- @link https://datatracker.ietf.org/doc/html/rfc5424

@@ -1,7 +1,7 @@
 [
   {
     "name": "Create RPGLE Program",
-    "command": "?CRTBNDRPG PGM(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') DBGVIEW(*SOURCE) OPTION(*EVENTF) PPMINOUTLN(240) TGTCCSID(37)",
+    "command": "?CRTBNDRPG PGM(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') DBGVIEW(*SOURCE) OPTION(*EVENTF) PPMINOUTLN(240)",
     "deployFirst": true,
     "environment": "ile",
     "extensions": [
@@ -10,7 +10,7 @@
   },
   {
     "name": "Create RPGLE Module",
-    "command": "?CRTRPGMOD MODULE(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') DBGVIEW(*SOURCE) OPTION(*EVENTF) PPMINOUTLN(240) TGTCCSID(37)",
+    "command": "?CRTRPGMOD MODULE(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') DBGVIEW(*SOURCE) OPTION(*EVENTF) PPMINOUTLN(240)",
     "deployFirst": true,
     "environment": "ile",
     "extensions": [
@@ -19,7 +19,7 @@
   },
   {
     "name": "Create SQLRPGLE Program",
-    "command": "?CRTSQLRPGI OBJ(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') CLOSQLCSR(*ENDACTGRP) COMPILEOPT('PPMINOUTLN(240) TGTCCSID(37)') DATFMT(*ISO) DBGVIEW(*SOURCE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL2) TIMFMT(*ISO)",
+    "command": "?CRTSQLRPGI OBJ(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') CLOSQLCSR(*ENDACTGRP) COMPILEOPT('PPMINOUTLN(240)') DATFMT(*ISO) DBGVIEW(*SOURCE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL2) TIMFMT(*ISO)",
     "deployFirst": true,
     "environment": "ile",
     "extensions": [
@@ -28,7 +28,7 @@
   },
   {
     "name": "Create SQLRPGLE Module",
-    "command": "?CRTSQLRPGI OBJ(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') CLOSQLCSR(*ENDACTGRP) COMPILEOPT('PPMINOUTLN(240) TGTCCSID(37)') DATFMT(*ISO) DBGVIEW(*SOURCE) OBJTYPE(*MODULE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL2) TIMFMT(*ISO)",
+    "command": "?CRTSQLRPGI OBJ(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') CLOSQLCSR(*ENDACTGRP) COMPILEOPT('PPMINOUTLN(240)') DATFMT(*ISO) DBGVIEW(*SOURCE) OBJTYPE(*MODULE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL2) TIMFMT(*ISO)",
     "deployFirst": true,
     "environment": "ile",
     "extensions": [
@@ -36,16 +36,20 @@
     ]
   },
   {
-    "extensions": [
-      "CLP",
-      "CLLE"
-    ],
     "name": "Create Bound CL Program",
     "command": "?CRTBNDCL PGM(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') DBGVIEW(*SOURCE) OPTION(*EVENTF)",
     "deployFirst": true,
-    "environment": "ile"
+    "environment": "ile",
+    "extensions": [
+      "CLP",
+      "CLLE"
+    ]
   },
   {
+    "name": "Run SQL Statements (RUNSQLSTM)",
+    "command": "?RUNSQLSTM SRCSTMF('&FULLPATH') COMMIT(*NONE) NAMING(*SQL)",
+    "deployFirst": true,
+    "environment": "ile",
     "extensions": [
       "SQL",
       "TABLE",
@@ -56,105 +60,25 @@
       "SQLTRG",
       "SQLALIAS",
       "SQLSEQ"
-    ],
-    "name": "Run SQL Statements (RUNSQLSTM)",
-    "command": "?RUNSQLSTM SRCSTMF('&FULLPATH') COMMIT(*NONE) NAMING(*SQL)",
-    "deployFirst": true,
-    "environment": "ile"
+    ]
   },
   {
     "name": "Create DSPF",
     "command": "?CRTDSPF FILE(&CURLIB/&NAME) OPTION(*EVENTF) RSTDSP(*NO) SRCFILE(&SRCFILE)",
-    "environment": "ile",
     "deployFirst": true,
+    "environment": "ile",
     "extensions": [
       "dspf"
     ]
   },
   {
-    "extensions": [
-      "GLOBAL"
-    ],
-    "name": "Create Service Program (CRTSRVPGM EXPORT(*ALL))",
-    "command": "?CRTSRVPGM SRVPGM(&CURLIB/&NAME) ACTGRP(*CALLER) BNDDIR(*NONE) BNDSRVPGM(*NONE) EXPORT(*ALL)",
-    "environment": "ile"
-  },
-  {
+    "name": "Create Service Program (CRTSRVPGM with source)",
+    "command": "?CRTSRVPGM SRVPGM(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') ACTGRP(*CALLER) BNDDIR(*NONE) BNDSRVPGM(*NONE)",
+    "deployFirst": true,
+    "environment": "ile",
     "extensions": [
       "BND",
       "BINDER"
-    ],
-    "deployFirst": true,
-    "name": "Create Service Program (CRTSRVPGM with source)",
-    "command": "?CRTSRVPGM SRVPGM(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') ACTGRP(*CALLER) BNDDIR(*NONE) BNDSRVPGM(*NONE)",
-    "environment": "ile"
-  },
-  {
-    "extensions": [
-      "GLOBAL"
-    ],
-    "name": "Build all",
-    "command": "/QOpenSys/pkgs/bin/gmake BUILDLIB=&CURLIB ERR=*EVENTF",
-    "environment": "pase",
-    "deployFirst": true
-  },
-  {
-    "extensions": [
-      "GLOBAL"
-    ],
-    "name": "Build current",
-    "command": "/QOpenSys/pkgs/bin/gmake &BASENAME BUILDLIB=&CURLIB ERR=*EVENTF",
-    "environment": "pase",
-    "deployFirst": true
-  },
-  {
-    "extensions": [
-      "GLOBAL"
-    ],
-    "name": "Build all",
-    "command": "OPT=*EVENTF BUILDLIB=&CURLIB /QOpenSys/pkgs/bin/makei build",
-    "environment": "pase",
-    "deployFirst": true,
-    "postDownload": [
-      ".logs",
-      ".evfevent"
-    ]
-  },
-  {
-    "extensions": [
-      "GLOBAL"
-    ],
-    "name": "Build current",
-    "command": "OPT=*EVENTF BUILDLIB=&CURLIB /QOpenSys/pkgs/bin/makei compile -f &BASENAME",
-    "environment": "pase",
-    "deployFirst": true,
-    "postDownload": [
-      ".logs",
-      ".evfevent"
-    ]
-  },
-  {
-    "name": "Build current with Source Orbit 🔨",
-    "command": "so -bf make -s &RELATIVEPATH && /QOpenSys/pkgs/bin/gmake LIBL='&LIBLS' BIN_LIB=&CURLIB OPT=*EVENTF",
-    "environment": "pase",
-    "deployFirst": true,
-    "extensions": [
-      "GLOBAL"
-    ],
-    "postDownload": [
-      ".evfevent/"
-    ]
-  },
-  {
-    "name": "Build entire project with Source Orbit 🔨",
-    "command": "so -bf make && /QOpenSys/pkgs/bin/gmake LIBL='&LIBLS' BIN_LIB=&CURLIB OPT=*EVENTF",
-    "environment": "pase",
-    "deployFirst": true,
-    "extensions": [
-      "GLOBAL"
-    ],
-    "postDownload": [
-      ".evfevent/"
     ]
   }
 ]

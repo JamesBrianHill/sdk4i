@@ -20,7 +20,7 @@ Security is critical and the SEC component gives a programmer the ability to def
 
 The SEC component does not use the outdated role-based security model. Instead, it utilizes a model called "Sliding Window Authorization" based on the Principle of Least Privilege and time-bounded authorizations where user activity can (sometimes) automatically renew the time-bound authorizations.
 
-You can read more about Sliding Window Authorization and other functionality provided by the SEC component on it's [README](./docs/src/sec/README.md).
+You can read more about Sliding Window Authorization and other functionality provided by the SEC component in it's [README](./docs/src/sec/README.md).
 
 ## Summary
 There are other components available in SDK4i, all available for you to use as much or as little as you need. The three highlighted above, LOG, VLD, and SEC, are the foundation we all need for our projects. Here are some of the other components available:
