@@ -82,7 +82,7 @@ DCL-PR SEC_Authenticate IND EXTPROC(*DCLCASE);
   i_password LIKE(tpl_sdk4i_secusrt_ds.usr) OPTIONS(*TRIM) CONST; // Yes, LIKE usr, not LIKE pwd.
   o_token LIKE(tpl_sdk4i_uuid);
   o_is_enabled LIKE(tpl_sdk4i_secusrt_ds.is_enabled);
-  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT);
 END-PR SEC_Authenticate;
 
 // -------------------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ END-PR SEC_Authenticate;
 // @param OPTIONAL. The username of the user.
 // @param OPTIONAL. The user profile of the user.
 // @param REQUIRED. This will hold a token (UUID) that can be used for subsequent requests.
-// @param REQUIRED. This will hold a U/D/blank flag. U=Unauthenticated, D=Disabled, Blank=error.
+// @param REQUIRED. This will hold a reason code. U=Unauthenticated, D=Disabled, Blank=error.
 // @param OPTIONAL. Information about the user associated with this event.
 //
 // @return *ON if the user was logged in successfully, *OFF otherwise.
@@ -169,7 +169,7 @@ END-PR SEC_AuthenticateUserProfile;
 // -------------------------------------------------------------------------------------------------
 DCL-PR SEC_CreateUUID IND EXTPROC(*DCLCASE);
   o_token LIKE(tpl_sdk4i_uuid);
-  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
 END-PR SEC_CreateUUID;
 
 // -------------------------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ END-PR SEC_CreateUUID;
 // -------------------------------------------------------------------------------------------------
 DCL-PR SEC_IsAuthenticated IND EXTPROC(*DCLCASE);
   i_token LIKE(tpl_sdk4i_uuid) CONST;
-  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NULLIND);
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NULLIND);
 END-PR SEC_IsAuthenticated;
 
 // -------------------------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ END-PR SEC_IsAuthenticated;
 DCL-PR SEC_IsAuthorized IND EXTPROC(*DCLCASE);
   i_token LIKE(tpl_sdk4i_uuid) CONST;
   i_action_id LIKE(tpl_sdk4i_secactt_ds.id) CONST;
-  i_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
+  i_log_user_info_ds LIKEDS(tpl_sdk4i_log_user_info_ds) OPTIONS(*NOPASS: *NULLIND: *OMIT) CONST;
 END-PR SEC_IsAuthorized;
 
 // -------------------------------------------------------------------------------------------------

@@ -6,7 +6,8 @@
     "environment": "ile",
     "extensions": [
       "RPGLE"
-    ]
+    ],
+    "type": "file"
   },
   {
     "name": "Create RPGLE Module",
@@ -15,25 +16,31 @@
     "environment": "ile",
     "extensions": [
       "RPGLE"
-    ]
+    ],
+    "type": "file"
   },
   {
     "name": "Create SQLRPGLE Program",
-    "command": "?CRTSQLRPGI OBJ(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') CLOSQLCSR(*ENDACTGRP) COMPILEOPT('PPMINOUTLN(240)') DATFMT(*ISO) DBGVIEW(*SOURCE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL2) TIMFMT(*ISO)",
+    "command": "?CRTSQLRPGI OBJ(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') CLOSQLCSR(*ENDACTGRP) COMPILEOPT('PPMINOUTLN(240) TGTCCSID(37)') DATFMT(*ISO) DBGVIEW(*SOURCE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL2) TIMFMT(*ISO)",
     "deployFirst": true,
     "environment": "ile",
     "extensions": [
       "SQLRPGLE"
-    ]
+    ],
+    "type": "file",
+    "refresh": "no",
+    "runOnProtected": false,
+    "outputToFile": ""
   },
   {
     "name": "Create SQLRPGLE Module",
-    "command": "?CRTSQLRPGI OBJ(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') CLOSQLCSR(*ENDACTGRP) COMPILEOPT('PPMINOUTLN(240)') DATFMT(*ISO) DBGVIEW(*SOURCE) OBJTYPE(*MODULE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL2) TIMFMT(*ISO)",
+    "command": "?CRTSQLRPGI OBJ(&CURLIB/&NAME) SRCSTMF('&RELATIVEPATH') CLOSQLCSR(*ENDACTGRP) COMPILEOPT('PPMINOUTLN(240) TGTCCSID(37)') DATFMT(*ISO) DBGVIEW(*SOURCE) OBJTYPE(*MODULE) OPTION(*EVENTF) OUTPUT(*PRINT) RPGPPOPT(*LVL2) TIMFMT(*ISO)",
     "deployFirst": true,
     "environment": "ile",
     "extensions": [
       "SQLRPGLE"
-    ]
+    ],
+    "type": "file"
   },
   {
     "name": "Create Bound CL Program",
@@ -43,7 +50,8 @@
     "extensions": [
       "CLP",
       "CLLE"
-    ]
+    ],
+    "type": "file"
   },
   {
     "name": "Run SQL Statements (RUNSQLSTM)",
@@ -60,7 +68,8 @@
       "SQLTRG",
       "SQLALIAS",
       "SQLSEQ"
-    ]
+    ],
+    "type": "file"
   },
   {
     "name": "Create DSPF",
@@ -69,7 +78,8 @@
     "environment": "ile",
     "extensions": [
       "dspf"
-    ]
+    ],
+    "type": "file"
   },
   {
     "name": "Create Service Program (CRTSRVPGM with source)",
@@ -79,6 +89,7 @@
     "extensions": [
       "BND",
       "BINDER"
-    ]
+    ],
+    "type": "file"
   }
 ]

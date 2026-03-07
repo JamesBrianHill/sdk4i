@@ -157,6 +157,7 @@ DCL-PROC WEB_CallWebService EXPORT;
   DCL-DS logwbrt_ds LIKEDS(tpl_sdk4i_logwbrt_ds) INZ(*LIKEDS);
   DCL-DS s_diagnostics_ds LIKEDS(tpl_sdk4i_err_sql_diagnostics_ds) INZ(*LIKEDS);
 
+  DCL-S actual_size LIKE(tpl_sdk4i_size);
   DCL-S blob LIKE(i_blob) INZ('N');
   DCL-S local_http_options SQLTYPE(CLOB: 4096) CCSID(*UTF8); // Can be up to 2G.
   DCL-S local_req_blob_payload SQLTYPE(BLOB: 8192); // Can be up to 2G.
@@ -200,6 +201,16 @@ DCL-PROC WEB_CallWebService EXPORT;
   CLEAR local_rsp_clob_data;
   CLEAR local_rsp_headers_data;
 
+  actual_size = %MIN(i_http_options_length: %SIZE(local_http_options_data));
+  IF (i_http_options_length > actual_size);
+    log_is_successful = *OFF;
+    log_msg = 'i_http_options_length ('+ %CHAR(i_http_options_length) +
+      ') is larger than the maximum size of local_http_options_data ('+
+      %CHAR(%SIZE(local_http_options_data)) +'). Aborting to avoid truncation.';
+    LOG_LogMsg(psds_ds: log_proc: log_msg);
+    RETURN log_is_successful;
+  ENDIF;
+
   API_CopyMemory(%ADDR(local_http_options_data): i_http_options: i_http_options_length);
   local_http_options_len = i_http_options_length;
 
@@ -226,9 +237,27 @@ DCL-PROC WEB_CallWebService EXPORT;
   //   If the caller is providing a Request Payload, copy it to our local variable.
   IF (%PARMS >= %PARMNUM(i_req_payload) AND i_req_payload <> *NULL AND i_req_payload_length > 0);
     IF (blob = 'N');
+      actual_size = %MIN(i_req_payload_length: %SIZE(local_req_clob_payload_data));
+      IF (i_req_payload_length > actual_size);
+        log_is_successful = *OFF;
+        log_msg = 'i_req_payload_length ('+ %CHAR(i_req_payload_length) +
+          ') is larger than the maximum size of local_req_clob_payload_data ('+
+          %CHAR(%SIZE(local_req_clob_payload_data)) +'). Aborting to avoid truncation.';
+        LOG_LogMsg(psds_ds: log_proc: log_msg);
+        RETURN log_is_successful;
+      ENDIF;
       API_CopyMemory(%ADDR(local_req_clob_payload_data): i_req_payload: i_req_payload_length);
       local_req_clob_payload_len = i_req_payload_length;
     ELSE;
+      actual_size = %MIN(i_req_payload_length: %SIZE(local_req_blob_payload_data));
+      IF (i_req_payload_length > actual_size);
+        log_is_successful = *OFF;
+        log_msg = 'i_req_payload_length ('+ %CHAR(i_req_payload_length) +
+          ') is larger than the maximum size of local_req_blob_payload_data ('+
+          %CHAR(%SIZE(local_req_blob_payload_data)) +'). Aborting to avoid truncation.';
+        LOG_LogMsg(psds_ds: log_proc: log_msg);
+        RETURN log_is_successful;
+      ENDIF;
       API_CopyMemory(%ADDR(local_req_blob_payload_data): i_req_payload: i_req_payload_length);
       local_req_blob_payload_len = i_req_payload_length;
     ENDIF;
@@ -472,6 +501,9 @@ DCL-PROC WEB_CallWebService EXPORT;
 
   // See if we encountered an error while executing the above SQL statement. If so, log some
   // information and leave this procedure.
+  // TODO: local_http_options_data may contain sensitive information such as authentication
+  // credentials. We should consider not logging that information or at least masking it before
+  // logging.
   IF (ERR_IsSQLError(s_diagnostics_ds: *OMIT: *OMIT: log_user_info_ds));
     log_is_successful = *OFF;
     log_msg = 'Error executing HTTP function. i_method = '+ i_method + ', i_url = '+ i_url +
@@ -507,6 +539,14 @@ DCL-PROC WEB_CallWebService EXPORT;
     // Copy response header data back to the caller.
     local_rsp_headers_len = %LEN(%TRIM(local_rsp_headers_data));
     io_rsp_headers_length = %MIN(io_rsp_headers_length: local_rsp_headers_len);
+    IF (io_rsp_headers_length > %SIZE(local_rsp_headers_data));
+      log_is_successful = *OFF;
+      log_msg = 'io_rsp_headers_length ('+ %CHAR(io_rsp_headers_length) +
+        ') is larger than the maximum size of local_rsp_headers_data ('+
+        %CHAR(%SIZE(local_rsp_headers_data)) +'). Aborting to avoid truncation.';
+      LOG_LogMsg(psds_ds: log_proc: log_msg);
+      RETURN log_is_successful;
+    ENDIF;
     API_CopyMemory(o_rsp_headers: %ADDR(local_rsp_headers_data): io_rsp_headers_length);
   ELSE;
     io_rsp_headers_length = 0;
@@ -517,12 +557,28 @@ DCL-PROC WEB_CallWebService EXPORT;
     IF (local_rsp_clob_null = C_SDK4I_NOT_NULL AND local_rsp_clob_len > 0);
       local_rsp_clob_len = %LEN(%TRIM(local_rsp_clob_data));
       io_rsp_payload_length = %MIN(io_rsp_payload_length: local_rsp_clob_len);
+      IF (io_rsp_payload_length > %SIZE(local_rsp_clob_data));
+        log_is_successful = *OFF;
+        log_msg = 'io_rsp_payload_length ('+ %CHAR(io_rsp_payload_length) +
+          ') is larger than the maximum size of local_rsp_clob_data ('+
+          %CHAR(%SIZE(local_rsp_clob_data)) +'). Aborting to avoid truncation.';
+        LOG_LogMsg(psds_ds: log_proc: log_msg);
+        RETURN log_is_successful;
+      ENDIF;
       API_CopyMemory(o_rsp_payload: %ADDR(local_rsp_clob_data): io_rsp_payload_length);
     ENDIF;
   ELSE;
     IF (local_rsp_blob_null = C_SDK4I_NOT_NULL AND local_rsp_blob_len > 0);
       local_rsp_blob_len = %LEN(%TRIM(local_rsp_blob_data));
       io_rsp_payload_length = %MIN(io_rsp_payload_length: local_rsp_blob_len);
+      IF (io_rsp_payload_length > %SIZE(local_rsp_blob_data));
+        log_is_successful = *OFF;
+        log_msg = 'io_rsp_payload_length ('+ %CHAR(io_rsp_payload_length) +
+          ') is larger than the maximum size of local_rsp_blob_data ('+
+          %CHAR(%SIZE(local_rsp_blob_data)) +'). Aborting to avoid truncation.';
+        LOG_LogMsg(psds_ds: log_proc: log_msg);
+        RETURN log_is_successful;
+      ENDIF;
       API_CopyMemory(o_rsp_payload: %ADDR(local_rsp_blob_data): io_rsp_payload_length);
     ENDIF;
   ENDIF;

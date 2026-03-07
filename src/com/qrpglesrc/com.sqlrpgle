@@ -175,7 +175,7 @@ END-PROC COM_SendBreakMessage;
 ///
 //   Send an email.
 //
-//   This procedure can send an email with a message of any size, with any number of attachements,
+//   This procedure can send an email with a message of any size, with any number of attachments,
 // digitally signed, and encrypted.
 //
 // @param REQUIRED. The number of recipients. Must be greater than 0 and less than or equal to

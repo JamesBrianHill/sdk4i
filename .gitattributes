@@ -1,8 +1,11 @@
 # Set default behavior for text files
   # Set line endings to LF
-  # Set encoding to UTF-8
-* text eol=lf
-* text encoding=utf-8
+* text=auto eol=lf
+
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
 
 # Except binary files.
 *.gif binary
