@@ -1,6 +1,34 @@
 -- *************************************************************************************************
 --   This table holds configuration settings for the LOG module.
 --
+--             ================================ WARNING ================================
+--   Be conservative when setting logcsit or logextt to 'Y'. Setting either of these columns to 'Y'
+-- can be very expensive with regards to resources and time when logging information. I recommend
+-- you leave these disabled (set to 'N') unless/until you know for sure you need to enable them.
+--
+--   When logcsit = 'Y', the SaveCallStackInfo procedure in the LOG service program will be called.
+-- This is a powerful procedure that captures information about every entry in the callstack for 
+-- every thread associated with the current job. That could result in thousands of rows being
+-- inserted.
+--
+--   When logextt = 'Y', the SaveExtendedInfo procedure in the LOG service program will be called.
+-- This is another powerful procedure that captures server/job information that we usually do not
+-- need.
+--
+--   We usually do not need a complete callstack or environment configuration dump when logging
+-- messages in our programs - however, that information is available to us so SDK4i makes it
+-- possible for us programmers to capture it when we absolutely need to.
+--
+--   It is also worth noting that setting logwblt or logwbrt to 'Y' can also impact resource usage,
+-- especially storage. The logwblt (log local web service information) flag is less impactful than
+-- the logwbrt (log remote web service information) flag. The former can consume about 3kB per row
+-- while the latter can consume multiple megabytes per row. If you called a remote web service 100
+-- times an hour with the logwbrt flag set to 'Y', it could consume gigabytes of storage every day.
+--
+--   Logging of web service information, whether locally or remotely served, can be very helpful in
+-- debugging an issue, compliance, audit, and other ways - you just need to be aware of the 
+-- potential impact to system resources.
+--
 -- @copyright Copyright (c) 2015 - 2026 by James Brian Hill
 -- @license GNU General Public License version 3
 -- @link https://www.gnu.org/licenses/gpl-3.0.html

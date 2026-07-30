@@ -29,6 +29,7 @@
 
 // -------------------------------------------------------------------------------------------------
 // Define the Program Status Data Structure.
+// @link https://www.ibm.com/docs/en/i/7.6.0?topic=exceptionerrors-program-status-data-structure
 // -------------------------------------------------------------------------------------------------
 DCL-DS psds_ds PSDS QUALIFIED;
   procedure   CHAR(10)   POS(1);   // *PROC (Program or Module name)
@@ -67,5 +68,7 @@ DCL-DS psds_ds PSDS QUALIFIED;
   elements    INT(20)    POS(372); // Elements set by XML-INTO and DATA-INTO
   job_id      CHAR(16)   POS(380); // 7.4 Internal job ID.
   sys         CHAR(8)    POS(396); // 7.4 System name.
-  unused      CHAR(50)   POS(404); // 7.5 Currently not used.
+  job_type    CHAR(1)    POS(404); // 20260717: Job type (see QUSRJOBI API for values)
+  job_subtype CHAR(1)    POS(405); // 20260717: Job subtype (see QUSRJOBI API for values)
+  unused      CHAR(48)   POS(406); // Unused.
 END-DS psds_ds;

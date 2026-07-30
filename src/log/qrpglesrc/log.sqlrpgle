@@ -572,10 +572,13 @@ END-PROC LOG_LogUse;
 // Overview:
 //   Get callstack information for the application that just called LOG_LogMsg.
 //
-//   Note that this procedure is expensive with regards to time and resources used. It will use the
+//             ================================ WARNING ================================
+//   This procedure can be very expensive with regards to time and resources used. It will use the
 // Db2 QSYS.STACK_INFO table function to retrieve one row for each entry in the callstack for every
 // thread associated with the current job. A single call to this procedure could insert thousands
 // of rows into the log table and take many seconds/minutes to execute.
+//
+//   The logcsit column in LOGCFGT controls whether or not this procedure will be called.
 //
 // Parameters:
 // @param REQUIRED. This is the LOGMSGT.ID of the row just created in LOG_LogMsg.
@@ -634,6 +637,11 @@ END-PROC SaveCallStackInfo;
 // Overview:
 //   We are able to gather considerable information about the environment when needed. The option to
 // collect extended information will likely be rare, when debugging a complicated error.
+//
+//             ================================ WARNING ================================
+//   This procedure can be expensive to execute in terms of resource usage. Use cautiously.
+//
+//   The logextt column in LOGCFGT controls whether or not this procedure will be called.
 //
 // Parameters:
 // @param REQUIRED. This is the LOGMSGT.ID of the row just created in LOG_LogMsg.
